@@ -1763,6 +1763,15 @@ GAME_HTML = """
                     if (newX > 0 && processedMap[newY][newX - 1] !== '#') {
                         playerX = newX - 1;
                         playerDirection = 'left';
+                    } else if (newX === 0 && newY === 13) {
+                        // Wrap-around tunnel: left edge to right edge at row 14
+                        playerX = processedMap[0].length - 1;
+                        playerDirection = 'left';
+                    } else if (newX === 0 && newY === 2) {
+                        // Wrap-around tunnel: left edge row 3 to right edge row 2
+                        playerX = processedMap[0].length - 1;
+                        playerY = 1;
+                        playerDirection = 'left';
                     }
                     break;
                 case 'ArrowRight':
@@ -1770,6 +1779,15 @@ GAME_HTML = """
                 case 'D':
                     if (newX < processedMap[0].length - 1 && processedMap[newY][newX + 1] !== '#') {
                         playerX = newX + 1;
+                        playerDirection = 'right';
+                    } else if (newX === processedMap[0].length - 1 && newY === 13) {
+                        // Wrap-around tunnel: right edge to left edge at row 14
+                        playerX = 0;
+                        playerDirection = 'right';
+                    } else if (newX === processedMap[0].length - 1 && newY === 1) {
+                        // Wrap-around tunnel: right edge row 2 to left edge row 3
+                        playerX = 0;
+                        playerY = 2;
                         playerDirection = 'right';
                     }
                     break;
