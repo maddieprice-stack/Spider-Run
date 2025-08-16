@@ -1894,10 +1894,12 @@ GAME_HTML = """
         function returnToTitle() {
             // Hide all cutscenes
             document.querySelectorAll('.win-loss-cutscene').forEach(cutscene => cutscene.classList.remove('active'));
+            // Hide all comic panels
+            document.querySelectorAll('.comic-panel').forEach(panel => panel.classList.remove('active'));
             // Show title screen
+            document.getElementById('titleScreen').classList.add('active');
             currentState = 'title';
             currentPanel = 0;
-            showPanel(0);
         }
         
         function retryLevel() {
@@ -1905,6 +1907,7 @@ GAME_HTML = """
             document.getElementById('loseCutscene').classList.remove('active');
             // Reset level and restart
             resetLevel();
+            currentState = 'gameplay';
             startLevel1();
         }
         
@@ -1913,6 +1916,7 @@ GAME_HTML = """
             document.getElementById('gameOverCutscene').classList.remove('active');
             // Reset everything and restart from level 1
             resetGame();
+            currentState = 'gameplay';
             startLevel1();
         }
         
