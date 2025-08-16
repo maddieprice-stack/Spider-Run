@@ -104,6 +104,19 @@ GAME_HTML = """
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
         }
 
+        .dr-strange-webp-image {
+            width: 300px;
+            height: 300px;
+            margin: 20px auto;
+            background: url('/static/Dr_Strange_Comic.webp') no-repeat center center;
+            background-size: contain;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+            border: 4px solid #000;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
         .speech-bubble {
             background: #fff;
             border: 3px solid #000;
@@ -345,9 +358,7 @@ GAME_HTML = """
 
         <div id="comicPanel1" class="comic-panel">
             <div class="panel-content">
-                <div class="character-image halftone-bg comic-border">
-                    Dr. Strange
-                </div>
+                <div class="dr-strange-webp-image"></div>
                 <div class="speech-bubble">
                     Spider-Man! I need your help — I've spilled space dust all over New York City!
                 </div>
@@ -365,9 +376,7 @@ GAME_HTML = """
 
         <div id="comicPanel3" class="comic-panel">
             <div class="panel-content">
-                <div class="character-image halftone-bg comic-border">
-                    Dr. Strange
-                </div>
+                <div class="dr-strange-webp-image"></div>
                 <div class="speech-bubble">
                     This dust isn't ordinary, Spider-Man. If left unchecked... it could END THE WORLD!
                 </div>
@@ -385,9 +394,7 @@ GAME_HTML = """
 
         <div id="comicPanel5" class="comic-panel">
             <div class="panel-content">
-                <div class="character-image halftone-bg comic-border">
-                    Dr. Strange
-                </div>
+                <div class="dr-strange-webp-image"></div>
                 <div class="speech-bubble">
                     The dust is scattered across the East Village — start there before it spreads any further!
                 </div>
@@ -396,9 +403,7 @@ GAME_HTML = """
 
         <div id="comicPanel6" class="comic-panel">
             <div class="panel-content">
-                <div class="character-image halftone-bg comic-border">
-                    Dr. Strange
-                </div>
+                <div class="dr-strange-webp-image"></div>
                 <div class="speech-bubble">
                     Be careful, Spider-Man. Some of your enemies are out tonight.
                 </div>
