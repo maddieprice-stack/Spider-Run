@@ -917,6 +917,20 @@ GAME_HTML = """
             webImage = img;
         }
         
+        // Load taxi Spider-Man sprite
+        let taxiSpiderManSprite = null;
+        let taxiSpiderManLoaded = false;
+        
+        function loadTaxiSpiderManSprite() {
+            const taxiSpiderManPath = '/static/spider_man_taxi.png';
+            const img = new Image();
+            img.onload = function() {
+                taxiSpiderManLoaded = true;
+            };
+            img.src = taxiSpiderManPath;
+            taxiSpiderManSprite = img;
+        }
+        
         // Load villain sprites
         function loadVillainSprites() {
             const villainPaths = {
@@ -1283,6 +1297,7 @@ GAME_HTML = """
             loadStreetImage();
             loadTaxiImage();
             loadWebImage();
+            loadTaxiSpiderManSprite();
             loadVillainSprites();
             
             // Initialize villains
@@ -1610,17 +1625,21 @@ GAME_HTML = """
                             }
                         }
                     } else if (tile === 'T') {
-                        // Draw taxi stop with image (only if not riding)
+                        // Draw taxi stop with image (only if not riding and taxi still exists)
                         if (!isRidingTaxi) {
-                            if (taxiImageLoaded && taxiImage) {
-                                ctx.drawImage(taxiImage, drawX, drawY, tileSize, tileSize);
-                            } else {
-                                // Fallback to yellow square while image loads
-                                ctx.fillStyle = '#ffff00';
-                                ctx.fillRect(drawX + 2, drawY + 2, tileSize - 4, tileSize - 4);
-                                ctx.strokeStyle = '#000';
-                                ctx.lineWidth = 1;
-                                ctx.strokeRect(drawX + 2, drawY + 2, tileSize - 4, tileSize - 4);
+                            // Check if this taxi position still exists in taxiStopPositions
+                            const taxiExists = taxiStopPositions.some(taxi => taxi.x === x && taxi.y === y);
+                            if (taxiExists) {
+                                if (taxiImageLoaded && taxiImage) {
+                                    ctx.drawImage(taxiImage, drawX, drawY, tileSize, tileSize);
+                                } else {
+                                    // Fallback to yellow square while image loads
+                                    ctx.fillStyle = '#ffff00';
+                                    ctx.fillRect(drawX + 2, drawY + 2, tileSize - 4, tileSize - 4);
+                                    ctx.strokeStyle = '#000';
+                                    ctx.lineWidth = 1;
+                                    ctx.strokeRect(drawX + 2, drawY + 2, tileSize - 4, tileSize - 4);
+                                }
                             }
                         }
                     }
@@ -1646,15 +1665,21 @@ GAME_HTML = """
                 window.playerSprite.src = '/static/Spider-man_Running_Sprite.png';
             }
             
-            if (window.playerSprite && window.playerSprite.complete) {
+            // Choose which Spider-Man sprite to use
+            let currentPlayerSprite = window.playerSprite;
+            if (isRidingTaxi && taxiSpiderManLoaded && taxiSpiderManSprite) {
+                currentPlayerSprite = taxiSpiderManSprite;
+            }
+            
+            if (currentPlayerSprite && currentPlayerSprite.complete) {
                 ctx.save();
                 if (playerDirection === 'left') {
                     // Flip horizontally when moving left
                     ctx.scale(-1, 1);
-                    ctx.drawImage(window.playerSprite, -(playerX * tileSize + 1 + tileSize - 2), playerY * tileSize + 1 + hudHeight, tileSize - 2, tileSize - 2);
+                    ctx.drawImage(currentPlayerSprite, -(playerX * tileSize + 1 + tileSize - 2), playerY * tileSize + 1 + hudHeight, tileSize - 2, tileSize - 2);
                 } else {
                     // Normal drawing for other directions
-                    ctx.drawImage(window.playerSprite, playerX * tileSize + 1, playerY * tileSize + 1 + hudHeight, tileSize - 2, tileSize - 2);
+                    ctx.drawImage(currentPlayerSprite, playerX * tileSize + 1, playerY * tileSize + 1 + hudHeight, tileSize - 2, tileSize - 2);
                 }
                 ctx.restore();
                 
@@ -1738,6 +1763,9 @@ GAME_HTML = """
         }
         
         function checkVillainCollision() {
+            // Spider-Man is immune to villains when riding a taxi
+            if (isRidingTaxi) return;
+            
             villains.forEach(villain => {
                 if (villain.x === playerX && villain.y === playerY) {
                     if (webShooterActive) {
