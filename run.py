@@ -698,7 +698,7 @@ GAME_HTML = """
         const level1Map = [
             "############################################################",
             "#W........###...........W#W........###...........W#W........###...........W#",
-            "#.####.#.###.###.#.####.#.####.#.###.###.#.####.#.####.#.###.###.#.####.#",
+            "############################################################",
             "#T#  #.#..... .....#  #T#T#  #.#..... .....#  #T#T#  #.#..... .....#  #T#",
             "#.#  #.#####-#####.#  #.#.#  #.#####-#####.#  #.#.#  #.#####-#####.#  #.#",
             "#.#  #.#   V V   #.#  #.#.#  #.#   V V   #.#  #.#.#  #.#   V V   #.#  #.#",
@@ -1949,6 +1949,11 @@ GAME_HTML = """
 
         // Event listeners
         document.addEventListener('click', function(e) {
+            // Don't handle clicks on buttons - let button event listeners handle them
+            if (e.target.tagName === 'BUTTON' || e.target.closest('button')) {
+                return;
+            }
+            
             console.log('Click detected, currentState:', currentState);
             if (currentState === 'comic') {
                 nextPanel();
@@ -1985,9 +1990,13 @@ GAME_HTML = """
         
         // Add event listener for start button
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, setting up start button...');
             const startButton = document.getElementById('startButton');
             if (startButton) {
-                startButton.addEventListener('click', function() {
+                console.log('Start button found, adding click listener...');
+                startButton.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
                     console.log('Start button clicked via event listener');
                     startGame();
                 });
