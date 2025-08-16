@@ -173,16 +173,19 @@ GAME_HTML = """
             image-rendering: -moz-crisp-edges;
             image-rendering: crisp-edges;
             animation: pixelGlow 3s ease-in-out infinite;
+            display: block;
+            border: 2px solid #00bfff;
+            background-color: rgba(255, 255, 255, 0.1);
         }
 
         @keyframes pixelGlow {
             0%, 100% { 
                 filter: brightness(1) contrast(1);
-                transform: translate(-50%, -50%) scale(1);
+                transform: scale(1);
             }
             50% { 
                 filter: brightness(1.2) contrast(1.1);
-                transform: translate(-50%, -50%) scale(1.05);
+                transform: scale(1.05);
             }
         }
 
