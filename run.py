@@ -478,9 +478,9 @@ GAME_HTML = """
         let buildingImages = [];
         let buildingImagesLoaded = 0;
         
-        // Street images
-        let streetImages = [];
-        let streetImagesLoaded = 0;
+        // Street image
+        let streetImage = null;
+        let streetImageLoaded = false;
         
         // Load building images
         function loadBuildingImages() {
@@ -503,23 +503,15 @@ GAME_HTML = """
             });
         }
         
-        // Load street images
-        function loadStreetImages() {
-            const streetPaths = [
-                '/static/Street_1.png',
-                '/static/Street_2.png',
-                '/static/Street_3.png',
-                '/static/Street_4.png'
-            ];
-            
-            streetPaths.forEach((path, index) => {
-                const img = new Image();
-                img.onload = function() {
-                    streetImagesLoaded++;
-                };
-                img.src = path;
-                streetImages[index] = img;
-            });
+        // Load street image
+        function loadStreetImage() {
+            const streetPath = '/static/Street_6.png';
+            const img = new Image();
+            img.onload = function() {
+                streetImageLoaded = true;
+            };
+            img.src = streetPath;
+            streetImage = img;
         }
         
         // Initialize level 1 data
@@ -544,7 +536,7 @@ GAME_HTML = """
             
             // Load building images
             loadBuildingImages();
-            loadStreetImages();
+            loadStreetImage();
         }
 
         // Audio effects (placeholder)
@@ -740,13 +732,8 @@ GAME_HTML = """
                     
                     // Draw street background for all non-building tiles
                     if (tile !== '#') {
-                        if (streetImagesLoaded >= 4) {
-                            // Select street image based on position for variety
-                            const streetIndex = (x + y * 2) % 4;
-                            const streetImg = streetImages[streetIndex];
-                            if (streetImg) {
-                                ctx.drawImage(streetImg, drawX, drawY, tileSize, tileSize);
-                            }
+                        if (streetImageLoaded && streetImage) {
+                            ctx.drawImage(streetImage, drawX, drawY, tileSize, tileSize);
                         }
                     }
                     
