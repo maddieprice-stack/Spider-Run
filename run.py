@@ -660,10 +660,20 @@ GAME_HTML = """
             canvas = document.getElementById('gameCanvas');
             ctx = canvas.getContext('2d');
             
+            // Calculate optimal tile size to fit screen
+            const maxWidth = window.innerWidth * 0.9; // 90% of screen width
+            const maxHeight = window.innerHeight * 0.8; // 80% of screen height
+            
+            const tileSizeX = Math.floor(maxWidth / level1Map[0].length);
+            const tileSizeY = Math.floor(maxHeight / level1Map.length);
+            const tileSize = Math.min(tileSizeX, tileSizeY, 40); // Cap at 40px, minimum of 20px
+            
             // Set canvas size to fit the map
-            const tileSize = 20;
             canvas.width = level1Map[0].length * tileSize;
             canvas.height = level1Map.length * tileSize;
+            
+            // Store tile size globally for rendering
+            window.gameTileSize = tileSize;
             
             // Start game loop
             gameLoop = setInterval(updateGame, 1000/60); // 60 FPS
@@ -705,7 +715,7 @@ GAME_HTML = """
         function renderGame() {
             if (!ctx) return;
             
-            const tileSize = 20;
+            const tileSize = window.gameTileSize || 20;
             
             // Clear canvas
             ctx.fillStyle = '#000';
@@ -721,7 +731,7 @@ GAME_HTML = """
         }
         
         function drawMapElements() {
-            const tileSize = 20;
+            const tileSize = window.gameTileSize || 20;
             
             // Draw map elements
             for (let y = 0; y < level1Map.length; y++) {
@@ -796,18 +806,20 @@ GAME_HTML = """
         }
         
         function drawHUD() {
-            const hudY = 25;
+            const tileSize = window.gameTileSize || 20;
+            const hudY = tileSize * 1.2;
+            const fontSize = Math.max(12, tileSize * 0.6);
             
             // Lives
             ctx.fillStyle = '#ffffff';
-            ctx.font = '16px Courier New';
-            ctx.fillText(`Lives: ${lives}`, 10, hudY);
+            ctx.font = `${fontSize}px Courier New`;
+            ctx.fillText(`Lives: ${lives}`, tileSize * 0.5, hudY);
             
             // Score
-            ctx.fillText(`Score: ${score}`, canvas.width/2 - 50, hudY);
+            ctx.fillText(`Score: ${score}`, canvas.width/2 - tileSize * 2.5, hudY);
             
             // Level
-            ctx.fillText('Level 1: East Village', canvas.width - 200, hudY);
+            ctx.fillText('Level 1: East Village', canvas.width - tileSize * 10, hudY);
         }
         
         function handleKeyPress(event) {
@@ -895,6 +907,23 @@ GAME_HTML = """
             document.querySelectorAll('.comic-panel').forEach(panel => panel.classList.remove('active'));
             document.getElementById('titleScreen').classList.add('active');
         }
+
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            if (level1State === 'gameplay' && canvas) {
+                // Recalculate tile size and canvas dimensions
+                const maxWidth = window.innerWidth * 0.9;
+                const maxHeight = window.innerHeight * 0.8;
+                
+                const tileSizeX = Math.floor(maxWidth / level1Map[0].length);
+                const tileSizeY = Math.floor(maxHeight / level1Map.length);
+                const tileSize = Math.min(tileSizeX, tileSizeY, 40);
+                
+                canvas.width = level1Map[0].length * tileSize;
+                canvas.height = level1Map.length * tileSize;
+                window.gameTileSize = tileSize;
+            }
+        });
 
         // Event listeners
         document.addEventListener('click', function(e) {
