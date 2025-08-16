@@ -237,20 +237,7 @@ GAME_HTML = """
             }
         }
 
-        .spider-man-sprite-above-instructions {
-            text-align: center;
-            margin: 5px auto;
-            padding: 5px;
-        }
-        
-        .spider-man-sprite-above-instructions img {
-            border-radius: 10px;
-            transition: transform 0.3s ease;
-        }
-        
-        .spider-man-sprite-above-instructions img:hover {
-            transform: scale(1.1);
-        }
+
 
         .instructions {
             background: #000;
@@ -538,11 +525,6 @@ GAME_HTML = """
                 
                 <!-- Spider-Man Sprite (replacing Pac-Man ghosts) -->
                 <div class="spider-man-sprite" title="Spider-Man"></div>
-                
-                <!-- Additional Spider-Man Sprite above instructions -->
-                <div class="spider-man-sprite-above-instructions">
-                    <img src="/static/Spider-man-sprite.png" alt="Spider-Man" style="width: 80px; height: 80px;">
-                </div>
                 
                 <!-- Instructions Section -->
                 <div class="instructions">
