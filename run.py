@@ -429,8 +429,8 @@ GAME_HTML = """
         
         // Level 1 game variables
         let level1State = 'intro'; // intro, splash, gameplay, win, lose
-        let playerX = 15; // Updated spawn position for new layout
-        let playerY = 15; // Updated spawn position for new layout
+        let playerX = 13;
+        let playerY = 12;
         let playerDirection = 'right';
         let score = 0;
         let lives = 3;
@@ -441,36 +441,36 @@ GAME_HTML = """
         let gameLoop;
         let canvas, ctx;
         
-        // Level 1 map data (31x25 grid) - Updated Board Design
+        // Level 1 map data (27x29 grid) - processed with flood-fill
         const level1Map = [
-            "###############################",
-            "#W............##............W#",
-            "#.####.#####.##.#####.####.#.#",
-            "#.#  #.#   #.##.#   #.#  #.#.#",
-            "#.#  #.#   #.##.#   #.#  #.#.#",
-            "#.####.#####.##.#####.####.#.#",
-            "#............................#",
-            "#.####.##.########.##.####.#.#",
-            "#.####.##.########.##.####.#.#",
-            "#......##....##....##......#.#",
-            "######.##### ## #####.######.#",
-            "     #.##### ## #####.#",
-            "     #.##          ##.#",
-            "     #.## ###--### ##.#",
-            "######.## #      # ##.######.#",
-            "      .   #      #   .",
-            "######.## #      # ##.######.#",
-            "     #.## ######## ##.#",
-            "     #.##          ##.#",
-            "     #.## ######## ##.#",
-            "######.## ######## ##.######.#",
-            "#............##............#.#",
-            "#.####.#####.##.#####.####.#.#",
-            "#.#  #.#   #.##.#   #.#  #.#.#",
-            "#.#  #.#   #.##.#   #.#  #.#.#",
-            "#.####.#####.##.#####.####.#.#",
-            "#W..........................W#",
-            "###############################"
+            "###########################",
+            "#W........###...........W#",
+            "#.####.#.###.###.#.####.#",
+            "#T#  #.#..... .....#. #T#",
+            "#.#  #.#####-#####.#  #.#",
+            "#.#  #.#   V V   #.#  #.#",
+            "#.#  #.#  V   V  #.#  #.#",
+            "#.#  #.#   V V   #.#  #.#",
+            "#.#  #.#####-#####.#  #.#",
+            "#T#  #.#..... .....#. #T#",
+            "#.####.#.###.###.#.####.#",
+            "#W........###...........#",
+            "#########  S  ###########",
+            "#...............T........#",
+            "#.####.#####.#####.####.#",
+            "#.#  #.#   #.#   #.#  #.#",
+            "#.#  #.# W #.# W #.#  #.#",
+            "#.#  #.#####.#####.#  #.#",
+            "#.#  #.............#  #.#",
+            "#.####.###.#.#.###.####.#",
+            "#.....T...#.#.#...T.....#",
+            "###.#####.#.#.#.#####.###",
+            "#...#   #.......#   #...#",
+            "#.#.# W ####### W #.#.#.#",
+            "#.#.#   #.....#   #.#.#.#",
+            "#.#.#####.#.#.#####.#.#.#",
+            "#T.......T.#.#.T.......T#",
+            "###########################"
         ];
         
         // Function to process ASCII maze with flood-fill
@@ -542,15 +542,8 @@ GAME_HTML = """
         }
         
         function isPassable(char) {
-            return char === '.' || char === ' ' || char === 'W';
-        }
-        
-        function isPlayerPassable(char) {
-            return char === '.' || char === ' ' || char === 'W';
-        }
-        
-        function isVillainPassable(char) {
-            return char === '.' || char === ' ' || char === 'W' || char === '-';
+            return char === '.' || char === ' ' || char === 'W' || char === 'T' || 
+                   char === 'V' || char === '-' || char === 'S';
         }
         
         // Dust positions (calculated from map)
@@ -560,11 +553,11 @@ GAME_HTML = """
         
         // Villain system
         let villains = [];
-        let villainPen = { x: 15, y: 13 }; // Center of ghost house
+        let villainPen = { x: 13, y: 6 }; // Center of villain pen
         let villainSpawns = [
-            { x: 14, y: 12 }, { x: 16, y: 12 },
-            { x: 13, y: 13 }, { x: 17, y: 13 },
-            { x: 14, y: 14 }, { x: 16, y: 14 }
+            { x: 12, y: 5 }, { x: 14, y: 5 },
+            { x: 11, y: 6 }, { x: 15, y: 6 },
+            { x: 12, y: 7 }, { x: 14, y: 7 }
         ];
         
         // Villain types for Level 1
@@ -715,8 +708,8 @@ GAME_HTML = """
             villain.targetX = Math.max(0, Math.min(processedMap[0].length - 1, villain.targetX));
             villain.targetY = Math.max(0, Math.min(processedMap.length - 1, villain.targetY));
             
-            if (!isVillainPassable(processedMap[villain.targetY][villain.targetX])) {
-                // If target is not passable, find nearest valid position
+            if (processedMap[villain.targetY][villain.targetX] === '#') {
+                // If target is a wall, find nearest valid position
                 setNewTarget(villain);
             }
         }
@@ -729,13 +722,13 @@ GAME_HTML = """
             if (Math.abs(dx) > Math.abs(dy)) {
                 // Move horizontally
                 const newX = villain.x + (dx > 0 ? 1 : -1);
-                if (newX >= 0 && newX < processedMap[0].length && isVillainPassable(processedMap[villain.y][newX])) {
+                if (newX >= 0 && newX < processedMap[0].length && processedMap[villain.y][newX] !== '#') {
                     villain.x = newX;
                 }
             } else {
                 // Move vertically
                 const newY = villain.y + (dy > 0 ? 1 : -1);
-                if (newY >= 0 && newY < processedMap.length && isVillainPassable(processedMap[newY][villain.x])) {
+                if (newY >= 0 && newY < processedMap.length && processedMap[newY][villain.x] !== '#') {
                     villain.y = newY;
                 }
             }
@@ -764,16 +757,23 @@ GAME_HTML = """
             // Process the maze with flood-fill to close off enclosed spaces
             const processedMap = processMazeWithFloodFill(level1Map);
             
-            // Count pellets for win condition
-            totalDust = 0;
+            dustPositions = [];
+            webShooterPositions = [];
+            taxiStopPositions = [];
+            
             for (let y = 0; y < processedMap.length; y++) {
                 for (let x = 0; x < processedMap[y].length; x++) {
                     const tile = processedMap[y][x];
-                    if (tile === '.' || tile === 'W') {
-                        totalDust++;
+                    if (tile === '.') {
+                        dustPositions.push({x, y});
+                    } else if (tile === 'W') {
+                        webShooterPositions.push({x, y});
+                    } else if (tile === 'T') {
+                        taxiStopPositions.push({x, y});
                     }
                 }
             }
+            totalDust = dustPositions.length;
             
             // Load building images
             loadBuildingImages();
@@ -1046,14 +1046,24 @@ GAME_HTML = """
                             ctx.fill();
                         }
                     } else if (tile === 'W') {
-                        // Draw power pellet
-                        ctx.fillStyle = '#00bfff';
-                        ctx.beginPath();
-                        ctx.arc(drawX + tileSize/2, drawY + tileSize/2, 8, 0, 2 * Math.PI);
-                        ctx.fill();
-                        ctx.strokeStyle = '#ffffff';
-                        ctx.lineWidth = 2;
-                        ctx.stroke();
+                        // Draw web shooter
+                        const webShooterExists = webShooterPositions.some(ws => ws.x === x && ws.y === y);
+                        if (webShooterExists) {
+                            ctx.fillStyle = '#00bfff';
+                            ctx.beginPath();
+                            ctx.arc(drawX + tileSize/2, drawY + tileSize/2, 8, 0, 2 * Math.PI);
+                            ctx.fill();
+                            ctx.strokeStyle = '#ffffff';
+                            ctx.lineWidth = 2;
+                            ctx.stroke();
+                        }
+                    } else if (tile === 'T') {
+                        // Draw taxi stop
+                        ctx.fillStyle = '#ffff00';
+                        ctx.fillRect(drawX + 2, drawY + 2, tileSize - 4, tileSize - 4);
+                        ctx.strokeStyle = '#000';
+                        ctx.lineWidth = 1;
+                        ctx.strokeRect(drawX + 2, drawY + 2, tileSize - 4, tileSize - 4);
                     }
                 }
             }
@@ -1106,8 +1116,8 @@ GAME_HTML = """
                     } else {
                         // Player loses life
                         lives--;
-                        playerX = 15; // Reset to spawn
-                        playerY = 15;
+                        playerX = 13; // Reset to spawn
+                        playerY = 12;
                     }
                 }
             });
@@ -1162,7 +1172,7 @@ GAME_HTML = """
                 case 'ArrowUp':
                 case 'w':
                 case 'W':
-                    if (newY > 0 && isPlayerPassable(processedMap[newY - 1][newX])) {
+                    if (newY > 0 && processedMap[newY - 1][newX] !== '#') {
                         playerY = newY - 1;
                         playerDirection = 'up';
                     }
@@ -1170,7 +1180,7 @@ GAME_HTML = """
                 case 'ArrowDown':
                 case 's':
                 case 'S':
-                    if (newY < processedMap.length - 1 && isPlayerPassable(processedMap[newY + 1][newX])) {
+                    if (newY < processedMap.length - 1 && processedMap[newY + 1][newX] !== '#') {
                         playerY = newY + 1;
                         playerDirection = 'down';
                     }
@@ -1178,52 +1188,51 @@ GAME_HTML = """
                 case 'ArrowLeft':
                 case 'a':
                 case 'A':
-                    if (newX > 0 && isPlayerPassable(processedMap[newY][newX - 1])) {
+                    if (newX > 0 && processedMap[newY][newX - 1] !== '#') {
                         playerX = newX - 1;
                         playerDirection = 'left';
-                    } else if (newX === 0) {
-                        // Wrap-around to right edge
-                        if (isPlayerPassable(processedMap[newY][processedMap[0].length - 1])) {
-                            playerX = processedMap[0].length - 1;
-                            playerDirection = 'left';
-                        }
                     }
                     break;
                 case 'ArrowRight':
                 case 'd':
                 case 'D':
-                    if (newX < processedMap[0].length - 1 && isPlayerPassable(processedMap[newY][newX + 1])) {
+                    if (newX < processedMap[0].length - 1 && processedMap[newY][newX + 1] !== '#') {
                         playerX = newX + 1;
                         playerDirection = 'right';
-                    } else if (newX === processedMap[0].length - 1) {
-                        // Wrap-around to left edge
-                        if (isPlayerPassable(processedMap[newY][0])) {
-                            playerX = 0;
-                            playerDirection = 'right';
-                        }
                     }
                     break;
             }
             
-            // Check for pellet collection
-            checkPelletCollection();
+            // Check for dust collection
+            checkDustCollection();
+            checkWebShooterCollection();
+            checkTaxiStopCollection();
         }
         
-        function checkPelletCollection() {
-            const processedMap = processMazeWithFloodFill(level1Map);
-            const currentTile = processedMap[playerY][playerX];
-            
-            if (currentTile === '.') {
-                // Regular pellet
-                score += 10;
+        function checkDustCollection() {
+            const dustIndex = dustPositions.findIndex(dust => dust.x === playerX && dust.y === playerY);
+            if (dustIndex !== -1) {
+                dustPositions.splice(dustIndex, 1);
                 dustCollected++;
-                // Remove pellet from map (it will be redrawn without the pellet)
-            } else if (currentTile === 'W') {
-                // Power pellet
-                score += 50;
+                score += 10;
+            }
+        }
+        
+        function checkWebShooterCollection() {
+            const webShooterIndex = webShooterPositions.findIndex(ws => ws.x === playerX && ws.y === playerY);
+            if (webShooterIndex !== -1) {
+                webShooterPositions.splice(webShooterIndex, 1);
                 webShooterActive = true;
                 webShooterTimer = 360; // 6 seconds at 60 FPS
-                // Remove power pellet from map
+                score += 50;
+            }
+        }
+        
+        function checkTaxiStopCollection() {
+            const taxiIndex = taxiStopPositions.findIndex(taxi => taxi.x === playerX && taxi.y === playerY);
+            if (taxiIndex !== -1) {
+                // Taxi ride effect (simplified for now)
+                score += 25;
             }
         }
         
