@@ -25,10 +25,13 @@ GAME_HTML = """
         }
 
         body {
-            font-family: 'Comic Sans MS', cursive, sans-serif;
+            font-family: 'Courier New', monospace;
             background: #000;
             overflow: hidden;
             cursor: pointer;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
         }
 
         #gameCanvas {
@@ -124,41 +127,123 @@ GAME_HTML = """
         }
 
         .title-screen {
-            background: linear-gradient(135deg, #ff0000 0%, #0000ff 100%);
+            background: #000;
             color: #fff;
             text-align: center;
-            padding: 50px;
+            padding: 40px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border: 4px solid #ffff00;
+            box-shadow: inset 0 0 20px rgba(255, 255, 0, 0.3);
         }
 
         .title-screen h1 {
-            font-size: 4em;
-            text-shadow: 4px 4px 0px #000;
-            margin-bottom: 30px;
+            font-size: 5em;
+            font-weight: bold;
+            color: #ffff00;
+            text-shadow: 3px 3px 0px #ff0000;
+            margin-bottom: 40px;
             text-transform: uppercase;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 4px;
         }
 
         .title-screen .subtitle {
-            font-size: 1.5em;
-            margin-bottom: 50px;
-            text-shadow: 2px 2px 0px #000;
+            font-size: 1.2em;
+            margin-bottom: 60px;
+            color: #fff;
+            font-family: 'Courier New', monospace;
+        }
+
+        .spider-man-sprite {
+            width: 80px;
+            height: 80px;
+            background: #ff0000;
+            border: 3px solid #0000ff;
+            border-radius: 50%;
+            margin: 20px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            color: #fff;
+            position: relative;
+        }
+
+        .spider-man-sprite::before {
+            content: '🕷️';
+            font-size: 40px;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-10px);
+            }
+            60% {
+                transform: translateY(-5px);
+            }
+        }
+
+        .instructions {
+            background: #000;
+            border: 2px solid #ffff00;
+            padding: 20px;
+            margin: 30px 0;
+            max-width: 600px;
+            color: #fff;
+            font-family: 'Courier New', monospace;
+        }
+
+        .instructions h3 {
+            color: #ffff00;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .instructions ul {
+            text-align: left;
+            list-style: none;
+            padding: 0;
+        }
+
+        .instructions li {
+            margin: 8px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .instructions li::before {
+            content: '•';
+            color: #ffff00;
+            position: absolute;
+            left: 0;
         }
 
         .menu-button {
-            background: #fff;
-            color: #000;
-            border: 3px solid #000;
+            background: #000;
+            color: #ffff00;
+            border: 3px solid #ffff00;
             padding: 15px 30px;
             margin: 10px;
             font-size: 1.2em;
             font-weight: bold;
             cursor: pointer;
             text-transform: uppercase;
+            font-family: 'Courier New', monospace;
             transition: all 0.3s ease;
         }
 
         .menu-button:hover {
-            background: #000;
-            color: #fff;
+            background: #ffff00;
+            color: #000;
             transform: scale(1.05);
         }
 
@@ -195,12 +280,27 @@ GAME_HTML = """
     <div class="game-container">
         <!-- Title Screen -->
         <div id="titleScreen" class="comic-panel active">
-            <div class="title-screen comic-border">
-                <h1>🕷️ Spider-Run 🕷️</h1>
+            <div class="title-screen">
+                <h1>SPIDER-RUN</h1>
                 <div class="subtitle">A Pac-Man-Inspired Adventure</div>
+                
+                <!-- Spider-Man Sprite (replacing Pac-Man ghosts) -->
+                <div class="spider-man-sprite"></div>
+                
+                <!-- Instructions Section -->
+                <div class="instructions">
+                    <h3>GAME INSTRUCTIONS</h3>
+                    <ul>
+                        <li>Use ARROW KEYS to move Spider-Man</li>
+                        <li>Collect all SPACE DUST to win</li>
+                        <li>Avoid ENEMIES or use POWER-UPS</li>
+                        <li>You have 3 LIVES per level</li>
+                        <li>Press ESC to pause the game</li>
+                    </ul>
+                </div>
+                
                 <div>
-                    <button class="menu-button" onclick="startGame()">Start Game</button>
-                    <button class="menu-button" onclick="showInstructions()">Instructions</button>
+                    <button class="menu-button" onclick="startGame()">START GAME</button>
                 </div>
             </div>
         </div>
@@ -339,8 +439,9 @@ GAME_HTML = """
         }
 
         function showInstructions() {
+            // Instructions are now displayed directly on the title screen
             playClickSound();
-            alert('Spider-Run Instructions:\\n\\n- Click to advance through comic panels\\n- Collect all space dust to win\\n- Avoid enemies or use power-ups\\n- Use arrow keys to move Spider-Man\\n- Press ESC to pause');
+            // Could add additional instructions here if needed
         }
 
         function nextPanel() {
