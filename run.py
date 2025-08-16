@@ -55,7 +55,8 @@ GAME_HTML = """
             left: 0;
             width: 100vw;
             height: 100vh;
-            background: #fff;
+            background: url('/static/New_York_5.webp') no-repeat center center;
+            background-size: cover;
             display: none;
             flex-direction: column;
             align-items: center;
@@ -71,6 +72,10 @@ GAME_HTML = """
             text-align: center;
             max-width: 80%;
             padding: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            border: 3px solid #000;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
         }
 
         .character-image {
@@ -98,6 +103,7 @@ GAME_HTML = """
             font-weight: bold;
             text-transform: uppercase;
             line-height: 1.4;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
         }
 
         .speech-bubble::after {
