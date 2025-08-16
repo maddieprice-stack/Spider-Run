@@ -166,54 +166,17 @@ GAME_HTML = """
         .spider-man-sprite {
             width: 120px;
             height: 120px;
-            background: #ff0000;
-            border: 4px solid #0000ff;
-            border-radius: 50%;
             margin: 20px auto;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 12px;
-            font-weight: bold;
-            color: #fff;
             position: relative;
-            overflow: hidden;
         }
 
-        .spider-man-sprite::before {
-            content: '🕷️';
-            font-size: 30px;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 2;
-            animation: bounce 2s infinite;
-        }
-
-        .spider-man-sprite::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: 
-                radial-gradient(circle at 30% 30%, #ff0000 0%, #cc0000 20%, transparent 30%),
-                radial-gradient(circle at 70% 70%, #ff0000 0%, #cc0000 20%, transparent 30%),
-                linear-gradient(45deg, #ff0000 0%, #cc0000 50%, #ff0000 100%);
-            border-radius: 50%;
-            z-index: 1;
-        }
-
-        /* Pixel art Spider-Man sprite overlay */
+        /* Pixel art Spider-Man sprite */
         .spider-man-sprite .pixel-sprite {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 60px;
-            height: 60px;
+            width: 100px;
+            height: 100px;
             background: 
                 /* Head */
                 linear-gradient(to right, transparent 20%, #ff0000 20%, #ff0000 80%, transparent 80%),
@@ -229,7 +192,6 @@ GAME_HTML = """
                 linear-gradient(45deg, transparent 40%, #000000 40%, #000000 45%, transparent 45%),
                 linear-gradient(-45deg, transparent 40%, #000000 40%, #000000 45%, transparent 45%);
             background-size: 100% 100%;
-            z-index: 1;
             image-rendering: pixelated;
             animation: pixelGlow 3s ease-in-out infinite;
         }
