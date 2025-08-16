@@ -1,0 +1,4 @@
+# Python dependencies for Spider-Run game
+flask==3.0.0
+
+

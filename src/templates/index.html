@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hackathon Project Runner</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            font-weight: 300;
+        }
+
+        .description {
+            text-align: center;
+            color: #666;
+            margin-bottom: 40px;
+            font-size: 1.1em;
+            line-height: 1.6;
+        }
+
+        .run-button {
+            display: block;
+            width: 200px;
+            margin: 0 auto 30px;
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .run-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .run-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .output-container {
+            margin-top: 30px;
+            display: none;
+        }
+
+        .output-section {
+            margin-bottom: 20px;
+        }
+
+        .output-label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .output-content {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .success {
+            border-left: 4px solid #28a745;
+        }
+
+        .error {
+            border-left: 4px solid #dc3545;
+        }
+
+        .status {
+            text-align: center;
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Hackathon Project Runner</h1>
+        <p class="description">
+            Click the button below to run your <code>run.py</code> script and see the output in real-time.
+        </p>
+        
+        <button class="run-button" onclick="runScript()" id="runBtn">
+            Run Script
+        </button>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Running your script...</p>
+        </div>
+        
+        <div class="output-container" id="outputContainer">
+            <div class="status" id="status"></div>
+            
+            <div class="output-section">
+                <label class="output-label">Standard Output:</label>
+                <div class="output-content" id="stdout"></div>
+            </div>
+            
+            <div class="output-section" id="stderrSection" style="display: none;">
+                <label class="output-label">Error Output:</label>
+                <div class="output-content error" id="stderr"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function runScript() {
+            const runBtn = document.getElementById('runBtn');
+            const loading = document.getElementById('loading');
+            const outputContainer = document.getElementById('outputContainer');
+            const status = document.getElementById('status');
+            const stdout = document.getElementById('stdout');
+            const stderr = document.getElementById('stderr');
+            const stderrSection = document.getElementById('stderrSection');
+            
+            // Disable button and show loading
+            runBtn.disabled = true;
+            loading.style.display = 'block';
+            outputContainer.style.display = 'none';
+            
+            try {
+                const response = await fetch('/run', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                
+                const result = await response.json();
+                
+                // Hide loading
+                loading.style.display = 'none';
+                outputContainer.style.display = 'block';
+                
+                // Update status
+                if (result.success) {
+                    status.textContent = '✅ Script executed successfully!';
+                    status.className = 'status success';
+                } else {
+                    status.textContent = '❌ Script execution failed!';
+                    status.className = 'status error';
+                }
+                
+                // Update output
+                stdout.textContent = result.stdout || '(No output)';
+                
+                if (result.stderr) {
+                    stderr.textContent = result.stderr;
+                    stderrSection.style.display = 'block';
+                } else {
+                    stderrSection.style.display = 'none';
+                }
+                
+            } catch (error) {
+                loading.style.display = 'none';
+                outputContainer.style.display = 'block';
+                
+                status.textContent = '❌ Network error occurred!';
+                status.className = 'status error';
+                stdout.textContent = 'Failed to communicate with server.';
+                stderrSection.style.display = 'none';
+            }
+            
+            // Re-enable button
+            runBtn.disabled = false;
+        }
+    </script>
+</body>
+</html>
