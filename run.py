@@ -135,27 +135,27 @@ GAME_HTML = """
         .speech-bubble::after {
             content: '';
             position: absolute;
-            bottom: -15px;
+            top: -15px;
             left: 50%;
             transform: translateX(-50%);
             width: 0;
             height: 0;
             border-left: 15px solid transparent;
             border-right: 15px solid transparent;
-            border-top: 15px solid #000;
+            border-bottom: 15px solid #000;
         }
 
         .speech-bubble::before {
             content: '';
             position: absolute;
-            bottom: -12px;
+            top: -12px;
             left: 50%;
             transform: translateX(-50%);
             width: 0;
             height: 0;
             border-left: 12px solid transparent;
             border-right: 12px solid transparent;
-            border-top: 12px solid #fff;
+            border-bottom: 12px solid #fff;
         }
 
         .title-screen {
