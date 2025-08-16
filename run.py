@@ -1039,19 +1039,7 @@ GAME_HTML = """
             // All villains can move freely - just pick random valid positions
             // Different villains have slight preferences but can go anywhere
             
-            if (villain.type === 'Doc Ock') {
-                // Doc Ock prefers center area but can go anywhere
-                const centerX = Math.floor(processedMap[0].length / 2);
-                const centerY = Math.floor(processedMap.length / 2);
-                
-                if (Math.random() < 0.7) { // 70% chance to target center area
-                    villain.targetX = centerX + (Math.random() - 0.5) * 8;
-                    villain.targetY = centerY + (Math.random() - 0.5) * 8;
-                } else { // 30% chance to go anywhere
-                    villain.targetX = Math.floor(Math.random() * processedMap[0].length);
-                    villain.targetY = Math.floor(Math.random() * processedMap.length);
-                }
-            } else if (villain.type === 'Green Goblin') {
+            if (villain.type === 'Green Goblin') {
                 // Green Goblin prefers outer areas but can go anywhere
                 if (Math.random() < 0.6) { // 60% chance to target edges
                     const edges = [
@@ -1066,7 +1054,7 @@ GAME_HTML = """
                     villain.targetY = Math.floor(Math.random() * processedMap.length);
                 }
             } else {
-                // All other villains (Vulture, Venom, Lizard, Mysterio) can go anywhere
+                // All other villains (Doc Ock, Vulture, Venom) can go anywhere
                 villain.targetX = Math.floor(Math.random() * processedMap[0].length);
                 villain.targetY = Math.floor(Math.random() * processedMap.length);
             }
@@ -1142,40 +1130,7 @@ GAME_HTML = """
                 villain.y = nextStep.y;
             } else {
                 // No path found or already at target, set new target
-                // For Doc Ock, try a simpler fallback movement
-                if (villain.type === 'Doc Ock') {
-                    // Try simple movement in any valid direction
-                    const directions = [[0, -1], [0, 1], [-1, 0], [1, 0]];
-                    let moved = false;
-                    
-                    for (let [dx, dy] of directions) {
-                        const newX = villain.x + dx;
-                        const newY = villain.y + dy;
-                        
-                        if (newX >= 0 && newX < processedMap[0].length && 
-                            newY >= 0 && newY < processedMap.length && 
-                            processedMap[newY][newX] !== '#') {
-                            
-                            // Update direction based on movement
-                            if (dx < 0) {
-                                villain.direction = 'left';
-                            } else if (dx > 0) {
-                                villain.direction = 'right';
-                            }
-                            
-                            villain.x = newX;
-                            villain.y = newY;
-                            moved = true;
-                            break;
-                        }
-                    }
-                    
-                    if (!moved) {
-                        setNewTarget(villain);
-                    }
-                } else {
-                    setNewTarget(villain);
-                }
+                setNewTarget(villain);
             }
         }
         
