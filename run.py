@@ -1053,6 +1053,14 @@ GAME_HTML = """
             if (path && path.length > 1) {
                 // Move to the next step in the path
                 const nextStep = path[1]; // path[0] is current position
+                
+                // Update direction based on movement
+                if (nextStep.x < villain.x) {
+                    villain.direction = 'left';
+                } else if (nextStep.x > villain.x) {
+                    villain.direction = 'right';
+                }
+                
                 villain.x = nextStep.x;
                 villain.y = nextStep.y;
             } else {
@@ -1070,6 +1078,14 @@ GAME_HTML = """
                         if (newX >= 0 && newX < processedMap[0].length && 
                             newY >= 0 && newY < processedMap.length && 
                             processedMap[newY][newX] !== '#') {
+                            
+                            // Update direction based on movement
+                            if (dx < 0) {
+                                villain.direction = 'left';
+                            } else if (dx > 0) {
+                                villain.direction = 'right';
+                            }
+                            
                             villain.x = newX;
                             villain.y = newY;
                             moved = true;
@@ -1345,9 +1361,9 @@ GAME_HTML = """
             const tileSizeY = Math.floor(maxHeight / level1Map.length);
             const tileSize = Math.min(tileSizeX, tileSizeY, 45); // Cap at 45px, minimum of 20px for better fit
             
-            // Set canvas size to fit the map
+            // Set canvas size to fit the map with space above for HUD
             canvas.width = level1Map[0].length * tileSize;
-            canvas.height = level1Map.length * tileSize;
+            canvas.height = level1Map.length * tileSize + 80; // Add 80px for HUD above
             
             // Store tile size globally for rendering
             window.gameTileSize = tileSize;
@@ -1422,6 +1438,9 @@ GAME_HTML = """
             ctx.fillStyle = '#000';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
+            // Draw HUD above the game board
+            drawHUD();
+            
             // Draw background (East Village pixel art) - only once
             if (!window.backgroundImage) {
                 window.backgroundImage = new Image();
@@ -1437,10 +1456,11 @@ GAME_HTML = """
         
         function drawMapElements() {
             const tileSize = window.gameTileSize || 30;
+            const hudHeight = 80; // Height of HUD area
             
-            // Draw background first (only if loaded)
+            // Draw background first (only if loaded) - offset by HUD height
             if (window.backgroundImage && window.backgroundImage.complete) {
-                ctx.drawImage(window.backgroundImage, 0, 0, canvas.width, canvas.height);
+                ctx.drawImage(window.backgroundImage, 0, hudHeight, canvas.width, canvas.height - hudHeight);
             }
             
             // Get processed map
@@ -1451,7 +1471,7 @@ GAME_HTML = """
                 for (let x = 0; x < processedMap[y].length; x++) {
                     const tile = processedMap[y][x];
                     const drawX = x * tileSize;
-                    const drawY = y * tileSize;
+                    const drawY = y * tileSize + hudHeight; // Offset by HUD height
                     
                     // Draw street background for all non-building tiles
                     if (tile !== '#') {
@@ -1516,12 +1536,18 @@ GAME_HTML = """
             // Draw player (Spider-Man sprite)
             const playerImg = new Image();
             playerImg.onload = function() {
-                ctx.drawImage(playerImg, playerX * tileSize + 1, playerY * tileSize + 1, tileSize - 2, tileSize - 2);
+                ctx.save();
+                if (playerDirection === 'left') {
+                    // Flip horizontally when moving left
+                    ctx.scale(-1, 1);
+                    ctx.drawImage(playerImg, -(playerX * tileSize + 1 + tileSize - 2), playerY * tileSize + 1 + hudHeight, tileSize - 2, tileSize - 2);
+                } else {
+                    // Normal drawing for other directions
+                    ctx.drawImage(playerImg, playerX * tileSize + 1, playerY * tileSize + 1 + hudHeight, tileSize - 2, tileSize - 2);
+                }
+                ctx.restore();
             };
             playerImg.src = '/static/Spider-man_Running_Sprite.png';
-            
-            // Draw HUD
-            drawHUD();
         }
         
         function drawVillains() {
@@ -1544,7 +1570,16 @@ GAME_HTML = """
                         ctx.globalAlpha = 1.0;
                     }
                     
-                    ctx.drawImage(villainSprite, villain.x * tileSize + 0.5, villain.y * tileSize + 0.5, tileSize - 1, tileSize - 1);
+                    ctx.save();
+                    if (villain.direction === 'left') {
+                        // Flip horizontally when moving left
+                        ctx.scale(-1, 1);
+                        ctx.drawImage(villainSprite, -(villain.x * tileSize + 0.5 + tileSize - 1), villain.y * tileSize + 0.5 + hudHeight, tileSize - 1, tileSize - 1);
+                    } else {
+                        // Normal drawing for other directions
+                        ctx.drawImage(villainSprite, villain.x * tileSize + 0.5, villain.y * tileSize + 0.5 + hudHeight, tileSize - 1, tileSize - 1);
+                    }
+                    ctx.restore();
                     ctx.globalAlpha = 1.0; // Reset alpha
                 } else {
                     // Fallback to colored block if sprite not loaded
@@ -1559,14 +1594,14 @@ GAME_HTML = """
                         ctx.fillStyle = villain.color;
                     }
                     
-                    ctx.fillRect(villain.x * tileSize + 0.5, villain.y * tileSize + 0.5, tileSize - 1, tileSize - 1);
+                    ctx.fillRect(villain.x * tileSize + 0.5, villain.y * tileSize + 0.5 + hudHeight, tileSize - 1, tileSize - 1);
                 }
                 
                 // Draw villain name
                 ctx.fillStyle = '#ffffff';
                 ctx.font = `${Math.max(8, tileSize * 0.3)}px Courier New`;
                 ctx.textAlign = 'center';
-                ctx.fillText(villain.type, villain.x * tileSize + tileSize/2, villain.y * tileSize - 5);
+                ctx.fillText(villain.type, villain.x * tileSize + tileSize/2, villain.y * tileSize - 5 + hudHeight);
             });
         }
         
@@ -1590,7 +1625,7 @@ GAME_HTML = """
         
         function drawHUD() {
             const tileSize = window.gameTileSize || 30;
-            const hudY = tileSize * 1.2;
+            const hudY = 25; // Fixed position above the game board
             const fontSize = Math.max(16, tileSize * 0.6);
             
             // Lives
