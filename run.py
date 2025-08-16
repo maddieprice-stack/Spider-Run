@@ -1306,14 +1306,14 @@ GAME_HTML = """
 
         // Panel navigation
         function showPanel(panelNumber) {
-            // Hide all panels
-            document.querySelectorAll('.comic-panel').forEach(panel => {
+            // Hide all panels including title screen
+            document.querySelectorAll('.comic-panel, #titleScreen').forEach(panel => {
                 panel.classList.remove('active');
             });
 
             // Show new panel immediately without page flip effect
             if (panelNumber === 0) {
-                document.getElementById('titleScreen').classList.add('active');
+                document.getElementById('comicPanel0').classList.add('active');
             } else {
                 document.getElementById(`comicPanel${panelNumber}`).classList.add('active');
             }
