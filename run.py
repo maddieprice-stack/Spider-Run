@@ -478,6 +478,10 @@ GAME_HTML = """
         let buildingImages = [];
         let buildingImagesLoaded = 0;
         
+        // Street images
+        let streetImages = [];
+        let streetImagesLoaded = 0;
+        
         // Load building images
         function loadBuildingImages() {
             const buildingPaths = [
@@ -496,6 +500,25 @@ GAME_HTML = """
                 };
                 img.src = path;
                 buildingImages[index] = img;
+            });
+        }
+        
+        // Load street images
+        function loadStreetImages() {
+            const streetPaths = [
+                '/static/Street_1.png',
+                '/static/Street_2.png',
+                '/static/Street_3.png',
+                '/static/Street_4.png'
+            ];
+            
+            streetPaths.forEach((path, index) => {
+                const img = new Image();
+                img.onload = function() {
+                    streetImagesLoaded++;
+                };
+                img.src = path;
+                streetImages[index] = img;
             });
         }
         
@@ -521,6 +544,7 @@ GAME_HTML = """
             
             // Load building images
             loadBuildingImages();
+            loadStreetImages();
         }
 
         // Audio effects (placeholder)
@@ -713,6 +737,18 @@ GAME_HTML = """
                     const tile = level1Map[y][x];
                     const drawX = x * tileSize;
                     const drawY = y * tileSize;
+                    
+                    // Draw street background for all non-building tiles
+                    if (tile !== '#') {
+                        if (streetImagesLoaded >= 4) {
+                            // Select street image based on position for variety
+                            const streetIndex = (x + y * 2) % 4;
+                            const streetImg = streetImages[streetIndex];
+                            if (streetImg) {
+                                ctx.drawImage(streetImg, drawX, drawY, tileSize, tileSize);
+                            }
+                        }
+                    }
                     
                     if (tile === '#') {
                         // Draw building with image
