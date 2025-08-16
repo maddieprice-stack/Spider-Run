@@ -158,7 +158,7 @@ GAME_HTML = """
 
         .title-screen .subtitle {
             font-size: 1.2em;
-            margin-bottom: 40px;
+            margin-bottom: 60px;
             color: #fff;
             font-family: 'Courier New', monospace;
         }
@@ -166,7 +166,7 @@ GAME_HTML = """
         .spider-man-sprite {
             width: 120px;
             height: 120px;
-            margin: 40px auto;
+            margin: 60px auto;
             background: url('/static/Spider-man sprite.png') no-repeat center center;
             background-size: 100% 100%;
             image-rendering: pixelated;
@@ -202,7 +202,7 @@ GAME_HTML = """
             background: #000;
             border: 2px solid #ffff00;
             padding: 20px;
-            margin: 40px auto;
+            margin: 60px auto;
             max-width: 600px;
             color: #fff;
             font-family: 'Courier New', monospace;
