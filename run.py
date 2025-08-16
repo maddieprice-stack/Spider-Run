@@ -441,7 +441,7 @@ GAME_HTML = """
         let gameLoop;
         let canvas, ctx;
         
-        // Level 1 map data (27x29 grid)
+        // Level 1 map data (27x29 grid) - processed with flood-fill
         const level1Map = [
             "###########################",
             "#W........###...........W#",
@@ -472,6 +472,79 @@ GAME_HTML = """
             "#T.......T.#.#.T.......T#",
             "###########################"
         ];
+        
+        // Function to process ASCII maze with flood-fill
+        function processMazeWithFloodFill(asciiMaze) {
+            // Convert to 2D grid
+            let grid = asciiMaze.map(row => row.split(''));
+            
+            // Add border
+            const width = grid[0].length;
+            const height = grid.length;
+            
+            // Create bordered grid
+            let borderedGrid = [];
+            borderedGrid.push(new Array(width + 2).fill('#'));
+            for (let row of grid) {
+                borderedGrid.push(['#', ...row, '#']);
+            }
+            borderedGrid.push(new Array(width + 2).fill('#'));
+            
+            // Flood fill from border
+            let visited = new Set();
+            let queue = [];
+            
+            // Add all border cells that are passable
+            for (let y = 0; y < borderedGrid.length; y++) {
+                for (let x = 0; x < borderedGrid[0].length; x++) {
+                    if (y === 0 || y === borderedGrid.length - 1 || x === 0 || x === borderedGrid[0].length - 1) {
+                        if (isPassable(borderedGrid[y][x])) {
+                            queue.push([x, y]);
+                            visited.add(`${x},${y}`);
+                        }
+                    }
+                }
+            }
+            
+            // BFS flood fill
+            const directions = [[0, 1], [1, 0], [0, -1], [-1, 0]];
+            while (queue.length > 0) {
+                let [x, y] = queue.shift();
+                
+                for (let [dx, dy] of directions) {
+                    let newX = x + dx;
+                    let newY = y + dy;
+                    
+                    if (newX >= 0 && newX < borderedGrid[0].length && 
+                        newY >= 0 && newY < borderedGrid.length) {
+                        
+                        let key = `${newX},${newY}`;
+                        if (!visited.has(key) && isPassable(borderedGrid[newY][newX])) {
+                            visited.add(key);
+                            queue.push([newX, newY]);
+                        }
+                    }
+                }
+            }
+            
+            // Convert enclosed spaces to blockers
+            for (let y = 1; y < borderedGrid.length - 1; y++) {
+                for (let x = 1; x < borderedGrid[0].length - 1; x++) {
+                    let key = `${x},${y}`;
+                    if (borderedGrid[y][x] === ' ' && !visited.has(key)) {
+                        borderedGrid[y][x] = '#';
+                    }
+                }
+            }
+            
+            // Remove border and convert back to strings
+            return borderedGrid.slice(1, -1).map(row => row.slice(1, -1).join(''));
+        }
+        
+        function isPassable(char) {
+            return char === '.' || char === ' ' || char === 'W' || char === 'T' || 
+                   char === 'V' || char === '-' || char === 'S';
+        }
         
         // Dust positions (calculated from map)
         let dustPositions = [];
@@ -608,17 +681,19 @@ GAME_HTML = """
         }
         
         function setNewTarget(villain) {
+            const processedMap = processMazeWithFloodFill(level1Map);
+            
             // Different targeting based on villain type
             if (villain.type === 'Doc Ock') {
                 // Prefer horizontal movement near center
-                const centerX = Math.floor(level1Map[0].length / 2);
+                const centerX = Math.floor(processedMap[0].length / 2);
                 villain.targetX = centerX + (Math.random() > 0.5 ? 1 : -1);
-                villain.targetY = Math.floor(level1Map.length / 2) + (Math.random() - 0.5) * 4;
+                villain.targetY = Math.floor(processedMap.length / 2) + (Math.random() - 0.5) * 4;
             } else if (villain.type === 'Green Goblin') {
                 // Prefer outer loops
                 const edges = [
-                    { x: 1, y: 1 }, { x: level1Map[0].length - 2, y: 1 },
-                    { x: 1, y: level1Map.length - 2 }, { x: level1Map[0].length - 2, y: level1Map.length - 2 }
+                    { x: 1, y: 1 }, { x: processedMap[0].length - 2, y: 1 },
+                    { x: 1, y: processedMap.length - 2 }, { x: processedMap[0].length - 2, y: processedMap.length - 2 }
                 ];
                 const target = edges[Math.floor(Math.random() * edges.length)];
                 villain.targetX = target.x;
@@ -626,33 +701,34 @@ GAME_HTML = """
             } else if (villain.type === 'Vulture') {
                 // Prefer vertical movement
                 villain.targetX = villain.x + (Math.random() > 0.5 ? 1 : -1);
-                villain.targetY = Math.floor(Math.random() * level1Map.length);
+                villain.targetY = Math.floor(Math.random() * processedMap.length);
             }
             
             // Ensure target is within bounds and not a wall
-            villain.targetX = Math.max(0, Math.min(level1Map[0].length - 1, villain.targetX));
-            villain.targetY = Math.max(0, Math.min(level1Map.length - 1, villain.targetY));
+            villain.targetX = Math.max(0, Math.min(processedMap[0].length - 1, villain.targetX));
+            villain.targetY = Math.max(0, Math.min(processedMap.length - 1, villain.targetY));
             
-            if (level1Map[villain.targetY][villain.targetX] === '#') {
+            if (processedMap[villain.targetY][villain.targetX] === '#') {
                 // If target is a wall, find nearest valid position
                 setNewTarget(villain);
             }
         }
         
         function moveTowardsTarget(villain) {
+            const processedMap = processMazeWithFloodFill(level1Map);
             const dx = villain.targetX - villain.x;
             const dy = villain.targetY - villain.y;
             
             if (Math.abs(dx) > Math.abs(dy)) {
                 // Move horizontally
                 const newX = villain.x + (dx > 0 ? 1 : -1);
-                if (newX >= 0 && newX < level1Map[0].length && level1Map[villain.y][newX] !== '#') {
+                if (newX >= 0 && newX < processedMap[0].length && processedMap[villain.y][newX] !== '#') {
                     villain.x = newX;
                 }
             } else {
                 // Move vertically
                 const newY = villain.y + (dy > 0 ? 1 : -1);
-                if (newY >= 0 && newY < level1Map.length && level1Map[newY][villain.x] !== '#') {
+                if (newY >= 0 && newY < processedMap.length && processedMap[newY][villain.x] !== '#') {
                     villain.y = newY;
                 }
             }
@@ -678,13 +754,16 @@ GAME_HTML = """
         
         // Initialize level 1 data
         function initLevel1() {
+            // Process the maze with flood-fill to close off enclosed spaces
+            const processedMap = processMazeWithFloodFill(level1Map);
+            
             dustPositions = [];
             webShooterPositions = [];
             taxiStopPositions = [];
             
-            for (let y = 0; y < level1Map.length; y++) {
-                for (let x = 0; x < level1Map[y].length; x++) {
-                    const tile = level1Map[y][x];
+            for (let y = 0; y < processedMap.length; y++) {
+                for (let x = 0; x < processedMap[y].length; x++) {
+                    const tile = processedMap[y][x];
                     if (tile === '.') {
                         dustPositions.push({x, y});
                     } else if (tile === 'W') {
@@ -922,10 +1001,13 @@ GAME_HTML = """
         function drawMapElements() {
             const tileSize = window.gameTileSize || 30;
             
+            // Get processed map
+            const processedMap = processMazeWithFloodFill(level1Map);
+            
             // Draw map elements
-            for (let y = 0; y < level1Map.length; y++) {
-                for (let x = 0; x < level1Map[y].length; x++) {
-                    const tile = level1Map[y][x];
+            for (let y = 0; y < processedMap.length; y++) {
+                for (let x = 0; x < processedMap[y].length; x++) {
+                    const tile = processedMap[y][x];
                     const drawX = x * tileSize;
                     const drawY = y * tileSize;
                     
@@ -1082,6 +1164,7 @@ GAME_HTML = """
         function handleKeyPress(event) {
             if (level1State !== 'gameplay') return;
             
+            const processedMap = processMazeWithFloodFill(level1Map);
             const newX = playerX;
             const newY = playerY;
             
@@ -1089,7 +1172,7 @@ GAME_HTML = """
                 case 'ArrowUp':
                 case 'w':
                 case 'W':
-                    if (newY > 0 && level1Map[newY - 1][newX] !== '#') {
+                    if (newY > 0 && processedMap[newY - 1][newX] !== '#') {
                         playerY = newY - 1;
                         playerDirection = 'up';
                     }
@@ -1097,7 +1180,7 @@ GAME_HTML = """
                 case 'ArrowDown':
                 case 's':
                 case 'S':
-                    if (newY < level1Map.length - 1 && level1Map[newY + 1][newX] !== '#') {
+                    if (newY < processedMap.length - 1 && processedMap[newY + 1][newX] !== '#') {
                         playerY = newY + 1;
                         playerDirection = 'down';
                     }
@@ -1105,7 +1188,7 @@ GAME_HTML = """
                 case 'ArrowLeft':
                 case 'a':
                 case 'A':
-                    if (newX > 0 && level1Map[newY][newX - 1] !== '#') {
+                    if (newX > 0 && processedMap[newY][newX - 1] !== '#') {
                         playerX = newX - 1;
                         playerDirection = 'left';
                     }
@@ -1113,7 +1196,7 @@ GAME_HTML = """
                 case 'ArrowRight':
                 case 'd':
                 case 'D':
-                    if (newX < level1Map[0].length - 1 && level1Map[newY][newX + 1] !== '#') {
+                    if (newX < processedMap[0].length - 1 && processedMap[newY][newX + 1] !== '#') {
                         playerX = newX + 1;
                         playerDirection = 'right';
                     }
