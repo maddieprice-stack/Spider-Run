@@ -1552,12 +1552,18 @@ GAME_HTML = """
         
         function drawVillains() {
             const tileSize = window.gameTileSize || 30;
+            const hudHeight = 80; // Height of HUD area
+            
+            // Debug logging
+            console.log('Drawing villains:', villains.length, 'villains');
+            console.log('Villain sprites loaded:', villainSpritesLoaded);
+            console.log('Villain sprites object:', Object.keys(villainSprites));
             
             villains.forEach(villain => {
                 // Get the villain sprite
                 const villainSprite = villainSprites[villain.type];
                 
-                if (villainSprite && villainSpritesLoaded >= 9) {
+                if (villainSprite && villainSpritesLoaded >= 1) { // Temporarily lowered for debugging
                     // Draw villain sprite
                     if (villain.stunned) {
                         // Draw stunned villain (flashing)
