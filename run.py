@@ -1533,37 +1533,59 @@ GAME_HTML = """
             // Draw villains
             drawVillains();
             
-            // Draw player (Spider-Man sprite)
-            const playerImg = new Image();
-            playerImg.onload = function() {
+            // Draw player (Spider-Man sprite) - use cached image
+            if (!window.playerSprite) {
+                window.playerSprite = new Image();
+                window.playerSprite.onload = function() {
+                    // Image loaded, will be drawn next frame
+                };
+                window.playerSprite.src = '/static/Spider-man_Running_Sprite.png';
+            }
+            
+            if (window.playerSprite && window.playerSprite.complete) {
                 ctx.save();
                 if (playerDirection === 'left') {
                     // Flip horizontally when moving left
                     ctx.scale(-1, 1);
-                    ctx.drawImage(playerImg, -(playerX * tileSize + 1 + tileSize - 2), playerY * tileSize + 1 + hudHeight, tileSize - 2, tileSize - 2);
+                    ctx.drawImage(window.playerSprite, -(playerX * tileSize + 1 + tileSize - 2), playerY * tileSize + 1 + hudHeight, tileSize - 2, tileSize - 2);
                 } else {
                     // Normal drawing for other directions
-                    ctx.drawImage(playerImg, playerX * tileSize + 1, playerY * tileSize + 1 + hudHeight, tileSize - 2, tileSize - 2);
+                    ctx.drawImage(window.playerSprite, playerX * tileSize + 1, playerY * tileSize + 1 + hudHeight, tileSize - 2, tileSize - 2);
                 }
                 ctx.restore();
-            };
-            playerImg.src = '/static/Spider-man_Running_Sprite.png';
+                
+                // Draw floating "YOU" text above Spider-Man
+                const textX = playerX * tileSize + tileSize / 2;
+                const textY = playerY * tileSize - 10 + hudHeight;
+                
+                // Glow effect
+                ctx.shadowColor = '#00bfff';
+                ctx.shadowBlur = 10;
+                ctx.shadowOffsetX = 0;
+                ctx.shadowOffsetY = 0;
+                
+                // Main text
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 16px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('YOU', textX, textY);
+                
+                // Reset shadow
+                ctx.shadowBlur = 0;
+            }
         }
         
         function drawVillains() {
             const tileSize = window.gameTileSize || 30;
             const hudHeight = 80; // Height of HUD area
             
-            // Debug logging
-            console.log('Drawing villains:', villains.length, 'villains');
-            console.log('Villain sprites loaded:', villainSpritesLoaded);
-            console.log('Villain sprites object:', Object.keys(villainSprites));
+
             
             villains.forEach(villain => {
                 // Get the villain sprite
                 const villainSprite = villainSprites[villain.type];
                 
-                if (villainSprite && villainSpritesLoaded >= 1) { // Temporarily lowered for debugging
+                if (villainSprite && villainSpritesLoaded >= 9) {
                     // Draw villain sprite
                     if (villain.stunned) {
                         // Draw stunned villain (flashing)
@@ -1631,8 +1653,8 @@ GAME_HTML = """
         
         function drawHUD() {
             const tileSize = window.gameTileSize || 30;
-            const hudY = 25; // Fixed position above the game board
-            const fontSize = Math.max(16, tileSize * 0.6);
+            const hudY = 35; // Increased position to prevent cutoff
+            const fontSize = Math.min(20, Math.max(14, tileSize * 0.4)); // Capped font size
             
             // Lives
             ctx.fillStyle = '#ffffff';
@@ -1646,8 +1668,8 @@ GAME_HTML = """
             ctx.fillText('Level 1: East Village', canvas.width - tileSize * 10, hudY);
             
             // Villain ability status
-            const statusY = hudY + fontSize + 5;
-            ctx.font = `${Math.max(12, tileSize * 0.4)}px Courier New`;
+            const statusY = hudY + fontSize + 8;
+            ctx.font = `${Math.min(16, Math.max(10, tileSize * 0.3))}px Courier New`;
             
             if (villainAbilities.alleyBlock.active) {
                 ctx.fillStyle = '#ff0000';
