@@ -422,6 +422,78 @@ GAME_HTML = """
         let currentState = 'title';
         let currentPanel = 0;
         const totalPanels = 7;
+        
+        // Level 1 game variables
+        let level1State = 'intro'; // intro, splash, gameplay, win, lose
+        let playerX = 13;
+        let playerY = 12;
+        let playerDirection = 'right';
+        let score = 0;
+        let lives = 3;
+        let dustCollected = 0;
+        let totalDust = 0;
+        let webShooterActive = false;
+        let webShooterTimer = 0;
+        let gameLoop;
+        let canvas, ctx;
+        
+        // Level 1 map data (27x29 grid)
+        const level1Map = [
+            "###########################",
+            "#W........###...........W#",
+            "#.####.#.###.###.#.####.#",
+            "#T#  #.#..... .....#. #T#",
+            "#.#  #.#####-#####.#  #.#",
+            "#.#  #.#   V V   #.#  #.#",
+            "#.#  #.#  V   V  #.#  #.#",
+            "#.#  #.#   V V   #.#  #.#",
+            "#.#  #.#####-#####.#  #.#",
+            "#T#  #.#..... .....#. #T#",
+            "#.####.#.###.###.#.####.#",
+            "#W........###...........#",
+            "#########  S  ###########",
+            "#...............T........#",
+            "#.####.#####.#####.####.#",
+            "#.#  #.#   #.#   #.#  #.#",
+            "#.#  #.# W #.# W #.#  #.#",
+            "#.#  #.#####.#####.#  #.#",
+            "#.#  #.............#  #.#",
+            "#.####.###.#.#.###.####.#",
+            "#.....T...#.#.#...T.....#",
+            "###.#####.#.#.#.#####.###",
+            "#...#   #.......#   #...#",
+            "#.#.# W ####### W #.#.#.#",
+            "#.#.#   #.....#   #.#.#.#",
+            "#.#.#####.#.#.#####.#.#.#",
+            "#T.......T.#.#.T.......T#",
+            "###########################"
+        ];
+        
+        // Dust positions (calculated from map)
+        let dustPositions = [];
+        let webShooterPositions = [];
+        let taxiStopPositions = [];
+        
+        // Initialize level 1 data
+        function initLevel1() {
+            dustPositions = [];
+            webShooterPositions = [];
+            taxiStopPositions = [];
+            
+            for (let y = 0; y < level1Map.length; y++) {
+                for (let x = 0; x < level1Map[y].length; x++) {
+                    const tile = level1Map[y][x];
+                    if (tile === '.') {
+                        dustPositions.push({x, y});
+                    } else if (tile === 'W') {
+                        webShooterPositions.push({x, y});
+                    } else if (tile === 'T') {
+                        taxiStopPositions.push({x, y});
+                    }
+                }
+            }
+            totalDust = dustPositions.length;
+        }
 
         // Audio effects (placeholder)
         function playPageFlipSound() {
@@ -487,12 +559,16 @@ GAME_HTML = """
                 panel.classList.remove('active');
             });
             
-            // Initialize game canvas
-            initGame();
+            // Start Level 1
+            startLevel1();
         }
 
-        // Game canvas setup
-        function initGame() {
+        // Level 1 functions
+        function startLevel1() {
+            level1State = 'splash';
+            initLevel1();
+            
+            // Show Level 1 splash screen
             const canvas = document.getElementById('gameCanvas');
             const ctx = canvas.getContext('2d');
             
@@ -500,12 +576,12 @@ GAME_HTML = """
             canvas.style.border = '5px solid #000';
             canvas.style.boxShadow = '5px 5px 0px rgba(0,0,0,0.3)';
             
-            // Draw placeholder game screen
+            // Draw splash screen
             ctx.fillStyle = '#1a1a2e';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
             // Draw comic-style title
-            ctx.fillStyle = '#fff';
+            ctx.fillStyle = '#ffff00';
             ctx.strokeStyle = '#000';
             ctx.lineWidth = 3;
             ctx.font = 'bold 48px Comic Sans MS';
@@ -515,21 +591,248 @@ GAME_HTML = """
             ctx.strokeText(title, canvas.width/2, 100);
             ctx.fillText(title, canvas.width/2, 100);
             
-            // Draw placeholder game elements
+            // Draw East Village background
+            const bgImage = new Image();
+            bgImage.onload = function() {
+                ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
+                // Redraw title over background
+                ctx.fillStyle = '#ffff00';
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 3;
+                ctx.font = 'bold 48px Comic Sans MS';
+                ctx.textAlign = 'center';
+                ctx.strokeText(title, canvas.width/2, 100);
+                ctx.fillText(title, canvas.width/2, 100);
+            };
+            bgImage.src = '/static/East_Village_Pixel_Scape.png';
+            
+            setTimeout(() => {
+                level1State = 'gameplay';
+                initGameplay();
+            }, 2000);
+        }
+        
+        function initGameplay() {
+            canvas = document.getElementById('gameCanvas');
+            ctx = canvas.getContext('2d');
+            
+            // Set canvas size to fit the map
+            const tileSize = 20;
+            canvas.width = level1Map[0].length * tileSize;
+            canvas.height = level1Map.length * tileSize;
+            
+            // Start game loop
+            gameLoop = setInterval(updateGame, 1000/60); // 60 FPS
+            
+            // Add keyboard controls
+            document.addEventListener('keydown', handleKeyPress);
+        }
+        
+        function updateGame() {
+            if (level1State !== 'gameplay') return;
+            
+            // Update web shooter timer
+            if (webShooterActive) {
+                webShooterTimer--;
+                if (webShooterTimer <= 0) {
+                    webShooterActive = false;
+                }
+            }
+            
+            // Check win condition
+            if (dustCollected >= totalDust) {
+                level1State = 'win';
+                clearInterval(gameLoop);
+                showWinScreen();
+                return;
+            }
+            
+            // Check lose condition
+            if (lives <= 0) {
+                level1State = 'lose';
+                clearInterval(gameLoop);
+                showLoseScreen();
+                return;
+            }
+            
+            renderGame();
+        }
+        
+        function renderGame() {
+            if (!ctx) return;
+            
+            const tileSize = 20;
+            
+            // Clear canvas
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw background (East Village pixel art)
+            const bgImage = new Image();
+            bgImage.onload = function() {
+                ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
+                drawMapElements();
+            };
+            bgImage.src = '/static/East_Village_Pixel_Scape.png';
+        }
+        
+        function drawMapElements() {
+            const tileSize = 20;
+            
+            // Draw map elements
+            for (let y = 0; y < level1Map.length; y++) {
+                for (let x = 0; x < level1Map[y].length; x++) {
+                    const tile = level1Map[y][x];
+                    const drawX = x * tileSize;
+                    const drawY = y * tileSize;
+                    
+                    if (tile === '#') {
+                        // Draw building/wall
+                        ctx.fillStyle = '#1a1a2e';
+                        ctx.fillRect(drawX, drawY, tileSize, tileSize);
+                        ctx.strokeStyle = '#00bfff';
+                        ctx.lineWidth = 2;
+                        ctx.strokeRect(drawX, drawY, tileSize, tileSize);
+                    } else if (tile === '.') {
+                        // Check if dust is still there
+                        const dustExists = dustPositions.some(dust => dust.x === x && dust.y === y);
+                        if (dustExists) {
+                            // Draw space dust
+                            ctx.fillStyle = '#ffffff';
+                            ctx.beginPath();
+                            ctx.arc(drawX + tileSize/2, drawY + tileSize/2, 3, 0, 2 * Math.PI);
+                            ctx.fill();
+                        }
+                    } else if (tile === 'W') {
+                        // Draw web shooter
+                        const webShooterExists = webShooterPositions.some(ws => ws.x === x && ws.y === y);
+                        if (webShooterExists) {
+                            ctx.fillStyle = '#00bfff';
+                            ctx.beginPath();
+                            ctx.arc(drawX + tileSize/2, drawY + tileSize/2, 8, 0, 2 * Math.PI);
+                            ctx.fill();
+                            ctx.strokeStyle = '#ffffff';
+                            ctx.lineWidth = 2;
+                            ctx.stroke();
+                        }
+                    } else if (tile === 'T') {
+                        // Draw taxi stop
+                        ctx.fillStyle = '#ffff00';
+                        ctx.fillRect(drawX + 2, drawY + 2, tileSize - 4, tileSize - 4);
+                        ctx.strokeStyle = '#000';
+                        ctx.lineWidth = 1;
+                        ctx.strokeRect(drawX + 2, drawY + 2, tileSize - 4, tileSize - 4);
+                    }
+                }
+            }
+            
+            // Draw player
             ctx.fillStyle = '#ff0000';
-            ctx.fillRect(350, 250, 100, 100); // Placeholder for Spider-Man
+            ctx.fillRect(playerX * tileSize + 2, playerY * tileSize + 2, tileSize - 4, tileSize - 4);
             
-            ctx.fillStyle = '#ffff00';
-            ctx.fillRect(100, 100, 20, 20); // Placeholder for dust
+            // Draw HUD
+            drawHUD();
+        }
+        
+        function drawHUD() {
+            const hudY = 25;
             
-            ctx.fillStyle = '#00ff00';
-            ctx.fillRect(700, 500, 20, 20); // Placeholder for power-up
+            // Lives
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '16px Courier New';
+            ctx.fillText(`Lives: ${lives}`, 10, hudY);
             
-            // Draw instruction
-            ctx.fillStyle = '#fff';
-            ctx.font = '24px Comic Sans MS';
-            ctx.fillText('Gameplay coming soon!', canvas.width/2, 400);
-            ctx.fillText('Click anywhere to return to title', canvas.width/2, 450);
+            // Score
+            ctx.fillText(`Score: ${score}`, canvas.width/2 - 50, hudY);
+            
+            // Level
+            ctx.fillText('Level 1: East Village', canvas.width - 200, hudY);
+        }
+        
+        function handleKeyPress(event) {
+            if (level1State !== 'gameplay') return;
+            
+            const newX = playerX;
+            const newY = playerY;
+            
+            switch(event.key) {
+                case 'ArrowUp':
+                case 'w':
+                case 'W':
+                    if (newY > 0 && level1Map[newY - 1][newX] !== '#') {
+                        playerY = newY - 1;
+                        playerDirection = 'up';
+                    }
+                    break;
+                case 'ArrowDown':
+                case 's':
+                case 'S':
+                    if (newY < level1Map.length - 1 && level1Map[newY + 1][newX] !== '#') {
+                        playerY = newY + 1;
+                        playerDirection = 'down';
+                    }
+                    break;
+                case 'ArrowLeft':
+                case 'a':
+                case 'A':
+                    if (newX > 0 && level1Map[newY][newX - 1] !== '#') {
+                        playerX = newX - 1;
+                        playerDirection = 'left';
+                    }
+                    break;
+                case 'ArrowRight':
+                case 'd':
+                case 'D':
+                    if (newX < level1Map[0].length - 1 && level1Map[newY][newX + 1] !== '#') {
+                        playerX = newX + 1;
+                        playerDirection = 'right';
+                    }
+                    break;
+            }
+            
+            // Check for dust collection
+            checkDustCollection();
+            checkWebShooterCollection();
+            checkTaxiStopCollection();
+        }
+        
+        function checkDustCollection() {
+            const dustIndex = dustPositions.findIndex(dust => dust.x === playerX && dust.y === playerY);
+            if (dustIndex !== -1) {
+                dustPositions.splice(dustIndex, 1);
+                dustCollected++;
+                score += 10;
+            }
+        }
+        
+        function checkWebShooterCollection() {
+            const webShooterIndex = webShooterPositions.findIndex(ws => ws.x === playerX && ws.y === playerY);
+            if (webShooterIndex !== -1) {
+                webShooterPositions.splice(webShooterIndex, 1);
+                webShooterActive = true;
+                webShooterTimer = 360; // 6 seconds at 60 FPS
+                score += 50;
+            }
+        }
+        
+        function checkTaxiStopCollection() {
+            const taxiIndex = taxiStopPositions.findIndex(taxi => taxi.x === playerX && taxi.y === playerY);
+            if (taxiIndex !== -1) {
+                // Taxi ride effect (simplified for now)
+                score += 25;
+            }
+        }
+        
+        function showWinScreen() {
+            currentState = 'win';
+            document.querySelectorAll('.comic-panel').forEach(panel => panel.classList.remove('active'));
+            document.getElementById('titleScreen').classList.add('active');
+        }
+        
+        function showLoseScreen() {
+            currentState = 'lose';
+            document.querySelectorAll('.comic-panel').forEach(panel => panel.classList.remove('active'));
+            document.getElementById('titleScreen').classList.add('active');
         }
 
         // Event listeners
@@ -537,7 +840,13 @@ GAME_HTML = """
             if (currentState === 'comic') {
                 nextPanel();
             } else if (currentState === 'gameplay') {
-                // Return to title for now
+                // Skip splash screen on click
+                if (level1State === 'splash') {
+                    level1State = 'gameplay';
+                    initGameplay();
+                }
+            } else if (currentState === 'win' || currentState === 'lose') {
+                // Return to title
                 currentState = 'title';
                 currentPanel = 0;
                 showPanel(0);
@@ -551,6 +860,10 @@ GAME_HTML = """
                     nextPanel();
                 } else if (currentState === 'title') {
                     startGame();
+                } else if (currentState === 'gameplay' && level1State === 'splash') {
+                    // Skip splash screen
+                    level1State = 'gameplay';
+                    initGameplay();
                 }
             }
         });
