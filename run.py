@@ -50,11 +50,11 @@ GAME_HTML = """
         }
 
         .comic-panel {
-            position: absolute;
+            position: fixed;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
+            width: 100vw;
+            height: 100vh;
             background: #fff;
             display: none;
             flex-direction: column;
@@ -131,13 +131,18 @@ GAME_HTML = """
             color: #fff;
             text-align: center;
             padding: 40px;
-            min-height: 100vh;
+            width: 100vw;
+            height: 100vh;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             border: 4px solid #ffff00;
             box-shadow: inset 0 0 20px rgba(255, 255, 0, 0.3);
+            position: fixed;
+            top: 0;
+            left: 0;
+            margin: 0;
         }
 
         .title-screen h1 {
@@ -248,11 +253,11 @@ GAME_HTML = """
         }
 
         .page-flip {
-            position: absolute;
+            position: fixed;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
+            width: 100vw;
+            height: 100vh;
             background: #000;
             z-index: 20;
             display: none;
