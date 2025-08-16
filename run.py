@@ -298,16 +298,9 @@ GAME_HTML = """
             left: 0;
             width: 100vw;
             height: 100vh;
-            background: #000;
+            background: transparent;
             z-index: 20;
             display: none;
-            animation: pageFlip 0.5s ease-in-out;
-        }
-
-        @keyframes pageFlip {
-            0% { transform: rotateY(0deg); }
-            50% { transform: rotateY(90deg); }
-            100% { transform: rotateY(180deg); }
         }
 
         .halftone-bg {
@@ -821,7 +814,7 @@ GAME_HTML = """
                 'Doc Ock': '/static/Doc_Oc.png',
                 'Green Goblin': '/static/Green_Goblin.png',
                 'Vulture': '/static/Vulture.png',
-                'Venom': '/static/Vulture.png', // Using Vulture sprite as placeholder for Venom
+                'Venom': '/static/Venom.png', // Now using actual Venom sprite
                 'Lizard': '/static/Lizard.png',
                 'Mysterio': '/static/Mysterio.png',
                 'Hobgoblin': '/static/Hobgoblin.png',
@@ -1187,20 +1180,12 @@ GAME_HTML = """
                 panel.classList.remove('active');
             });
 
-            // Show page flip effect
-            const pageFlip = document.getElementById('pageFlip');
-            pageFlip.style.display = 'block';
-            playPageFlipSound();
-
-            // After animation, show new panel
-            setTimeout(() => {
-                pageFlip.style.display = 'none';
-                if (panelNumber === 0) {
-                    document.getElementById('titleScreen').classList.add('active');
-                } else {
-                    document.getElementById(`comicPanel${panelNumber}`).classList.add('active');
-                }
-            }, 250);
+            // Show new panel immediately without page flip effect
+            if (panelNumber === 0) {
+                document.getElementById('titleScreen').classList.add('active');
+            } else {
+                document.getElementById(`comicPanel${panelNumber}`).classList.add('active');
+            }
         }
 
         // Game flow functions
@@ -1376,17 +1361,26 @@ GAME_HTML = """
             ctx.fillStyle = '#000';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
-            // Draw background (East Village pixel art)
-            const bgImage = new Image();
-            bgImage.onload = function() {
-                ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
-                drawMapElements();
-            };
-            bgImage.src = '/static/East_Village_Pixel_Scape.png';
+            // Draw background (East Village pixel art) - only once
+            if (!window.backgroundImage) {
+                window.backgroundImage = new Image();
+                window.backgroundImage.onload = function() {
+                    // Background is loaded, but we'll draw it in drawMapElements
+                };
+                window.backgroundImage.src = '/static/East_Village_Pixel_Scape.png';
+            }
+            
+            // Draw map elements (which will handle background drawing)
+            drawMapElements();
         }
         
         function drawMapElements() {
             const tileSize = window.gameTileSize || 30;
+            
+            // Draw background first (only if loaded)
+            if (window.backgroundImage && window.backgroundImage.complete) {
+                ctx.drawImage(window.backgroundImage, 0, 0, canvas.width, canvas.height);
+            }
             
             // Get processed map
             const processedMap = processMazeWithFloodFill(level1Map);
