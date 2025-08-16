@@ -131,6 +131,40 @@ This is a hackathon project created for educational and entertainment purposes.
 
 ---
 
+## 🚀 Quick Start
+
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/maddieprice-stack/Spider-Run.git
+   cd Spider-Run
+   ```
+
+2. **Install dependencies**:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+3. **Run the game**:
+   ```bash
+   python run.py
+   ```
+
+4. **Open your browser** and go to: `http://localhost:8081`
+
+## 🤝 Contributing
+
+This is a hackathon project, but contributions are welcome! Feel free to:
+- Report bugs
+- Suggest new features
+- Submit pull requests
+- Improve the comic book styling
+
+## 📄 License
+
+This project is created for educational and entertainment purposes.
+
+---
+
 **Ready to swing into action? Run `python run.py` and start your Spider-Run adventure!** 🕷️✨
 
 
