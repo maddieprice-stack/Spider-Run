@@ -832,7 +832,12 @@ GAME_HTML = """
         let villainAbilities = {
             alleyBlock: { active: false, timer: 0, cooldown: 720 }, // 12 seconds at 60fps
             pumpkinBomb: { active: false, timer: 0, cooldown: 720 },
-            windGust: { active: false, timer: 0, cooldown: 720 }
+            windGust: { active: false, timer: 0, cooldown: 720 },
+            darkTendrils: { active: false, timer: 0, cooldown: 720 }, // Venom
+            razorBats: { active: false, timer: 0, cooldown: 720 }, // Hobgoblin
+            clawsOfDarkness: { active: false, timer: 0, cooldown: 720 }, // Prowler
+            illusionGas: { active: false, timer: 0, cooldown: 720 }, // Mysterio
+            tailWhip: { active: false, timer: 0, cooldown: 720 } // Lizard
         };
         
         let playerSlowed = false;
@@ -1845,15 +1850,35 @@ GAME_HTML = """
             }
             if (villainAbilities.pumpkinBomb.active) {
                 ctx.fillStyle = '#ff8800';
-                ctx.fillText('Goblin: Pumpkin Bomb!', canvas.width/2 - tileSize * 2.5, statusY);
+                ctx.fillText('Green Goblin: Pumpkin Bomb!', canvas.width/2 - tileSize * 2.5, statusY);
             }
             if (villainAbilities.windGust.active || playerSlowed) {
                 ctx.fillStyle = '#00ffff';
                 ctx.fillText('Vulture: Wind Gust!', canvas.width - tileSize * 10, statusY);
             }
+            if (villainAbilities.darkTendrils.active) {
+                ctx.fillStyle = '#800080';
+                ctx.fillText('Venom: Dark Tendrils!', tileSize * 0.5, statusY + 20);
+            }
+            if (villainAbilities.razorBats.active) {
+                ctx.fillStyle = '#ff6600';
+                ctx.fillText('Hobgoblin: Razor Bats!', canvas.width/2 - tileSize * 2.5, statusY + 20);
+            }
+            if (villainAbilities.clawsOfDarkness.active) {
+                ctx.fillStyle = '#000080';
+                ctx.fillText('Prowler: Claws of Darkness!', canvas.width - tileSize * 10, statusY + 20);
+            }
+            if (villainAbilities.illusionGas.active) {
+                ctx.fillStyle = '#00ff00';
+                ctx.fillText('Mysterio: Illusion Gas!', tileSize * 0.5, statusY + 40);
+            }
+            if (villainAbilities.tailWhip.active) {
+                ctx.fillStyle = '#008000';
+                ctx.fillText('Lizard: Tail Whip!', canvas.width/2 - tileSize * 2.5, statusY + 40);
+            }
             if (webShooterActive) {
                 ctx.fillStyle = '#00bfff';
-                ctx.fillText('Web Shooter Active!', canvas.width/2, statusY);
+                ctx.fillText('Web Shooter Active!', canvas.width/2, statusY + 60);
             }
         }
         
