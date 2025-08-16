@@ -478,6 +478,32 @@ GAME_HTML = """
         let webShooterPositions = [];
         let taxiStopPositions = [];
         
+        // Villain system
+        let villains = [];
+        let villainPen = { x: 13, y: 6 }; // Center of villain pen
+        let villainSpawns = [
+            { x: 12, y: 5 }, { x: 14, y: 5 },
+            { x: 11, y: 6 }, { x: 15, y: 6 },
+            { x: 12, y: 7 }, { x: 14, y: 7 }
+        ];
+        
+        // Villain types for Level 1
+        const villainTypes = [
+            { name: 'Doc Ock', color: '#228B22', speed: 0.9, ability: 'alleyBlock' },
+            { name: 'Green Goblin', color: '#32CD32', speed: 1.0, ability: 'pumpkinBomb' },
+            { name: 'Vulture', color: '#006400', speed: 1.1, ability: 'windGust' }
+        ];
+        
+        // Villain state
+        let villainAbilities = {
+            alleyBlock: { active: false, timer: 0, cooldown: 720 }, // 12 seconds at 60fps
+            pumpkinBomb: { active: false, timer: 0, cooldown: 720 },
+            windGust: { active: false, timer: 0, cooldown: 720 }
+        };
+        
+        let playerSlowed = false;
+        let playerSlowTimer = 0;
+        
         // Building images
         let buildingImages = [];
         let buildingImagesLoaded = 0;
@@ -518,6 +544,138 @@ GAME_HTML = """
             streetImage = img;
         }
         
+        // Initialize villains
+        function initVillains() {
+            villains = [];
+            
+            // Create 3 villains for Level 1
+            for (let i = 0; i < 3; i++) {
+                const spawn = villainSpawns[i];
+                const villainType = villainTypes[i];
+                
+                villains.push({
+                    x: spawn.x,
+                    y: spawn.y,
+                    type: villainType.name,
+                    color: villainType.color,
+                    speed: villainType.speed,
+                    ability: villainType.ability,
+                    direction: 'right',
+                    moveTimer: 0,
+                    abilityTimer: 0,
+                    stunned: false,
+                    stunnedTimer: 0,
+                    targetX: spawn.x,
+                    targetY: spawn.y
+                });
+            }
+        }
+        
+        // Villain AI movement
+        function updateVillains() {
+            villains.forEach(villain => {
+                if (villain.stunned) {
+                    villain.stunnedTimer--;
+                    if (villain.stunnedTimer <= 0) {
+                        villain.stunned = false;
+                        // Return to pen
+                        villain.x = villainPen.x;
+                        villain.y = villainPen.y;
+                    }
+                    return;
+                }
+                
+                // Move towards target
+                villain.moveTimer++;
+                if (villain.moveTimer >= Math.floor(60 / villain.speed)) {
+                    villain.moveTimer = 0;
+                    
+                    // Check if reached target
+                    if (villain.x === villain.targetX && villain.y === villain.targetY) {
+                        setNewTarget(villain);
+                    } else {
+                        moveTowardsTarget(villain);
+                    }
+                }
+                
+                // Update abilities
+                villain.abilityTimer++;
+                if (villain.abilityTimer >= 720) { // 12 seconds
+                    villain.abilityTimer = 0;
+                    useVillainAbility(villain);
+                }
+            });
+        }
+        
+        function setNewTarget(villain) {
+            // Different targeting based on villain type
+            if (villain.type === 'Doc Ock') {
+                // Prefer horizontal movement near center
+                const centerX = Math.floor(level1Map[0].length / 2);
+                villain.targetX = centerX + (Math.random() > 0.5 ? 1 : -1);
+                villain.targetY = Math.floor(level1Map.length / 2) + (Math.random() - 0.5) * 4;
+            } else if (villain.type === 'Green Goblin') {
+                // Prefer outer loops
+                const edges = [
+                    { x: 1, y: 1 }, { x: level1Map[0].length - 2, y: 1 },
+                    { x: 1, y: level1Map.length - 2 }, { x: level1Map[0].length - 2, y: level1Map.length - 2 }
+                ];
+                const target = edges[Math.floor(Math.random() * edges.length)];
+                villain.targetX = target.x;
+                villain.targetY = target.y;
+            } else if (villain.type === 'Vulture') {
+                // Prefer vertical movement
+                villain.targetX = villain.x + (Math.random() > 0.5 ? 1 : -1);
+                villain.targetY = Math.floor(Math.random() * level1Map.length);
+            }
+            
+            // Ensure target is within bounds and not a wall
+            villain.targetX = Math.max(0, Math.min(level1Map[0].length - 1, villain.targetX));
+            villain.targetY = Math.max(0, Math.min(level1Map.length - 1, villain.targetY));
+            
+            if (level1Map[villain.targetY][villain.targetX] === '#') {
+                // If target is a wall, find nearest valid position
+                setNewTarget(villain);
+            }
+        }
+        
+        function moveTowardsTarget(villain) {
+            const dx = villain.targetX - villain.x;
+            const dy = villain.targetY - villain.y;
+            
+            if (Math.abs(dx) > Math.abs(dy)) {
+                // Move horizontally
+                const newX = villain.x + (dx > 0 ? 1 : -1);
+                if (newX >= 0 && newX < level1Map[0].length && level1Map[villain.y][newX] !== '#') {
+                    villain.x = newX;
+                }
+            } else {
+                // Move vertically
+                const newY = villain.y + (dy > 0 ? 1 : -1);
+                if (newY >= 0 && newY < level1Map.length && level1Map[newY][villain.x] !== '#') {
+                    villain.y = newY;
+                }
+            }
+        }
+        
+        function useVillainAbility(villain) {
+            if (villain.ability === 'alleyBlock') {
+                // Doc Ock blocks nearest alley
+                villainAbilities.alleyBlock.active = true;
+                villainAbilities.alleyBlock.timer = 180; // 3 seconds
+            } else if (villain.ability === 'pumpkinBomb') {
+                // Green Goblin drops bomb at random intersection
+                villainAbilities.pumpkinBomb.active = true;
+                villainAbilities.pumpkinBomb.timer = 240; // 4 seconds
+            } else if (villain.ability === 'windGust') {
+                // Vulture creates wind gust
+                villainAbilities.windGust.active = true;
+                villainAbilities.windGust.timer = 180; // 3 seconds
+                playerSlowed = true;
+                playerSlowTimer = 180; // 3 seconds
+            }
+        }
+        
         // Initialize level 1 data
         function initLevel1() {
             dustPositions = [];
@@ -541,6 +699,9 @@ GAME_HTML = """
             // Load building images
             loadBuildingImages();
             loadStreetImage();
+            
+            // Initialize villains
+            initVillains();
         }
 
         // Audio effects (placeholder)
@@ -697,6 +858,30 @@ GAME_HTML = """
                 }
             }
             
+            // Update villain abilities
+            Object.keys(villainAbilities).forEach(ability => {
+                if (villainAbilities[ability].active) {
+                    villainAbilities[ability].timer--;
+                    if (villainAbilities[ability].timer <= 0) {
+                        villainAbilities[ability].active = false;
+                    }
+                }
+            });
+            
+            // Update player slow effect
+            if (playerSlowed) {
+                playerSlowTimer--;
+                if (playerSlowTimer <= 0) {
+                    playerSlowed = false;
+                }
+            }
+            
+            // Update villains
+            updateVillains();
+            
+            // Check villain collision
+            checkVillainCollision();
+            
             // Check win condition
             if (dustCollected >= totalDust) {
                 level1State = 'win';
@@ -801,12 +986,59 @@ GAME_HTML = """
                 }
             }
             
+            // Draw villains
+            drawVillains();
+            
             // Draw player
             ctx.fillStyle = '#ff0000';
             ctx.fillRect(playerX * tileSize + 2, playerY * tileSize + 2, tileSize - 4, tileSize - 4);
             
             // Draw HUD
             drawHUD();
+        }
+        
+        function drawVillains() {
+            const tileSize = window.gameTileSize || 30;
+            
+            villains.forEach(villain => {
+                if (villain.stunned) {
+                    // Draw stunned villain (flashing)
+                    if (Math.floor(Date.now() / 100) % 2 === 0) {
+                        ctx.fillStyle = '#ffffff';
+                    } else {
+                        ctx.fillStyle = villain.color;
+                    }
+                } else {
+                    ctx.fillStyle = villain.color;
+                }
+                
+                // Draw villain sprite
+                ctx.fillRect(villain.x * tileSize + 1, villain.y * tileSize + 1, tileSize - 2, tileSize - 2);
+                
+                // Draw villain name
+                ctx.fillStyle = '#ffffff';
+                ctx.font = `${Math.max(8, tileSize * 0.3)}px Courier New`;
+                ctx.textAlign = 'center';
+                ctx.fillText(villain.type, villain.x * tileSize + tileSize/2, villain.y * tileSize - 5);
+            });
+        }
+        
+        function checkVillainCollision() {
+            villains.forEach(villain => {
+                if (villain.x === playerX && villain.y === playerY) {
+                    if (webShooterActive) {
+                        // Stun villain
+                        villain.stunned = true;
+                        villain.stunnedTimer = 180; // 3 seconds
+                        score += 100;
+                    } else {
+                        // Player loses life
+                        lives--;
+                        playerX = 13; // Reset to spawn
+                        playerY = 12;
+                    }
+                }
+            });
         }
         
         function drawHUD() {
@@ -824,6 +1056,27 @@ GAME_HTML = """
             
             // Level
             ctx.fillText('Level 1: East Village', canvas.width - tileSize * 10, hudY);
+            
+            // Villain ability status
+            const statusY = hudY + fontSize + 5;
+            ctx.font = `${Math.max(12, tileSize * 0.4)}px Courier New`;
+            
+            if (villainAbilities.alleyBlock.active) {
+                ctx.fillStyle = '#ff0000';
+                ctx.fillText('Doc Ock: Alley Blocked!', tileSize * 0.5, statusY);
+            }
+            if (villainAbilities.pumpkinBomb.active) {
+                ctx.fillStyle = '#ff8800';
+                ctx.fillText('Goblin: Pumpkin Bomb!', canvas.width/2 - tileSize * 2.5, statusY);
+            }
+            if (villainAbilities.windGust.active || playerSlowed) {
+                ctx.fillStyle = '#00ffff';
+                ctx.fillText('Vulture: Wind Gust!', canvas.width - tileSize * 10, statusY);
+            }
+            if (webShooterActive) {
+                ctx.fillStyle = '#00bfff';
+                ctx.fillText('Web Shooter Active!', canvas.width/2, statusY);
+            }
         }
         
         function handleKeyPress(event) {
