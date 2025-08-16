@@ -162,6 +162,17 @@ GAME_HTML = """
             border-bottom: 12px solid #fff;
         }
 
+        .spider-run-logo {
+            margin-bottom: 20px;
+            filter: drop-shadow(0 4px 8px rgba(0, 191, 255, 0.5));
+            animation: logoGlow 3s ease-in-out infinite alternate;
+        }
+        
+        @keyframes logoGlow {
+            0% { filter: drop-shadow(0 4px 8px rgba(0, 191, 255, 0.5)); }
+            100% { filter: drop-shadow(0 8px 16px rgba(0, 191, 255, 0.8)); }
+        }
+        
         .title-screen {
             background: #000;
             color: #fff;
@@ -194,36 +205,12 @@ GAME_HTML = """
 
         .title-screen .subtitle {
             font-size: 1.2em;
-            margin-bottom: 30px;
+            margin-bottom: 60px;
             color: #fff;
             font-family: 'Courier New', monospace;
         }
 
-        .spider-man-sprite {
-            width: 120px;
-            height: 120px;
-            margin: 30px auto;
-            background: url('/static/Spider-man sprite.png') no-repeat center center;
-            background-size: 100% 100%;
-            image-rendering: pixelated;
-            image-rendering: -moz-crisp-edges;
-            image-rendering: crisp-edges;
-            animation: pixelGlow 3s ease-in-out infinite;
-            display: block;
-            border: 2px solid #00bfff;
-            background-color: rgba(255, 255, 255, 0.1);
-        }
 
-        @keyframes pixelGlow {
-            0%, 100% { 
-                filter: brightness(1) contrast(1);
-                transform: scale(1);
-            }
-            50% { 
-                filter: brightness(1.2) contrast(1.1);
-                transform: scale(1.05);
-            }
-        }
 
         @keyframes bounce {
             0%, 20%, 50%, 80%, 100% {
@@ -520,11 +507,9 @@ GAME_HTML = """
         <!-- Title Screen -->
         <div id="titleScreen" class="comic-panel active">
             <div class="title-screen">
-                <h1>SPIDER-RUN</h1>
-                <div class="subtitle">A Pac-Man-Inspired Adventure</div>
-                
-                <!-- Spider-Man Sprite (replacing Pac-Man ghosts) -->
-                <div class="spider-man-sprite" title="Spider-Man"></div>
+                <div class="spider-run-logo">
+                    <img src="/static/spider_run_official_logo.png" alt="SPIDER-RUN" style="width: 600px; height: auto; max-width: 100%;">
+                </div>
                 
                 <!-- Instructions Section -->
                 <div class="instructions">
@@ -532,14 +517,15 @@ GAME_HTML = """
                     <ul>
                         <li>Use ARROW KEYS to move Spider-Man</li>
                         <li>Collect all SPACE DUST to win</li>
-                        <li>Avoid ENEMIES or use POWER-UPS</li>
-                        <li>You have 3 LIVES per level</li>
-                        <li>Press ESC to pause the game</li>
+                        <li>Avoid ENEMIES or use WEB-SLINGERS</li>
+                        <li>You have 5 LIVES per level</li>
+                        <li>TAXIS will move you double time</li>
+                        <li>WEB SHOOTERS stun villains and give bonus points</li>
                     </ul>
                 </div>
                 
                 <div>
-                    <button class="menu-button" id="startButton">START GAME</button>
+                    <button class="menu-button" id="startButton">PRESS ANYWHERE TO BEGIN</button>
                 </div>
             </div>
         </div>
@@ -608,6 +594,43 @@ GAME_HTML = """
             </div>
         </div>
 
+        <!-- Post-Level 1 Victory Comic Panels -->
+        <div id="victoryPanel0" class="comic-panel">
+            <div class="panel-content">
+                <div class="dr-strange-image"></div>
+                <div class="speech-bubble">
+                    Excellent work, Spider-Man! The East Village is clean!
+                </div>
+            </div>
+        </div>
+
+        <div id="victoryPanel1" class="comic-panel">
+            <div class="panel-content">
+                <div class="dr-strange-webp-image"></div>
+                <div class="speech-bubble">
+                    But the space dust has spread to Times Square! We need to act fast!
+                </div>
+            </div>
+        </div>
+
+        <div id="victoryPanel2" class="comic-panel">
+            <div class="panel-content">
+                <div class="dr-strange-image"></div>
+                <div class="speech-bubble">
+                    Times Square? That's going to be a lot more crowded with villains...
+                </div>
+            </div>
+        </div>
+
+        <div id="victoryPanel3" class="comic-panel">
+            <div class="panel-content">
+                <div class="dr-strange-webp-image"></div>
+                <div class="speech-bubble">
+                    The stakes are higher now, Spider-Man. Can you handle Times Square?
+                </div>
+            </div>
+        </div>
+
         <!-- Game Canvas -->
         <canvas id="gameCanvas" width="800" height="600"></canvas>
         
@@ -626,6 +649,7 @@ GAME_HTML = """
                 <div class="spider-man-victory"></div>
                 <div class="quip-bubble" id="winQuip"></div>
                 <div class="cutscene-buttons">
+                    <button class="cutscene-button retry" onclick="continueToNextLevel()">CONTINUE</button>
                     <button class="cutscene-button" onclick="returnToTitle()">EXIT</button>
                 </div>
             </div>
@@ -661,6 +685,8 @@ GAME_HTML = """
         let currentState = 'title';
         let currentPanel = 0;
         const totalPanels = 7;
+        let currentVictoryPanel = 0;
+        const totalVictoryPanels = 4;
         
         // Level 1 game variables
         let level1State = 'intro'; // intro, splash, gameplay, win, lose
@@ -1336,6 +1362,33 @@ GAME_HTML = """
                 startGameplay();
             }
         }
+        
+        function showVictoryPanel(panelNumber) {
+            // Hide all panels including title screen
+            document.querySelectorAll('.comic-panel, #titleScreen').forEach(panel => {
+                panel.classList.remove('active');
+            });
+
+            // Show new victory panel
+            document.getElementById(`victoryPanel${panelNumber}`).classList.add('active');
+        }
+        
+        function nextVictoryPanel() {
+            if (currentState === 'victoryComic' && currentVictoryPanel < totalVictoryPanels - 1) {
+                currentVictoryPanel++;
+                showVictoryPanel(currentVictoryPanel);
+            } else if (currentState === 'victoryComic' && currentVictoryPanel === totalVictoryPanels - 1) {
+                // End of victory comic, start next level
+                startNextLevel();
+            }
+        }
+        
+        function startNextLevel() {
+            // Start next level without resetting lives
+            startNewLevel();
+            currentState = 'gameplay';
+            startLevel1();
+        }
 
         function startGameplay() {
             currentState = 'gameplay';
@@ -1640,6 +1693,14 @@ GAME_HTML = """
             
             if (currentPlayerSprite && currentPlayerSprite.complete) {
                 ctx.save();
+                
+                // Add fade effect when web shooter is active
+                if (webShooterActive) {
+                    // Create a pulsing fade effect (fade in and out)
+                    const fadeValue = 0.3 + 0.7 * Math.abs(Math.sin(Date.now() * 0.01)); // Pulsing between 0.3 and 1.0
+                    ctx.globalAlpha = fadeValue;
+                }
+                
                 if (playerDirection === 'left') {
                     // Flip horizontally when moving left
                     ctx.scale(-1, 1);
@@ -1952,7 +2013,7 @@ GAME_HTML = """
             if (webShooterIndex !== -1) {
                 webShooterPositions.splice(webShooterIndex, 1);
                 webShooterActive = true;
-                webShooterTimer = 360; // 6 seconds at 60 FPS
+                webShooterTimer = 480; // 8 seconds at 60 FPS (6 + 2 more seconds)
                 score += 50;
             }
         }
@@ -2125,12 +2186,45 @@ GAME_HTML = """
             startLevel1();
         }
         
+        function continueToNextLevel() {
+            // Hide win cutscene
+            document.getElementById('winCutscene').classList.remove('active');
+            // Show victory comic panels
+            currentState = 'victoryComic';
+            currentVictoryPanel = 0;
+            showVictoryPanel(0);
+        }
+        
         function resetLevel() {
             // Reset level-specific variables
             playerX = 13;
             playerY = 12;
             score = 0;
-            lives = 5;
+            lives = 5; // Reset lives when retrying the same level
+            dustCollected = 0;
+            webShooterActive = false;
+            webShooterTimer = 0;
+            level1State = 'intro';
+            
+            // Reset taxi riding variables
+            isRidingTaxi = false;
+            taxiX = 0;
+            taxiY = 0;
+            taxiDirection = 'right';
+            taxiMoveTimer = 0;
+            
+            // Reset swing animation
+            swingAnimationCounter = 0;
+            lastPlayerX = 13;
+            lastPlayerY = 12;
+        }
+        
+        function startNewLevel() {
+            // Start a new level without resetting lives
+            playerX = 13;
+            playerY = 12;
+            score = 0;
+            // lives = 5; // Don't reset lives when starting a new level
             dustCollected = 0;
             webShooterActive = false;
             webShooterTimer = 0;
@@ -2185,6 +2279,8 @@ GAME_HTML = """
                 startGame();
             } else if (currentState === 'comic') {
                 nextPanel();
+            } else if (currentState === 'victoryComic') {
+                nextVictoryPanel();
             } else if (currentState === 'gameplay') {
                 // Skip splash screen on click
                 if (level1State === 'splash') {
@@ -2202,6 +2298,8 @@ GAME_HTML = """
                 e.preventDefault();
                 if (currentState === 'comic') {
                     nextPanel();
+                } else if (currentState === 'victoryComic') {
+                    nextVictoryPanel();
                 } else if (currentState === 'title') {
                     startGame();
                 } else if (currentState === 'gameplay' && level1State === 'splash') {
