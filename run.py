@@ -608,6 +608,11 @@ GAME_HTML = """
 
         <!-- Game Canvas -->
         <canvas id="gameCanvas" width="800" height="600"></canvas>
+        
+        <!-- Background Music -->
+        <audio id="backgroundMusic" loop>
+            <source src="/static/background_music.mp3" type="audio/mpeg">
+        </audio>
 
         <!-- Page Flip Effect -->
         <div id="pageFlip" class="page-flip"></div>
@@ -1237,6 +1242,9 @@ GAME_HTML = """
             
             // Initialize villains
             initVillains();
+            
+            // Initialize background music
+            initBackgroundMusic();
         }
 
         // Audio effects (placeholder)
@@ -1248,6 +1256,32 @@ GAME_HTML = """
         function playClickSound() {
             // Placeholder for click sound
             console.log('Click sound played');
+        }
+        
+        // Background music functions
+        function initBackgroundMusic() {
+            const bgMusic = document.getElementById('backgroundMusic');
+            if (bgMusic) {
+                bgMusic.volume = 0.3; // Set volume to 30%
+                bgMusic.loop = true;
+            }
+        }
+        
+        function startBackgroundMusic() {
+            const bgMusic = document.getElementById('backgroundMusic');
+            if (bgMusic) {
+                bgMusic.play().catch(error => {
+                    console.log('Background music autoplay blocked:', error);
+                });
+            }
+        }
+        
+        function stopBackgroundMusic() {
+            const bgMusic = document.getElementById('backgroundMusic');
+            if (bgMusic) {
+                bgMusic.pause();
+                bgMusic.currentTime = 0;
+            }
         }
 
         // Panel navigation
@@ -1373,6 +1407,9 @@ GAME_HTML = """
             
             // Add keyboard controls
             document.addEventListener('keydown', handleKeyPress);
+            
+            // Start background music
+            startBackgroundMusic();
         }
         
         function updateGame() {
@@ -1659,7 +1696,7 @@ GAME_HTML = """
             // Lives
             ctx.fillStyle = '#ffffff';
             ctx.font = `${fontSize}px Courier New`;
-            ctx.fillText(`Lives: ${lives}`, tileSize * 0.5, hudY);
+            ctx.fillText(`Lives: ${lives}`, tileSize * 1.5, hudY);
             
             // Score
             ctx.fillText(`Score: ${score}`, canvas.width/2 - tileSize * 2.5, hudY);
@@ -1789,6 +1826,9 @@ GAME_HTML = """
             currentQuip = winQuips['level1']; // For now, hardcoded to level 1
             quipTimer = 0;
             
+            // Stop background music
+            stopBackgroundMusic();
+            
             // Hide all panels and show win cutscene
             document.querySelectorAll('.comic-panel').forEach(panel => panel.classList.remove('active'));
             document.getElementById('winCutscene').classList.add('active');
@@ -1801,6 +1841,9 @@ GAME_HTML = """
             currentQuip = lossQuips[Math.floor(Math.random() * lossQuips.length)];
             quipTimer = 0;
             
+            // Stop background music
+            stopBackgroundMusic();
+            
             // Hide all panels and show lose cutscene
             document.querySelectorAll('.comic-panel').forEach(panel => panel.classList.remove('active'));
             document.getElementById('loseCutscene').classList.add('active');
@@ -1812,6 +1855,9 @@ GAME_HTML = """
             winLossState = 'gameOver';
             currentQuip = lossQuips[Math.floor(Math.random() * lossQuips.length)];
             quipTimer = 0;
+            
+            // Stop background music
+            stopBackgroundMusic();
             
             // Hide all panels and show game over cutscene
             document.querySelectorAll('.comic-panel').forEach(panel => panel.classList.remove('active'));
