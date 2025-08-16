@@ -29,7 +29,7 @@ Spider-Run is a comic book-styled arcade game where you play as Spider-Man helpi
 
 ### ✅ Implemented
 - **Title Screen**: Comic cover style with Start Game and Instructions buttons
-- **Comic Intro Sequence**: 6-panel interactive story with Dr. Strange and Spider-Man
+- **Comic Intro Sequence**: 7-panel interactive story with Dr. Strange and Spider-Man
 - **Page-Flip Animations**: Smooth transitions between comic panels
 - **Comic Book Styling**: Bold borders, halftone backgrounds, speech bubbles
 - **Click-Through Dialogue**: Advance story by clicking or pressing Enter/Space
@@ -46,6 +46,7 @@ Spider-Run is a comic book-styled arcade game where you play as Spider-Man helpi
 
 The intro sequence follows the exact script from the PRD:
 
+0. **Spider-Man**: "Hi Dr. Strange!"
 1. **Dr. Strange**: "Spider-Man! I need your help — I've spilled space dust all over New York City!"
 2. **Spider-Man**: "What's a little more dust on the streets? We've seen worse."
 3. **Dr. Strange**: "This dust isn't ordinary, Spider-Man. If left unchecked... it could END THE WORLD!"

@@ -206,6 +206,17 @@ GAME_HTML = """
         </div>
 
         <!-- Comic Intro Panels -->
+        <div id="comicPanel0" class="comic-panel">
+            <div class="panel-content">
+                <div class="character-image halftone-bg comic-border">
+                    Spider-Man
+                </div>
+                <div class="speech-bubble">
+                    Hi Dr. Strange!
+                </div>
+            </div>
+        </div>
+
         <div id="comicPanel1" class="comic-panel">
             <div class="panel-content">
                 <div class="character-image halftone-bg comic-border">
@@ -283,7 +294,7 @@ GAME_HTML = """
         // Game state management
         let currentState = 'title';
         let currentPanel = 0;
-        const totalPanels = 6;
+        const totalPanels = 7;
 
         // Audio effects (placeholder)
         function playPageFlipSound() {
@@ -323,8 +334,8 @@ GAME_HTML = """
         function startGame() {
             playClickSound();
             currentState = 'comic';
-            currentPanel = 1;
-            showPanel(1);
+            currentPanel = 0;
+            showPanel(0);
         }
 
         function showInstructions() {
@@ -333,10 +344,10 @@ GAME_HTML = """
         }
 
         function nextPanel() {
-            if (currentState === 'comic' && currentPanel < totalPanels) {
+            if (currentState === 'comic' && currentPanel < totalPanels - 1) {
                 currentPanel++;
                 showPanel(currentPanel);
-            } else if (currentState === 'comic' && currentPanel === totalPanels) {
+            } else if (currentState === 'comic' && currentPanel === totalPanels - 1) {
                 // End of comic, start gameplay
                 startGameplay();
             }
