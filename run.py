@@ -137,8 +137,8 @@ GAME_HTML = """
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            border: 4px solid #ffff00;
-            box-shadow: inset 0 0 20px rgba(255, 255, 0, 0.3);
+            border: 4px solid #00bfff;
+            box-shadow: inset 0 0 20px rgba(0, 191, 255, 0.3);
             position: fixed;
             top: 0;
             left: 0;
@@ -148,7 +148,7 @@ GAME_HTML = """
         .title-screen h1 {
             font-size: 5em;
             font-weight: bold;
-            color: #ffff00;
+            color: #00bfff;
             text-shadow: 3px 3px 0px #ff0000;
             margin-bottom: 40px;
             text-transform: uppercase;
@@ -234,8 +234,8 @@ GAME_HTML = """
 
         .menu-button {
             background: #000;
-            color: #ffff00;
-            border: 3px solid #ffff00;
+            color: #00bfff;
+            border: 3px solid #00bfff;
             padding: 15px 30px;
             margin: 10px;
             font-size: 1.2em;
@@ -247,7 +247,7 @@ GAME_HTML = """
         }
 
         .menu-button:hover {
-            background: #ffff00;
+            background: #00bfff;
             color: #000;
             transform: scale(1.05);
         }
