@@ -474,6 +474,31 @@ GAME_HTML = """
         let webShooterPositions = [];
         let taxiStopPositions = [];
         
+        // Building images
+        let buildingImages = [];
+        let buildingImagesLoaded = 0;
+        
+        // Load building images
+        function loadBuildingImages() {
+            const buildingPaths = [
+                '/static/Building_1.png',
+                '/static/Building_2.png',
+                '/static/Building_3.png',
+                '/static/Building_4.png',
+                '/static/Building_5.png',
+                '/static/Building_6.png'
+            ];
+            
+            buildingPaths.forEach((path, index) => {
+                const img = new Image();
+                img.onload = function() {
+                    buildingImagesLoaded++;
+                };
+                img.src = path;
+                buildingImages[index] = img;
+            });
+        }
+        
         // Initialize level 1 data
         function initLevel1() {
             dustPositions = [];
@@ -493,6 +518,9 @@ GAME_HTML = """
                 }
             }
             totalDust = dustPositions.length;
+            
+            // Load building images
+            loadBuildingImages();
         }
 
         // Audio effects (placeholder)
@@ -687,12 +715,22 @@ GAME_HTML = """
                     const drawY = y * tileSize;
                     
                     if (tile === '#') {
-                        // Draw building/wall
-                        ctx.fillStyle = '#1a1a2e';
-                        ctx.fillRect(drawX, drawY, tileSize, tileSize);
-                        ctx.strokeStyle = '#00bfff';
-                        ctx.lineWidth = 2;
-                        ctx.strokeRect(drawX, drawY, tileSize, tileSize);
+                        // Draw building with image
+                        if (buildingImagesLoaded >= 6) {
+                            // Select building image based on position for variety
+                            const buildingIndex = (x + y * 3) % 6;
+                            const buildingImg = buildingImages[buildingIndex];
+                            if (buildingImg) {
+                                ctx.drawImage(buildingImg, drawX, drawY, tileSize, tileSize);
+                            }
+                        } else {
+                            // Fallback to simple square while images load
+                            ctx.fillStyle = '#1a1a2e';
+                            ctx.fillRect(drawX, drawY, tileSize, tileSize);
+                            ctx.strokeStyle = '#00bfff';
+                            ctx.lineWidth = 2;
+                            ctx.strokeRect(drawX, drawY, tileSize, tileSize);
+                        }
                     } else if (tile === '.') {
                         // Check if dust is still there
                         const dustExists = dustPositions.some(dust => dust.x === x && dust.y === y);
