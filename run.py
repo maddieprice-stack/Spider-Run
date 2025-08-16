@@ -164,10 +164,10 @@ GAME_HTML = """
         }
 
         .spider-man-sprite {
-            width: 80px;
-            height: 80px;
+            width: 120px;
+            height: 120px;
             background: #ff0000;
-            border: 3px solid #0000ff;
+            border: 4px solid #0000ff;
             border-radius: 50%;
             margin: 20px auto;
             display: flex;
@@ -177,12 +177,72 @@ GAME_HTML = """
             font-weight: bold;
             color: #fff;
             position: relative;
+            overflow: hidden;
         }
 
         .spider-man-sprite::before {
             content: '🕷️';
-            font-size: 40px;
+            font-size: 30px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 2;
             animation: bounce 2s infinite;
+        }
+
+        .spider-man-sprite::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 30% 30%, #ff0000 0%, #cc0000 20%, transparent 30%),
+                radial-gradient(circle at 70% 70%, #ff0000 0%, #cc0000 20%, transparent 30%),
+                linear-gradient(45deg, #ff0000 0%, #cc0000 50%, #ff0000 100%);
+            border-radius: 50%;
+            z-index: 1;
+        }
+
+        /* Pixel art Spider-Man sprite overlay */
+        .spider-man-sprite .pixel-sprite {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60px;
+            height: 60px;
+            background: 
+                /* Head */
+                linear-gradient(to right, transparent 20%, #ff0000 20%, #ff0000 80%, transparent 80%),
+                linear-gradient(to bottom, transparent 10%, #ff0000 10%, #ff0000 30%, transparent 30%),
+                /* Eyes */
+                linear-gradient(to right, transparent 25%, #ffffff 25%, #ffffff 35%, transparent 35%),
+                linear-gradient(to right, transparent 65%, #ffffff 65%, #ffffff 75%, transparent 75%),
+                linear-gradient(to bottom, transparent 15%, #ffffff 15%, #ffffff 25%, transparent 25%),
+                /* Body */
+                linear-gradient(to right, transparent 15%, #0000ff 15%, #0000ff 85%, transparent 85%),
+                linear-gradient(to bottom, transparent 30%, #0000ff 30%, #0000ff 70%, transparent 70%),
+                /* Web pattern */
+                linear-gradient(45deg, transparent 40%, #000000 40%, #000000 45%, transparent 45%),
+                linear-gradient(-45deg, transparent 40%, #000000 40%, #000000 45%, transparent 45%);
+            background-size: 100% 100%;
+            z-index: 1;
+            image-rendering: pixelated;
+            animation: pixelGlow 3s ease-in-out infinite;
+        }
+
+        @keyframes pixelGlow {
+            0%, 100% { 
+                filter: brightness(1) contrast(1);
+                transform: translate(-50%, -50%) scale(1);
+            }
+            50% { 
+                filter: brightness(1.2) contrast(1.1);
+                transform: translate(-50%, -50%) scale(1.05);
+            }
         }
 
         @keyframes bounce {
@@ -290,7 +350,9 @@ GAME_HTML = """
                 <div class="subtitle">A Pac-Man-Inspired Adventure</div>
                 
                 <!-- Spider-Man Sprite (replacing Pac-Man ghosts) -->
-                <div class="spider-man-sprite"></div>
+                <div class="spider-man-sprite">
+                    <div class="pixel-sprite"></div>
+                </div>
                 
                 <!-- Instructions Section -->
                 <div class="instructions">
