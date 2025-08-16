@@ -319,6 +319,205 @@ GAME_HTML = """
             border: 5px solid #000;
             box-shadow: 5px 5px 0px rgba(0,0,0,0.3);
         }
+        
+        /* Win/Loss Cut Scene Styles */
+        .win-loss-cutscene {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+        
+        .win-loss-cutscene.active {
+            opacity: 1;
+        }
+        
+        .cutscene-panel {
+            background: #fff;
+            border: 4px solid #000;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            max-width: 600px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .cutscene-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 2px,
+                rgba(0, 0, 0, 0.1) 2px,
+                rgba(0, 0, 0, 0.1) 4px
+            );
+            pointer-events: none;
+        }
+        
+        .game-over-text {
+            font-family: 'Courier New', monospace;
+            font-size: 48px;
+            font-weight: bold;
+            color: #ff0000;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            margin-bottom: 30px;
+            animation: gameOverGlow 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes gameOverGlow {
+            0% { text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); }
+            100% { text-shadow: 2px 2px 20px rgba(255, 0, 0, 0.8); }
+        }
+        
+        .win-text {
+            font-family: 'Courier New', monospace;
+            font-size: 36px;
+            font-weight: bold;
+            color: #00ff00;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            margin-bottom: 30px;
+            animation: winGlow 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes winGlow {
+            0% { text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); }
+            100% { text-shadow: 2px 2px 20px rgba(0, 255, 0, 0.8); }
+        }
+        
+        .spider-man-defeated {
+            width: 200px;
+            height: 200px;
+            margin: 20px auto;
+            background: url('/static/Spider-man sprite.png') no-repeat center center;
+            background-size: contain;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+            opacity: 0.7;
+            transform: scale(0.8);
+            animation: defeatedBounce 3s ease-in-out infinite;
+        }
+        
+        @keyframes defeatedBounce {
+            0%, 100% { transform: scale(0.8) translateY(0px); }
+            50% { transform: scale(0.8) translateY(-10px); }
+        }
+        
+        .spider-man-victory {
+            width: 200px;
+            height: 200px;
+            margin: 20px auto;
+            background: url('/static/Spider-man sprite.png') no-repeat center center;
+            background-size: contain;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+            animation: victoryBounce 2s ease-in-out infinite;
+        }
+        
+        @keyframes victoryBounce {
+            0%, 100% { transform: scale(1) translateY(0px); }
+            50% { transform: scale(1.1) translateY(-15px); }
+        }
+        
+        .quip-bubble {
+            background: #fff;
+            border: 3px solid #000;
+            border-radius: 20px;
+            padding: 20px;
+            margin: 20px 0;
+            position: relative;
+            font-family: 'Comic Sans MS', cursive;
+            font-size: 18px;
+            line-height: 1.4;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            opacity: 0;
+            transform: scale(0.8);
+            animation: quipAppear 1s ease-out 1s forwards;
+        }
+        
+        @keyframes quipAppear {
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        .quip-bubble::before {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-top: 15px solid #000;
+        }
+        
+        .quip-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 12px solid transparent;
+            border-right: 12px solid transparent;
+            border-top: 12px solid #fff;
+        }
+        
+        .cutscene-buttons {
+            margin-top: 30px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+        
+        .cutscene-button {
+            background: #00bfff;
+            color: #fff;
+            border: 3px solid #000;
+            border-radius: 10px;
+            padding: 15px 30px;
+            font-family: 'Courier New', monospace;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        
+        .cutscene-button:hover {
+            background: #0099cc;
+            transform: scale(1.05);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+        }
+        
+        .cutscene-button.retry {
+            background: #ff6b35;
+        }
+        
+        .cutscene-button.retry:hover {
+            background: #e55a2b;
+        }
     </style>
 </head>
 <body>
@@ -345,7 +544,7 @@ GAME_HTML = """
                 </div>
                 
                 <div>
-                    <button class="menu-button" onclick="startGame()">START GAME</button>
+                    <button class="menu-button" id="startButton">START GAME</button>
                 </div>
             </div>
         </div>
@@ -419,6 +618,42 @@ GAME_HTML = """
 
         <!-- Page Flip Effect -->
         <div id="pageFlip" class="page-flip"></div>
+        
+        <!-- Win/Loss Cut Scenes -->
+        <div id="winCutscene" class="win-loss-cutscene">
+            <div class="cutscene-panel">
+                <div class="win-text">LEVEL COMPLETE!</div>
+                <div class="spider-man-victory"></div>
+                <div class="quip-bubble" id="winQuip"></div>
+                <div class="cutscene-buttons">
+                    <button class="cutscene-button" onclick="returnToTitle()">EXIT</button>
+                </div>
+            </div>
+        </div>
+        
+        <div id="loseCutscene" class="win-loss-cutscene">
+            <div class="cutscene-panel">
+                <div class="game-over-text">GAME OVER</div>
+                <div class="spider-man-defeated"></div>
+                <div class="quip-bubble" id="loseQuip"></div>
+                <div class="cutscene-buttons">
+                    <button class="cutscene-button retry" onclick="retryLevel()">RETRY</button>
+                    <button class="cutscene-button" onclick="returnToTitle()">EXIT</button>
+                </div>
+            </div>
+        </div>
+        
+        <div id="gameOverCutscene" class="win-loss-cutscene">
+            <div class="cutscene-panel">
+                <div class="game-over-text">GAME OVER</div>
+                <div class="spider-man-defeated"></div>
+                <div class="quip-bubble" id="gameOverQuip"></div>
+                <div class="cutscene-buttons">
+                    <button class="cutscene-button retry" onclick="retryGame()">RETRY</button>
+                    <button class="cutscene-button" onclick="returnToTitle()">EXIT</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -441,104 +676,43 @@ GAME_HTML = """
         let gameLoop;
         let canvas, ctx;
         
-        // Level 1 map data (27x29 grid) - processed with flood-fill
+        // Level 1 map data (60x27 grid) - much larger horizontally
         const level1Map = [
-            "###########################",
-            "#W........###...........W#",
-            "#.####.#.###.###.#.####.#",
-            "#T#  #.#..... .....#. #T#",
-            "#.#  #.#####-#####.#  #.#",
-            "#.#  #.#   V V   #.#  #.#",
-            "#.#  #.#  V   V  #.#  #.#",
-            "#.#  #.#   V V   #.#  #.#",
-            "#.#  #.#####-#####.#  #.#",
-            "#T#  #.#..... .....#. #T#",
-            "#.####.#.###.###.#.####.#",
-            "#W........###...........#",
-            "#########  S  ###########",
-            "#...............T........#",
-            "#.####.#####.#####.####.#",
-            "#.#  #.#   #.#   #.#  #.#",
-            "#.#  #.# W #.# W #.#  #.#",
-            "#.#  #.#####.#####.#  #.#",
-            "#.#  #.............#  #.#",
-            "#.####.###.#.#.###.####.#",
-            "#.....T...#.#.#...T.....#",
-            "###.#####.#.#.#.#####.###",
-            "#...#   #.......#   #...#",
-            "#.#.# W ####### W #.#.#.#",
-            "#.#.#   #.....#   #.#.#.#",
-            "#.#.#####.#.#.#####.#.#.#",
-            "#T.......T.#.#.T.......T#",
-            "###########################"
+            "############################################################",
+            "#W........###...........W#W........###...........W#W........###...........W#",
+            "#.####.#.###.###.#.####.#.####.#.###.###.#.####.#.####.#.###.###.#.####.#",
+            "#T#  #.#..... .....#  #T#T#  #.#..... .....#  #T#T#  #.#..... .....#  #T#",
+            "#.#  #.#####-#####.#  #.#.#  #.#####-#####.#  #.#.#  #.#####-#####.#  #.#",
+            "#.#  #.#   V V   #.#  #.#.#  #.#   V V   #.#  #.#.#  #.#   V V   #.#  #.#",
+            "#.#  #.#  V   V  #.#  #.#.#  #.#  V   V  #.#  #.#.#  #.#  V   V  #.#  #.#",
+            "#.#  #.#   V V   #.#  #.#.#  #.#   V V   #.#  #.#.#  #.#   V V   #.#  #.#",
+            "#.#  #.#####-#####.#  #.#.#  #.#####-#####.#  #.#.#  #.#####-#####.#  #.#",
+            "#T#  #.#..... .....#  #T#T#  #.#..... .....#  #T#T#  #.#..... .....#  #T#",
+            "#.####.#.###.###.#.####.#.####.#.###.###.#.####.#.####.#.###.###.#.####.#",
+            "#W........###...........#W........###...........#W........###...........#",
+            "#########  S  ########### #########  S  ########### #########  S  ###########",
+            "#...............T........#...............T........#...............T........#",
+            "#.####.#####.#####.####.#.####.#####.#####.####.#.####.#####.#####.####.#",
+            "#.#  #.#   #.#   #.#  #.#.#  #.#   #.#   #.#  #.#.#  #.#   #.#   #.#  #.#",
+            "#.#  #.# W #.# W #.#  #.#.#  #.# W #.# W #.#  #.#.#  #.# W #.# W #.#  #.#",
+            "#.#  #.#####.#####.#  #.#.#  #.#####.#####.#  #.#.#  #.#####.#####.#  #.#",
+            "#.#  #.............#  #.#.#  #.............#  #.#.#  #.............#  #.#",
+            "#.####.###.#.#.###.####.#.####.###.#.#.###.####.#.####.###.#.#.###.####.#",
+            "#.....T...#.#.#...T.....#.....T...#.#.#...T.....#.....T...#.#.#...T.....#",
+            "###.#####.#.#.#.#####.### ###.#####.#.#.#.#####.### ###.#####.#.#.#.#####.###",
+            "#...#   #.......#   #...#...#   #.......#   #...#...#   #.......#   #...#",
+            "#.#.# W ####### W #.#.#.#.#.# W ####### W #.#.#.#.#.# W ####### W #.#.#.#",
+            "#.#.#   #.....#   #.#.#.#.#.#   #.....#   #.#.#.#.#.#   #.....#   #.#.#.#",
+            "#.#.#####.#.#.#####.#.#.#.#.#####.#.#.#####.#.#.#.#.#####.#.#.#####.#.#.#",
+            "#T.......T...T.......T#T.......T...T.......T#T.......T...T.......T#",
+            "############################################################"
         ];
         
         // Function to process ASCII maze with flood-fill
         function processMazeWithFloodFill(asciiMaze) {
-            // Convert to 2D grid
-            let grid = asciiMaze.map(row => row.split(''));
-            
-            // Add border
-            const width = grid[0].length;
-            const height = grid.length;
-            
-            // Create bordered grid
-            let borderedGrid = [];
-            borderedGrid.push(new Array(width + 2).fill('#'));
-            for (let row of grid) {
-                borderedGrid.push(['#', ...row, '#']);
-            }
-            borderedGrid.push(new Array(width + 2).fill('#'));
-            
-            // Flood fill from border
-            let visited = new Set();
-            let queue = [];
-            
-            // Add all border cells that are passable
-            for (let y = 0; y < borderedGrid.length; y++) {
-                for (let x = 0; x < borderedGrid[0].length; x++) {
-                    if (y === 0 || y === borderedGrid.length - 1 || x === 0 || x === borderedGrid[0].length - 1) {
-                        if (isPassable(borderedGrid[y][x])) {
-                            queue.push([x, y]);
-                            visited.add(`${x},${y}`);
-                        }
-                    }
-                }
-            }
-            
-            // BFS flood fill
-            const directions = [[0, 1], [1, 0], [0, -1], [-1, 0]];
-            while (queue.length > 0) {
-                let [x, y] = queue.shift();
-                
-                for (let [dx, dy] of directions) {
-                    let newX = x + dx;
-                    let newY = y + dy;
-                    
-                    if (newX >= 0 && newX < borderedGrid[0].length && 
-                        newY >= 0 && newY < borderedGrid.length) {
-                        
-                        let key = `${newX},${newY}`;
-                        if (!visited.has(key) && isPassable(borderedGrid[newY][newX])) {
-                            visited.add(key);
-                            queue.push([newX, newY]);
-                        }
-                    }
-                }
-            }
-            
-            // Convert enclosed spaces to blockers
-            for (let y = 1; y < borderedGrid.length - 1; y++) {
-                for (let x = 1; x < borderedGrid[0].length - 1; x++) {
-                    let key = `${x},${y}`;
-                    if (borderedGrid[y][x] === ' ' && !visited.has(key)) {
-                        borderedGrid[y][x] = '#';
-                    }
-                }
-            }
-            
-            // Remove border and convert back to strings
-            return borderedGrid.slice(1, -1).map(row => row.slice(1, -1).join(''));
+            // Simply return the original maze without any flood-fill processing
+            // This keeps all spaces as open walkable areas
+            return asciiMaze;
         }
         
         function isPassable(char) {
@@ -557,14 +731,24 @@ GAME_HTML = """
         let villainSpawns = [
             { x: 12, y: 5 }, { x: 14, y: 5 },
             { x: 11, y: 6 }, { x: 15, y: 6 },
-            { x: 12, y: 7 }, { x: 14, y: 7 }
+            { x: 12, y: 7 }, { x: 14, y: 7 },
+            { x: 13, y: 5 }, { x: 13, y: 7 }, // Additional spawns for more villains
+            { x: 11, y: 5 }, { x: 15, y: 5 },
+            { x: 12, y: 6 }, { x: 14, y: 6 }, // More spawns for 9 villains
+            { x: 11, y: 7 }, { x: 15, y: 7 }
         ];
         
         // Villain types for Level 1
         const villainTypes = [
             { name: 'Doc Ock', color: '#228B22', speed: 0.9, ability: 'alleyBlock' },
             { name: 'Green Goblin', color: '#32CD32', speed: 1.0, ability: 'pumpkinBomb' },
-            { name: 'Vulture', color: '#006400', speed: 1.1, ability: 'windGust' }
+            { name: 'Vulture', color: '#006400', speed: 1.1, ability: 'windGust' },
+            { name: 'Venom', color: '#000000', speed: 1.1, ability: 'windGust' },
+            { name: 'Lizard', color: '#228B22', speed: 1.1, ability: 'windGust' },
+            { name: 'Mysterio', color: '#4B0082', speed: 1.1, ability: 'windGust' },
+            { name: 'Hobgoblin', color: '#FF4500', speed: 1.1, ability: 'windGust' },
+            { name: 'Prowler', color: '#800080', speed: 1.1, ability: 'windGust' },
+            { name: 'Sandman', color: '#D2B48C', speed: 1.1, ability: 'windGust' }
         ];
         
         // Villain state
@@ -584,6 +768,20 @@ GAME_HTML = """
         // Street image
         let streetImage = null;
         let streetImageLoaded = false;
+        
+        // Villain sprites
+        let villainSprites = {
+            'Doc Ock': null,
+            'Green Goblin': null,
+            'Vulture': null,
+            'Venom': null,
+            'Lizard': null,
+            'Mysterio': null,
+            'Hobgoblin': null,
+            'Prowler': null,
+            'Sandman': null
+        };
+        let villainSpritesLoaded = 0;
         
         // Load building images
         function loadBuildingImages() {
@@ -617,12 +815,36 @@ GAME_HTML = """
             streetImage = img;
         }
         
+        // Load villain sprites
+        function loadVillainSprites() {
+            const villainPaths = {
+                'Doc Ock': '/static/Doc_Oc.png',
+                'Green Goblin': '/static/Green_Goblin.png',
+                'Vulture': '/static/Vulture.png',
+                'Venom': '/static/Vulture.png', // Using Vulture sprite as placeholder for Venom
+                'Lizard': '/static/Lizard.png',
+                'Mysterio': '/static/Mysterio.png',
+                'Hobgoblin': '/static/Hobgoblin.png',
+                'Prowler': '/static/Prowler.png',
+                'Sandman': '/static/Sandman.png'
+            };
+            
+            Object.keys(villainPaths).forEach(villainName => {
+                const img = new Image();
+                img.onload = function() {
+                    villainSpritesLoaded++;
+                };
+                img.src = villainPaths[villainName];
+                villainSprites[villainName] = img;
+            });
+        }
+        
         // Initialize villains
         function initVillains() {
             villains = [];
             
-            // Create 3 villains for Level 1
-            for (let i = 0; i < 3; i++) {
+            // Create 9 villains for Level 1
+            for (let i = 0; i < 9; i++) {
                 const spawn = villainSpawns[i];
                 const villainType = villainTypes[i];
                 
@@ -683,24 +905,38 @@ GAME_HTML = """
         function setNewTarget(villain) {
             const processedMap = processMazeWithFloodFill(level1Map);
             
-            // Different targeting based on villain type
+            // All villains can move freely - just pick random valid positions
+            // Different villains have slight preferences but can go anywhere
+            
             if (villain.type === 'Doc Ock') {
-                // Prefer horizontal movement near center
+                // Doc Ock prefers center area but can go anywhere
                 const centerX = Math.floor(processedMap[0].length / 2);
-                villain.targetX = centerX + (Math.random() > 0.5 ? 1 : -1);
-                villain.targetY = Math.floor(processedMap.length / 2) + (Math.random() - 0.5) * 4;
+                const centerY = Math.floor(processedMap.length / 2);
+                
+                if (Math.random() < 0.7) { // 70% chance to target center area
+                    villain.targetX = centerX + (Math.random() - 0.5) * 8;
+                    villain.targetY = centerY + (Math.random() - 0.5) * 8;
+                } else { // 30% chance to go anywhere
+                    villain.targetX = Math.floor(Math.random() * processedMap[0].length);
+                    villain.targetY = Math.floor(Math.random() * processedMap.length);
+                }
             } else if (villain.type === 'Green Goblin') {
-                // Prefer outer loops
-                const edges = [
-                    { x: 1, y: 1 }, { x: processedMap[0].length - 2, y: 1 },
-                    { x: 1, y: processedMap.length - 2 }, { x: processedMap[0].length - 2, y: processedMap.length - 2 }
-                ];
-                const target = edges[Math.floor(Math.random() * edges.length)];
-                villain.targetX = target.x;
-                villain.targetY = target.y;
-            } else if (villain.type === 'Vulture') {
-                // Prefer vertical movement
-                villain.targetX = villain.x + (Math.random() > 0.5 ? 1 : -1);
+                // Green Goblin prefers outer areas but can go anywhere
+                if (Math.random() < 0.6) { // 60% chance to target edges
+                    const edges = [
+                        { x: 1, y: 1 }, { x: processedMap[0].length - 2, y: 1 },
+                        { x: 1, y: processedMap.length - 2 }, { x: processedMap[0].length - 2, y: processedMap.length - 2 }
+                    ];
+                    const target = edges[Math.floor(Math.random() * edges.length)];
+                    villain.targetX = target.x;
+                    villain.targetY = target.y;
+                } else { // 40% chance to go anywhere
+                    villain.targetX = Math.floor(Math.random() * processedMap[0].length);
+                    villain.targetY = Math.floor(Math.random() * processedMap.length);
+                }
+            } else {
+                // All other villains (Vulture, Venom, Lizard, Mysterio) can go anywhere
+                villain.targetX = Math.floor(Math.random() * processedMap[0].length);
                 villain.targetY = Math.floor(Math.random() * processedMap.length);
             }
             
@@ -708,30 +944,179 @@ GAME_HTML = """
             villain.targetX = Math.max(0, Math.min(processedMap[0].length - 1, villain.targetX));
             villain.targetY = Math.max(0, Math.min(processedMap.length - 1, villain.targetY));
             
+            // If target is a wall, find a valid position nearby
             if (processedMap[villain.targetY][villain.targetX] === '#') {
-                // If target is a wall, find nearest valid position
-                setNewTarget(villain);
+                // Search for nearest valid position
+                let found = false;
+                let searchRadius = 1;
+                
+                while (!found && searchRadius < Math.max(processedMap.length, processedMap[0].length)) {
+                    for (let dy = -searchRadius; dy <= searchRadius; dy++) {
+                        for (let dx = -searchRadius; dx <= searchRadius; dx++) {
+                            const newX = villain.targetX + dx;
+                            const newY = villain.targetY + dy;
+                            
+                            if (newX >= 0 && newX < processedMap[0].length && 
+                                newY >= 0 && newY < processedMap.length && 
+                                processedMap[newY][newX] !== '#') {
+                                villain.targetX = newX;
+                                villain.targetY = newY;
+                                found = true;
+                                break;
+                            }
+                        }
+                        if (found) break;
+                    }
+                    searchRadius++;
+                }
+                
+                // If still no valid position found, pick a random valid position
+                if (!found) {
+                    const validPositions = [];
+                    for (let y = 0; y < processedMap.length; y++) {
+                        for (let x = 0; x < processedMap[y].length; x++) {
+                            if (processedMap[y][x] !== '#') {
+                                validPositions.push({x, y});
+                            }
+                        }
+                    }
+                    
+                    if (validPositions.length > 0) {
+                        const randomPos = validPositions[Math.floor(Math.random() * validPositions.length)];
+                        villain.targetX = randomPos.x;
+                        villain.targetY = randomPos.y;
+                    }
+                }
             }
         }
         
         function moveTowardsTarget(villain) {
             const processedMap = processMazeWithFloodFill(level1Map);
-            const dx = villain.targetX - villain.x;
-            const dy = villain.targetY - villain.y;
             
-            if (Math.abs(dx) > Math.abs(dy)) {
-                // Move horizontally
-                const newX = villain.x + (dx > 0 ? 1 : -1);
-                if (newX >= 0 && newX < processedMap[0].length && processedMap[villain.y][newX] !== '#') {
-                    villain.x = newX;
-                }
+            // Find the best path to target using A* pathfinding
+            const path = findPathToTarget(villain.x, villain.y, villain.targetX, villain.targetY, processedMap);
+            
+            if (path && path.length > 1) {
+                // Move to the next step in the path
+                const nextStep = path[1]; // path[0] is current position
+                villain.x = nextStep.x;
+                villain.y = nextStep.y;
             } else {
-                // Move vertically
-                const newY = villain.y + (dy > 0 ? 1 : -1);
-                if (newY >= 0 && newY < processedMap.length && processedMap[newY][villain.x] !== '#') {
-                    villain.y = newY;
+                // No path found or already at target, set new target
+                // For Doc Ock, try a simpler fallback movement
+                if (villain.type === 'Doc Ock') {
+                    // Try simple movement in any valid direction
+                    const directions = [[0, -1], [0, 1], [-1, 0], [1, 0]];
+                    let moved = false;
+                    
+                    for (let [dx, dy] of directions) {
+                        const newX = villain.x + dx;
+                        const newY = villain.y + dy;
+                        
+                        if (newX >= 0 && newX < processedMap[0].length && 
+                            newY >= 0 && newY < processedMap.length && 
+                            processedMap[newY][newX] !== '#') {
+                            villain.x = newX;
+                            villain.y = newY;
+                            moved = true;
+                            break;
+                        }
+                    }
+                    
+                    if (!moved) {
+                        setNewTarget(villain);
+                    }
+                } else {
+                    setNewTarget(villain);
                 }
             }
+        }
+        
+        // A* pathfinding algorithm
+        function findPathToTarget(startX, startY, targetX, targetY, map) {
+            const openSet = [];
+            const closedSet = new Set();
+            const cameFrom = new Map();
+            const gScore = new Map();
+            const fScore = new Map();
+            
+            const startKey = `${startX},${startY}`;
+            const targetKey = `${targetX},${targetY}`;
+            
+            openSet.push({x: startX, y: startY});
+            gScore.set(startKey, 0);
+            fScore.set(startKey, heuristic(startX, startY, targetX, targetY));
+            
+            while (openSet.length > 0) {
+                // Find node with lowest fScore
+                let currentIndex = 0;
+                for (let i = 1; i < openSet.length; i++) {
+                    const currentKey = `${openSet[currentIndex].x},${openSet[currentIndex].y}`;
+                    const nextKey = `${openSet[i].x},${openSet[i].y}`;
+                    if (fScore.get(nextKey) < fScore.get(currentKey)) {
+                        currentIndex = i;
+                    }
+                }
+                
+                const current = openSet.splice(currentIndex, 1)[0];
+                const currentKey = `${current.x},${current.y}`;
+                
+                if (currentKey === targetKey) {
+                    // Path found, reconstruct it
+                    return reconstructPath(cameFrom, current);
+                }
+                
+                closedSet.add(currentKey);
+                
+                // Check all 4 neighbors
+                const directions = [[0, -1], [0, 1], [-1, 0], [1, 0]]; // up, down, left, right
+                for (let [dx, dy] of directions) {
+                    const neighborX = current.x + dx;
+                    const neighborY = current.y + dy;
+                    const neighborKey = `${neighborX},${neighborY}`;
+                    
+                    // Check bounds and if it's a wall
+                    if (neighborX < 0 || neighborX >= map[0].length || 
+                        neighborY < 0 || neighborY >= map.length || 
+                        map[neighborY][neighborX] === '#' || 
+                        closedSet.has(neighborKey)) {
+                        continue;
+                    }
+                    
+                    const tentativeGScore = gScore.get(currentKey) + 1;
+                    
+                    if (!openSet.some(node => node.x === neighborX && node.y === neighborY)) {
+                        openSet.push({x: neighborX, y: neighborY});
+                    } else if (tentativeGScore >= gScore.get(neighborKey)) {
+                        continue;
+                    }
+                    
+                    cameFrom.set(neighborKey, current);
+                    gScore.set(neighborKey, tentativeGScore);
+                    fScore.set(neighborKey, tentativeGScore + heuristic(neighborX, neighborY, targetX, targetY));
+                }
+            }
+            
+            // No path found
+            return null;
+        }
+        
+        function heuristic(x1, y1, x2, y2) {
+            // Manhattan distance
+            return Math.abs(x1 - x2) + Math.abs(y1 - y2);
+        }
+        
+        function reconstructPath(cameFrom, current) {
+            const path = [current];
+            let currentKey = `${current.x},${current.y}`;
+            
+            while (cameFrom.has(currentKey)) {
+                current = cameFrom.get(currentKey);
+                path.unshift(current);
+                currentKey = `${current.x},${current.y}`;
+            }
+            
+            return path;
         }
         
         function useVillainAbility(villain) {
@@ -778,6 +1163,7 @@ GAME_HTML = """
             // Load building images
             loadBuildingImages();
             loadStreetImage();
+            loadVillainSprites();
             
             // Initialize villains
             initVillains();
@@ -819,6 +1205,7 @@ GAME_HTML = """
 
         // Game flow functions
         function startGame() {
+            console.log('Start game clicked!');
             playClickSound();
             currentState = 'comic';
             currentPanel = 0;
@@ -904,13 +1291,13 @@ GAME_HTML = """
             canvas = document.getElementById('gameCanvas');
             ctx = canvas.getContext('2d');
             
-            // Calculate optimal tile size to fit screen
-            const maxWidth = window.innerWidth * 0.95; // 95% of screen width
+            // Calculate optimal tile size to fit screen horizontally
+            const maxWidth = window.innerWidth * 0.98; // 98% of screen width for maximum horizontal coverage
             const maxHeight = window.innerHeight * 0.85; // 85% of screen height
             
             const tileSizeX = Math.floor(maxWidth / level1Map[0].length);
             const tileSizeY = Math.floor(maxHeight / level1Map.length);
-            const tileSize = Math.min(tileSizeX, tileSizeY, 60); // Cap at 60px, minimum of 30px
+            const tileSize = Math.min(tileSizeX, tileSizeY, 45); // Cap at 45px, minimum of 20px for better fit
             
             // Set canvas size to fit the map
             canvas.width = level1Map[0].length * tileSize;
@@ -973,7 +1360,7 @@ GAME_HTML = """
             if (lives <= 0) {
                 level1State = 'lose';
                 clearInterval(gameLoop);
-                showLoseScreen();
+                showGameOverScreen(); // Use game over screen when all lives are lost
                 return;
             }
             
@@ -1071,9 +1458,12 @@ GAME_HTML = """
             // Draw villains
             drawVillains();
             
-            // Draw player
-            ctx.fillStyle = '#ff0000';
-            ctx.fillRect(playerX * tileSize + 2, playerY * tileSize + 2, tileSize - 4, tileSize - 4);
+            // Draw player (Spider-Man sprite)
+            const playerImg = new Image();
+            playerImg.onload = function() {
+                ctx.drawImage(playerImg, playerX * tileSize + 2, playerY * tileSize + 2, tileSize - 4, tileSize - 4);
+            };
+            playerImg.src = '/static/Spider-man_Running_Sprite.png';
             
             // Draw HUD
             drawHUD();
@@ -1083,19 +1473,39 @@ GAME_HTML = """
             const tileSize = window.gameTileSize || 30;
             
             villains.forEach(villain => {
-                if (villain.stunned) {
-                    // Draw stunned villain (flashing)
-                    if (Math.floor(Date.now() / 100) % 2 === 0) {
-                        ctx.fillStyle = '#ffffff';
+                // Get the villain sprite
+                const villainSprite = villainSprites[villain.type];
+                
+                if (villainSprite && villainSpritesLoaded >= 9) {
+                    // Draw villain sprite
+                    if (villain.stunned) {
+                        // Draw stunned villain (flashing)
+                        if (Math.floor(Date.now() / 100) % 2 === 0) {
+                            ctx.globalAlpha = 0.5; // Make it semi-transparent when stunned
+                        } else {
+                            ctx.globalAlpha = 1.0;
+                        }
+                    } else {
+                        ctx.globalAlpha = 1.0;
+                    }
+                    
+                    ctx.drawImage(villainSprite, villain.x * tileSize + 1, villain.y * tileSize + 1, tileSize - 2, tileSize - 2);
+                    ctx.globalAlpha = 1.0; // Reset alpha
+                } else {
+                    // Fallback to colored block if sprite not loaded
+                    if (villain.stunned) {
+                        // Draw stunned villain (flashing)
+                        if (Math.floor(Date.now() / 100) % 2 === 0) {
+                            ctx.fillStyle = '#ffffff';
+                        } else {
+                            ctx.fillStyle = villain.color;
+                        }
                     } else {
                         ctx.fillStyle = villain.color;
                     }
-                } else {
-                    ctx.fillStyle = villain.color;
+                    
+                    ctx.fillRect(villain.x * tileSize + 1, villain.y * tileSize + 1, tileSize - 2, tileSize - 2);
                 }
-                
-                // Draw villain sprite
-                ctx.fillRect(villain.x * tileSize + 1, villain.y * tileSize + 1, tileSize - 2, tileSize - 2);
                 
                 // Draw villain name
                 ctx.fillStyle = '#ffffff';
@@ -1236,28 +1646,116 @@ GAME_HTML = """
             }
         }
         
+        // Win/Loss Cut Scene System
+        let winLossState = 'none'; // none, win, lose, gameOver
+        let currentQuip = '';
+        let quipTimer = 0;
+        
+        // Win quips for different levels
+        const winQuips = {
+            'level1': "Guess sweeping the streets really is my job…",
+            'level2': "Bright lights, cleaner streets — you're welcome, New York!"
+        };
+        
+        // Loss quips (randomized)
+        const lossQuips = [
+            "Man… I really dropped the ball this time.",
+            "Note to self: dodging villains is harder than it looks.",
+            "Remind me to never tell Strange I messed this up…",
+            "Even heroes have bad days."
+        ];
+        
         function showWinScreen() {
             currentState = 'win';
+            winLossState = 'win';
+            currentQuip = winQuips['level1']; // For now, hardcoded to level 1
+            quipTimer = 0;
+            
+            // Hide all panels and show win cutscene
             document.querySelectorAll('.comic-panel').forEach(panel => panel.classList.remove('active'));
-            document.getElementById('titleScreen').classList.add('active');
+            document.getElementById('winCutscene').classList.add('active');
+            document.getElementById('winQuip').textContent = currentQuip;
         }
         
         function showLoseScreen() {
             currentState = 'lose';
+            winLossState = 'lose';
+            currentQuip = lossQuips[Math.floor(Math.random() * lossQuips.length)];
+            quipTimer = 0;
+            
+            // Hide all panels and show lose cutscene
             document.querySelectorAll('.comic-panel').forEach(panel => panel.classList.remove('active'));
-            document.getElementById('titleScreen').classList.add('active');
+            document.getElementById('loseCutscene').classList.add('active');
+            document.getElementById('loseQuip').textContent = currentQuip;
+        }
+        
+        function showGameOverScreen() {
+            currentState = 'gameOver';
+            winLossState = 'gameOver';
+            currentQuip = lossQuips[Math.floor(Math.random() * lossQuips.length)];
+            quipTimer = 0;
+            
+            // Hide all panels and show game over cutscene
+            document.querySelectorAll('.comic-panel').forEach(panel => panel.classList.remove('active'));
+            document.getElementById('gameOverCutscene').classList.add('active');
+            document.getElementById('gameOverQuip').textContent = currentQuip;
+        }
+        
+        // Cut scene button functions
+        function returnToTitle() {
+            // Hide all cutscenes
+            document.querySelectorAll('.win-loss-cutscene').forEach(cutscene => cutscene.classList.remove('active'));
+            // Show title screen
+            currentState = 'title';
+            currentPanel = 0;
+            showPanel(0);
+        }
+        
+        function retryLevel() {
+            // Hide lose cutscene
+            document.getElementById('loseCutscene').classList.remove('active');
+            // Reset level and restart
+            resetLevel();
+            startLevel1();
+        }
+        
+        function retryGame() {
+            // Hide game over cutscene
+            document.getElementById('gameOverCutscene').classList.remove('active');
+            // Reset everything and restart from level 1
+            resetGame();
+            startLevel1();
+        }
+        
+        function resetLevel() {
+            // Reset level-specific variables
+            playerX = 13;
+            playerY = 12;
+            score = 0;
+            lives = 3;
+            dustCollected = 0;
+            webShooterActive = false;
+            webShooterTimer = 0;
+            level1State = 'intro';
+        }
+        
+        function resetGame() {
+            // Reset all game variables
+            resetLevel();
+            currentState = 'title';
+            currentPanel = 0;
         }
 
         // Handle window resize
         window.addEventListener('resize', function() {
             if (level1State === 'gameplay' && canvas) {
                 // Recalculate tile size and canvas dimensions
-                const maxWidth = window.innerWidth * 0.9;
-                const maxHeight = window.innerHeight * 0.8;
+                const maxWidth = window.innerWidth * 0.98;
+                const maxHeight = window.innerHeight * 0.85;
                 
                 const tileSizeX = Math.floor(maxWidth / level1Map[0].length);
                 const tileSizeY = Math.floor(maxHeight / level1Map.length);
-                const tileSize = Math.min(tileSizeX, tileSizeY, 60);
+                const tileSize = Math.min(tileSizeX, tileSizeY, 45);
                 
                 canvas.width = level1Map[0].length * tileSize;
                 canvas.height = level1Map.length * tileSize;
@@ -1267,6 +1765,7 @@ GAME_HTML = """
 
         // Event listeners
         document.addEventListener('click', function(e) {
+            console.log('Click detected, currentState:', currentState);
             if (currentState === 'comic') {
                 nextPanel();
             } else if (currentState === 'gameplay') {
@@ -1275,11 +1774,9 @@ GAME_HTML = """
                     level1State = 'gameplay';
                     initGameplay();
                 }
-            } else if (currentState === 'win' || currentState === 'lose') {
-                // Return to title
-                currentState = 'title';
-                currentPanel = 0;
-                showPanel(0);
+            } else if (currentState === 'win' || currentState === 'lose' || currentState === 'gameOver') {
+                // Don't handle clicks for cut scenes - let buttons handle them
+                return;
             }
         });
 
@@ -1301,6 +1798,19 @@ GAME_HTML = """
         // Initialize
         console.log('Spider-Run game loaded!');
         console.log('Click to advance through comic panels');
+        
+        // Add event listener for start button
+        document.addEventListener('DOMContentLoaded', function() {
+            const startButton = document.getElementById('startButton');
+            if (startButton) {
+                startButton.addEventListener('click', function() {
+                    console.log('Start button clicked via event listener');
+                    startGame();
+                });
+            } else {
+                console.error('Start button not found!');
+            }
+        });
     </script>
 </body>
 </html>
