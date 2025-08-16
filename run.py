@@ -702,6 +702,9 @@ GAME_HTML = """
         let taxiSpeed = 0.3; // Speed multiplier for taxi movement
         let taxiMoveTimer = 0;
         
+        // Swing animation system
+        let swingAnimationCounter = 0;
+        
         // Level 1 map data based on classic Pac-Man layout (25x15)
         const level1Map = [
             "#########################",
@@ -929,6 +932,30 @@ GAME_HTML = """
             };
             img.src = taxiSpiderManPath;
             taxiSpiderManSprite = img;
+        }
+        
+        // Load swing Spider-Man sprites
+        let swingSpiderManSprite1 = null;
+        let swingSpiderManSprite2 = null;
+        let swingSpiderManLoaded = false;
+        
+        function loadSwingSpiderManSprites() {
+            const swingPath1 = '/static/spider_man_swing.png';
+            const swingPath2 = '/static/spider_man_swing_2.png';
+            
+            const img1 = new Image();
+            img1.onload = function() {
+                swingSpiderManLoaded = true;
+            };
+            img1.src = swingPath1;
+            swingSpiderManSprite1 = img1;
+            
+            const img2 = new Image();
+            img2.onload = function() {
+                swingSpiderManLoaded = true;
+            };
+            img2.src = swingPath2;
+            swingSpiderManSprite2 = img2;
         }
         
         // Load villain sprites
@@ -1298,6 +1325,7 @@ GAME_HTML = """
             loadTaxiImage();
             loadWebImage();
             loadTaxiSpiderManSprite();
+            loadSwingSpiderManSprites();
             loadVillainSprites();
             
             // Initialize villains
@@ -1669,6 +1697,14 @@ GAME_HTML = """
             let currentPlayerSprite = window.playerSprite;
             if (isRidingTaxi && taxiSpiderManLoaded && taxiSpiderManSprite) {
                 currentPlayerSprite = taxiSpiderManSprite;
+            } else if (webShooterActive && swingSpiderManLoaded && swingSpiderManSprite1 && swingSpiderManSprite2) {
+                // Alternate between swing sprites when web shooter is active
+                swingAnimationCounter++;
+                if (swingAnimationCounter % 2 === 0) {
+                    currentPlayerSprite = swingSpiderManSprite1;
+                } else {
+                    currentPlayerSprite = swingSpiderManSprite2;
+                }
             }
             
             if (currentPlayerSprite && currentPlayerSprite.complete) {
@@ -1911,8 +1947,8 @@ GAME_HTML = """
         
         function checkTaxiStopCollection() {
             const taxiIndex = taxiStopPositions.findIndex(taxi => taxi.x === playerX && taxi.y === playerY);
-            if (taxiIndex !== -1 && !isRidingTaxi) {
-                // Start taxi ride
+            if (taxiIndex !== -1 && !isRidingTaxi && !webShooterActive) {
+                // Start taxi ride (only if web shooter is not active)
                 isRidingTaxi = true;
                 taxiX = playerX;
                 taxiY = playerY;
@@ -2094,6 +2130,9 @@ GAME_HTML = """
             taxiY = 0;
             taxiDirection = 'right';
             taxiMoveTimer = 0;
+            
+            // Reset swing animation
+            swingAnimationCounter = 0;
         }
         
         function resetGame() {
