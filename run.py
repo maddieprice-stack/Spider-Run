@@ -36,8 +36,12 @@ GAME_HTML = """
 
         #gameCanvas {
             display: block;
-            margin: 0 auto;
+            margin: 20px auto;
             background: #000;
+            border: 3px solid #00bfff;
+            box-shadow: 0 0 20px rgba(0, 191, 255, 0.3);
+            max-width: 95vw;
+            max-height: 85vh;
         }
 
         .game-container {
@@ -661,12 +665,12 @@ GAME_HTML = """
             ctx = canvas.getContext('2d');
             
             // Calculate optimal tile size to fit screen
-            const maxWidth = window.innerWidth * 0.9; // 90% of screen width
-            const maxHeight = window.innerHeight * 0.8; // 80% of screen height
+            const maxWidth = window.innerWidth * 0.95; // 95% of screen width
+            const maxHeight = window.innerHeight * 0.85; // 85% of screen height
             
             const tileSizeX = Math.floor(maxWidth / level1Map[0].length);
             const tileSizeY = Math.floor(maxHeight / level1Map.length);
-            const tileSize = Math.min(tileSizeX, tileSizeY, 40); // Cap at 40px, minimum of 20px
+            const tileSize = Math.min(tileSizeX, tileSizeY, 60); // Cap at 60px, minimum of 30px
             
             // Set canvas size to fit the map
             canvas.width = level1Map[0].length * tileSize;
@@ -715,7 +719,7 @@ GAME_HTML = """
         function renderGame() {
             if (!ctx) return;
             
-            const tileSize = window.gameTileSize || 20;
+            const tileSize = window.gameTileSize || 30;
             
             // Clear canvas
             ctx.fillStyle = '#000';
@@ -731,7 +735,7 @@ GAME_HTML = """
         }
         
         function drawMapElements() {
-            const tileSize = window.gameTileSize || 20;
+            const tileSize = window.gameTileSize || 30;
             
             // Draw map elements
             for (let y = 0; y < level1Map.length; y++) {
@@ -806,9 +810,9 @@ GAME_HTML = """
         }
         
         function drawHUD() {
-            const tileSize = window.gameTileSize || 20;
+            const tileSize = window.gameTileSize || 30;
             const hudY = tileSize * 1.2;
-            const fontSize = Math.max(12, tileSize * 0.6);
+            const fontSize = Math.max(16, tileSize * 0.6);
             
             // Lives
             ctx.fillStyle = '#ffffff';
@@ -917,7 +921,7 @@ GAME_HTML = """
                 
                 const tileSizeX = Math.floor(maxWidth / level1Map[0].length);
                 const tileSizeY = Math.floor(maxHeight / level1Map.length);
-                const tileSize = Math.min(tileSizeX, tileSizeY, 40);
+                const tileSize = Math.min(tileSizeX, tileSizeY, 60);
                 
                 canvas.width = level1Map[0].length * tileSize;
                 canvas.height = level1Map.length * tileSize;
