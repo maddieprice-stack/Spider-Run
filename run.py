@@ -703,9 +703,70 @@ GAME_HTML = """
         
         // Function to process ASCII maze with flood-fill
         function processMazeWithFloodFill(asciiMaze) {
-            // Simply return the original maze without any flood-fill processing
-            // This keeps all spaces as open walkable areas
-            return asciiMaze;
+            // Convert ASCII to 2D grid
+            const grid = asciiMaze.map(row => row.split(''));
+            
+            // Find all walkable tiles on the border and player spawn
+            const reachable = new Set();
+            const queue = [];
+            
+            // Add border walkable tiles to queue
+            for (let y = 0; y < grid.length; y++) {
+                for (let x = 0; x < grid[y].length; x++) {
+                    // Check if it's a border tile
+                    const isBorder = (y === 0 || y === grid.length - 1 || x === 0 || x === grid[y].length - 1);
+                    
+                    if (isBorder && isWalkable(grid[y][x])) {
+                        const key = `${y},${x}`;
+                        queue.push([y, x]);
+                        reachable.add(key);
+                    }
+                }
+            }
+            
+            // Add player spawn point to queue (if not already added)
+            const spawnKey = `${12},${13}`; // Player spawn position
+            if (!reachable.has(spawnKey) && isWalkable(grid[12][13])) {
+                queue.push([12, 13]);
+                reachable.add(spawnKey);
+            }
+            
+            // Flood-fill from border and spawn
+            while (queue.length > 0) {
+                const [y, x] = queue.shift();
+                
+                // Check all 4 directions
+                const directions = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+                for (let [dy, dx] of directions) {
+                    const ny = y + dy;
+                    const nx = x + dx;
+                    
+                    if (ny >= 0 && ny < grid.length && nx >= 0 && nx < grid[ny].length) {
+                        const key = `${ny},${nx}`;
+                        if (!reachable.has(key) && isWalkable(grid[ny][nx])) {
+                            reachable.add(key);
+                            queue.push([ny, nx]);
+                        }
+                    }
+                }
+            }
+            
+            // Convert unreached walkable tiles to black voids
+            for (let y = 0; y < grid.length; y++) {
+                for (let x = 0; x < grid[y].length; x++) {
+                    if (isWalkable(grid[y][x]) && !reachable.has(`${y},${x}`)) {
+                        grid[y][x] = '#'; // Convert to black void (wall)
+                    }
+                }
+            }
+            
+            // Convert back to ASCII
+            return grid.map(row => row.join(''));
+        }
+        
+        function isWalkable(char) {
+            return char === '.' || char === ' ' || char === 'W' || char === 'T' || 
+                   char === 'V' || char === '-' || char === 'S';
         }
         
         function isPassable(char) {
@@ -1455,7 +1516,7 @@ GAME_HTML = """
             // Draw player (Spider-Man sprite)
             const playerImg = new Image();
             playerImg.onload = function() {
-                ctx.drawImage(playerImg, playerX * tileSize + 2, playerY * tileSize + 2, tileSize - 4, tileSize - 4);
+                ctx.drawImage(playerImg, playerX * tileSize + 1, playerY * tileSize + 1, tileSize - 2, tileSize - 2);
             };
             playerImg.src = '/static/Spider-man_Running_Sprite.png';
             
@@ -1483,7 +1544,7 @@ GAME_HTML = """
                         ctx.globalAlpha = 1.0;
                     }
                     
-                    ctx.drawImage(villainSprite, villain.x * tileSize + 1, villain.y * tileSize + 1, tileSize - 2, tileSize - 2);
+                    ctx.drawImage(villainSprite, villain.x * tileSize + 0.5, villain.y * tileSize + 0.5, tileSize - 1, tileSize - 1);
                     ctx.globalAlpha = 1.0; // Reset alpha
                 } else {
                     // Fallback to colored block if sprite not loaded
@@ -1498,7 +1559,7 @@ GAME_HTML = """
                         ctx.fillStyle = villain.color;
                     }
                     
-                    ctx.fillRect(villain.x * tileSize + 1, villain.y * tileSize + 1, tileSize - 2, tileSize - 2);
+                    ctx.fillRect(villain.x * tileSize + 0.5, villain.y * tileSize + 0.5, tileSize - 1, tileSize - 1);
                 }
                 
                 // Draw villain name
