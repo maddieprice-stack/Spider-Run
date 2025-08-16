@@ -336,9 +336,7 @@ GAME_HTML = """
         <!-- Comic Intro Panels -->
         <div id="comicPanel0" class="comic-panel">
             <div class="panel-content">
-                <div class="character-image halftone-bg comic-border">
-                    Spider-Man
-                </div>
+                <div class="dr-strange-image"></div>
                 <div class="speech-bubble">
                     Hi Dr. Strange!
                 </div>
@@ -347,7 +345,9 @@ GAME_HTML = """
 
         <div id="comicPanel1" class="comic-panel">
             <div class="panel-content">
-                <div class="dr-strange-image"></div>
+                <div class="character-image halftone-bg comic-border">
+                    Dr. Strange
+                </div>
                 <div class="speech-bubble">
                     Spider-Man! I need your help — I've spilled space dust all over New York City!
                 </div>
@@ -356,9 +356,7 @@ GAME_HTML = """
 
         <div id="comicPanel2" class="comic-panel">
             <div class="panel-content">
-                <div class="character-image halftone-bg comic-border">
-                    Spider-Man
-                </div>
+                <div class="dr-strange-image"></div>
                 <div class="speech-bubble">
                     What's a little more dust on the streets? We've seen worse.
                 </div>
@@ -367,7 +365,9 @@ GAME_HTML = """
 
         <div id="comicPanel3" class="comic-panel">
             <div class="panel-content">
-                <div class="dr-strange-image"></div>
+                <div class="character-image halftone-bg comic-border">
+                    Dr. Strange
+                </div>
                 <div class="speech-bubble">
                     This dust isn't ordinary, Spider-Man. If left unchecked... it could END THE WORLD!
                 </div>
@@ -376,9 +376,7 @@ GAME_HTML = """
 
         <div id="comicPanel4" class="comic-panel">
             <div class="panel-content">
-                <div class="character-image halftone-bg comic-border">
-                    Spider-Man
-                </div>
+                <div class="dr-strange-image"></div>
                 <div class="speech-bubble">
                     ...Okay, okay. Guess I'll grab a broom.
                 </div>
@@ -387,7 +385,9 @@ GAME_HTML = """
 
         <div id="comicPanel5" class="comic-panel">
             <div class="panel-content">
-                <div class="dr-strange-image"></div>
+                <div class="character-image halftone-bg comic-border">
+                    Dr. Strange
+                </div>
                 <div class="speech-bubble">
                     The dust is scattered across the East Village — start there before it spreads any further!
                 </div>
@@ -396,7 +396,9 @@ GAME_HTML = """
 
         <div id="comicPanel6" class="comic-panel">
             <div class="panel-content">
-                <div class="dr-strange-image"></div>
+                <div class="character-image halftone-bg comic-border">
+                    Dr. Strange
+                </div>
                 <div class="speech-bubble">
                     Be careful, Spider-Man. Some of your enemies are out tonight.
                 </div>
