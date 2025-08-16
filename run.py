@@ -694,18 +694,26 @@ GAME_HTML = """
         let gameLoop;
         let canvas, ctx;
         
+        // Taxi riding system
+        let isRidingTaxi = false;
+        let taxiX = 0;
+        let taxiY = 0;
+        let taxiDirection = 'right';
+        let taxiSpeed = 0.3; // Speed multiplier for taxi movement
+        let taxiMoveTimer = 0;
+        
         // Level 1 map data based on classic Pac-Man layout (25x15)
         const level1Map = [
             "#########################",
             "#W........###...........W#",
             " .####.#.###.###.#.####.#",
-            "#T#  #.#..... .....#  #T#",
+            "# #  #.#..... .....#  #T#",
             "#.#  #.#####-#####.#  #.#",
             "#.#  #.#   V V   #.#  #.#",
             "#.#  #.#  V   V  #.#  #.#",
             "#.#  #.#   V V   #.#  #.#",
             "#.#  #.#####-#####.#  #.#",
-            "#T#  #.#..... .....#  #T#",
+            "#T#  #.#..... .....#  # #",
             "#.####.#.###.###.#.####.#",
             "#W........###...........#",
             "#########  S  ###########",
@@ -879,6 +887,34 @@ GAME_HTML = """
             };
             img.src = streetPath;
             streetImage = img;
+        }
+        
+        // Load taxi image
+        let taxiImage = null;
+        let taxiImageLoaded = false;
+        
+        function loadTaxiImage() {
+            const taxiPath = '/static/taxi.png';
+            const img = new Image();
+            img.onload = function() {
+                taxiImageLoaded = true;
+            };
+            img.src = taxiPath;
+            taxiImage = img;
+        }
+        
+        // Load web image
+        let webImage = null;
+        let webImageLoaded = false;
+        
+        function loadWebImage() {
+            const webPath = '/static/webs.png';
+            const img = new Image();
+            img.onload = function() {
+                webImageLoaded = true;
+            };
+            img.src = webPath;
+            webImage = img;
         }
         
         // Load villain sprites
@@ -1245,6 +1281,8 @@ GAME_HTML = """
             // Load building images
             loadBuildingImages();
             loadStreetImage();
+            loadTaxiImage();
+            loadWebImage();
             loadVillainSprites();
             
             // Initialize villains
@@ -1451,6 +1489,9 @@ GAME_HTML = """
             // Update villains
             updateVillains();
             
+            // Update taxi ride
+            updateTaxiRide();
+            
             // Check villain collision
             checkVillainCollision();
             
@@ -1552,30 +1593,49 @@ GAME_HTML = """
                             ctx.fill();
                         }
                     } else if (tile === 'W') {
-                        // Draw web shooter
+                        // Draw web shooter with image
                         const webShooterExists = webShooterPositions.some(ws => ws.x === x && ws.y === y);
                         if (webShooterExists) {
-                            ctx.fillStyle = '#00bfff';
-                            ctx.beginPath();
-                            ctx.arc(drawX + tileSize/2, drawY + tileSize/2, 8, 0, 2 * Math.PI);
-                            ctx.fill();
-                            ctx.strokeStyle = '#ffffff';
-                            ctx.lineWidth = 2;
-                            ctx.stroke();
+                            if (webImageLoaded && webImage) {
+                                ctx.drawImage(webImage, drawX, drawY, tileSize, tileSize);
+                            } else {
+                                // Fallback to blue circle while image loads
+                                ctx.fillStyle = '#00bfff';
+                                ctx.beginPath();
+                                ctx.arc(drawX + tileSize/2, drawY + tileSize/2, 8, 0, 2 * Math.PI);
+                                ctx.fill();
+                                ctx.strokeStyle = '#ffffff';
+                                ctx.lineWidth = 2;
+                                ctx.stroke();
+                            }
                         }
                     } else if (tile === 'T') {
-                        // Draw taxi stop
-                        ctx.fillStyle = '#ffff00';
-                        ctx.fillRect(drawX + 2, drawY + 2, tileSize - 4, tileSize - 4);
-                        ctx.strokeStyle = '#000';
-                        ctx.lineWidth = 1;
-                        ctx.strokeRect(drawX + 2, drawY + 2, tileSize - 4, tileSize - 4);
+                        // Draw taxi stop with image (only if not riding)
+                        if (!isRidingTaxi) {
+                            if (taxiImageLoaded && taxiImage) {
+                                ctx.drawImage(taxiImage, drawX, drawY, tileSize, tileSize);
+                            } else {
+                                // Fallback to yellow square while image loads
+                                ctx.fillStyle = '#ffff00';
+                                ctx.fillRect(drawX + 2, drawY + 2, tileSize - 4, tileSize - 4);
+                                ctx.strokeStyle = '#000';
+                                ctx.lineWidth = 1;
+                                ctx.strokeRect(drawX + 2, drawY + 2, tileSize - 4, tileSize - 4);
+                            }
+                        }
                     }
                 }
             }
             
             // Draw villains
             drawVillains();
+            
+            // Draw taxi if riding
+            if (isRidingTaxi && taxiImageLoaded && taxiImage) {
+                const drawTaxiX = taxiX * tileSize;
+                const drawTaxiY = taxiY * tileSize + hudHeight;
+                ctx.drawImage(taxiImage, drawTaxiX, drawTaxiY, tileSize, tileSize);
+            }
             
             // Draw player (Spider-Man sprite) - use cached image
             if (!window.playerSprite) {
@@ -1736,6 +1796,9 @@ GAME_HTML = """
         function handleKeyPress(event) {
             if (level1State !== 'gameplay') return;
             
+            // Don't allow movement while riding taxi
+            if (isRidingTaxi) return;
+            
             const processedMap = processMazeWithFloodFill(level1Map);
             const newX = playerX;
             const newY = playerY;
@@ -1820,9 +1883,75 @@ GAME_HTML = """
         
         function checkTaxiStopCollection() {
             const taxiIndex = taxiStopPositions.findIndex(taxi => taxi.x === playerX && taxi.y === playerY);
-            if (taxiIndex !== -1) {
-                // Taxi ride effect (simplified for now)
+            if (taxiIndex !== -1 && !isRidingTaxi) {
+                // Start taxi ride
+                isRidingTaxi = true;
+                taxiX = playerX;
+                taxiY = playerY;
+                taxiDirection = playerDirection;
+                taxiMoveTimer = 0;
                 score += 25;
+                
+                // Remove taxi from collection list
+                taxiStopPositions.splice(taxiIndex, 1);
+            }
+        }
+        
+        function updateTaxiRide() {
+            if (!isRidingTaxi) return;
+            
+            taxiMoveTimer += taxiSpeed;
+            
+            if (taxiMoveTimer >= 1) {
+                taxiMoveTimer = 0;
+                
+                const processedMap = processMazeWithFloodFill(level1Map);
+                let newTaxiX = taxiX;
+                let newTaxiY = taxiY;
+                
+                // Move taxi in its direction
+                switch (taxiDirection) {
+                    case 'up':
+                        newTaxiY = taxiY - 1;
+                        break;
+                    case 'down':
+                        newTaxiY = taxiY + 1;
+                        break;
+                    case 'left':
+                        newTaxiX = taxiX - 1;
+                        break;
+                    case 'right':
+                        newTaxiX = taxiX + 1;
+                        break;
+                }
+                
+                // Check if taxi can move
+                if (newTaxiX >= 0 && newTaxiX < processedMap[0].length &&
+                    newTaxiY >= 0 && newTaxiY < processedMap.length &&
+                    processedMap[newTaxiY][newTaxiX] !== '#') {
+                    
+                    // Check if taxi would hit column 1 or 25 (stop at edges)
+                    if (newTaxiX === 0 || newTaxiX === processedMap[0].length - 1) {
+                        // Taxi hit column 1 or 25, end the ride
+                        isRidingTaxi = false;
+                        return;
+                    }
+                    
+                    // Update taxi position
+                    taxiX = newTaxiX;
+                    taxiY = newTaxiY;
+                    
+                    // Move player with taxi
+                    playerX = taxiX;
+                    playerY = taxiY;
+                    
+                    // Check for dust collection while riding taxi
+                    checkDustCollection();
+                    checkWebShooterCollection();
+                } else {
+                    // Taxi hit a wall or edge, end the ride
+                    isRidingTaxi = false;
+                }
             }
         }
         
@@ -1930,6 +2059,13 @@ GAME_HTML = """
             webShooterActive = false;
             webShooterTimer = 0;
             level1State = 'intro';
+            
+            // Reset taxi riding variables
+            isRidingTaxi = false;
+            taxiX = 0;
+            taxiY = 0;
+            taxiDirection = 'right';
+            taxiMoveTimer = 0;
         }
         
         function resetGame() {
