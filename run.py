@@ -469,27 +469,27 @@ GAME_HTML = """
         .quip-bubble::before {
             content: '';
             position: absolute;
-            bottom: -15px;
+            top: -15px;
             left: 50%;
             transform: translateX(-50%);
             width: 0;
             height: 0;
             border-left: 15px solid transparent;
             border-right: 15px solid transparent;
-            border-top: 15px solid #000;
+            border-bottom: 15px solid #000;
         }
         
         .quip-bubble::after {
             content: '';
             position: absolute;
-            bottom: -12px;
+            top: -12px;
             left: 50%;
             transform: translateX(-50%);
             width: 0;
             height: 0;
             border-left: 12px solid transparent;
             border-right: 12px solid transparent;
-            border-top: 12px solid #fff;
+            border-bottom: 12px solid #fff;
         }
         
         .cutscene-buttons {
@@ -822,12 +822,7 @@ GAME_HTML = """
             { name: 'Doc Ock', color: '#228B22', speed: 0.9, ability: 'alleyBlock' },
             { name: 'Green Goblin', color: '#32CD32', speed: 1.0, ability: 'pumpkinBomb' },
             { name: 'Vulture', color: '#006400', speed: 1.1, ability: 'windGust' },
-            { name: 'Venom', color: '#000000', speed: 1.1, ability: 'windGust' },
-            { name: 'Lizard', color: '#228B22', speed: 1.1, ability: 'windGust' },
-            { name: 'Mysterio', color: '#4B0082', speed: 1.1, ability: 'windGust' },
-            { name: 'Hobgoblin', color: '#FF4500', speed: 1.1, ability: 'windGust' },
-            { name: 'Prowler', color: '#800080', speed: 1.1, ability: 'windGust' },
-            { name: 'Sandman', color: '#D2B48C', speed: 1.1, ability: 'windGust' }
+            { name: 'Venom', color: '#000000', speed: 1.1, ability: 'windGust' }
         ];
         
         // Villain state
@@ -835,11 +830,7 @@ GAME_HTML = """
             alleyBlock: { active: false, timer: 0, cooldown: 720 }, // 12 seconds at 60fps
             pumpkinBomb: { active: false, timer: 0, cooldown: 720 },
             windGust: { active: false, timer: 0, cooldown: 720 },
-            darkTendrils: { active: false, timer: 0, cooldown: 720 }, // Venom
-            razorBats: { active: false, timer: 0, cooldown: 720 }, // Hobgoblin
-            clawsOfDarkness: { active: false, timer: 0, cooldown: 720 }, // Prowler
-            illusionGas: { active: false, timer: 0, cooldown: 720 }, // Mysterio
-            tailWhip: { active: false, timer: 0, cooldown: 720 } // Lizard
+            darkTendrils: { active: false, timer: 0, cooldown: 720 } // Venom
         };
         
         let playerSlowed = false;
@@ -858,12 +849,7 @@ GAME_HTML = """
             'Doc Ock': null,
             'Green Goblin': null,
             'Vulture': null,
-            'Venom': null,
-            'Lizard': null,
-            'Mysterio': null,
-            'Hobgoblin': null,
-            'Prowler': null,
-            'Sandman': null
+            'Venom': null
         };
         let villainSpritesLoaded = 0;
         
@@ -971,12 +957,7 @@ GAME_HTML = """
                 'Doc Ock': '/static/Doc_Oc.png',
                 'Green Goblin': '/static/Green_Goblin.png',
                 'Vulture': '/static/Vulture.png',
-                'Venom': '/static/Venom.png', // Now using actual Venom sprite
-                'Lizard': '/static/Lizard.png',
-                'Mysterio': '/static/Mysterio.png',
-                'Hobgoblin': '/static/Hobgoblin.png',
-                'Prowler': '/static/Prowler.png',
-                'Sandman': '/static/Sandman.png'
+                'Venom': '/static/Venom.png' // Now using actual Venom sprite
             };
             
             Object.keys(villainPaths).forEach(villainName => {
@@ -993,8 +974,8 @@ GAME_HTML = """
         function initVillains() {
             villains = [];
             
-            // Create 9 villains for Level 1
-            for (let i = 0; i < 9; i++) {
+            // Create 4 villains for Level 1
+            for (let i = 0; i < 4; i++) {
                 const spawn = villainSpawns[i];
                 const villainType = villainTypes[i];
                 
@@ -1773,17 +1754,9 @@ GAME_HTML = """
                     glowColor = '#00ffff'; // Cyan glow for Vulture
                 } else if (villain.type === 'Venom' && villainAbilities.darkTendrils.active) {
                     glowColor = '#800080'; // Purple glow for Venom
-                } else if (villain.type === 'Hobgoblin' && villainAbilities.razorBats.active) {
-                    glowColor = '#ff6600'; // Dark orange glow for Hobgoblin
-                } else if (villain.type === 'Prowler' && villainAbilities.clawsOfDarkness.active) {
-                    glowColor = '#000080'; // Dark blue glow for Prowler
-                } else if (villain.type === 'Mysterio' && villainAbilities.illusionGas.active) {
-                    glowColor = '#00ff00'; // Green glow for Mysterio
-                } else if (villain.type === 'Sandman' && villainAbilities.tailWhip.active) {
-                    glowColor = '#008000'; // Dark green glow for Lizard
                 }
                 
-                if (villainSprite && villainSpritesLoaded >= 9) {
+                if (villainSprite && villainSpritesLoaded >= 4) {
                     // Draw villain sprite
                     if (villain.stunned) {
                         // Draw stunned villain (flashing)
@@ -1858,13 +1831,58 @@ GAME_HTML = """
             villains.forEach(villain => {
                 if (villain.x === playerX && villain.y === playerY) {
                     if (webShooterActive) {
+                        // Check if villain is using special power for bonus points
+                        let isVillainUsingSpecialPower = false;
+                        
+                        if (villain.type === 'Doc Ock' && villainAbilities.alleyBlock.active) {
+                            isVillainUsingSpecialPower = true;
+                        } else if (villain.type === 'Green Goblin' && villainAbilities.pumpkinBomb.active) {
+                            isVillainUsingSpecialPower = true;
+                        } else if (villain.type === 'Vulture' && villainAbilities.windGust.active) {
+                            isVillainUsingSpecialPower = true;
+                        } else if (villain.type === 'Venom' && villainAbilities.darkTendrils.active) {
+                            isVillainUsingSpecialPower = true;
+                        } else if (villain.type === 'Hobgoblin' && villainAbilities.razorBats.active) {
+                            isVillainUsingSpecialPower = true;
+                        } else if (villain.type === 'Prowler' && villainAbilities.clawsOfDarkness.active) {
+                            isVillainUsingSpecialPower = true;
+                        } else if (villain.type === 'Mysterio' && villainAbilities.illusionGas.active) {
+                            isVillainUsingSpecialPower = true;
+                        } else if (villain.type === 'Sandman' && villainAbilities.tailWhip.active) {
+                            isVillainUsingSpecialPower = true;
+                        }
+                        
                         // Stun villain
                         villain.stunned = true;
                         villain.stunnedTimer = 180; // 3 seconds
-                        score += 100;
+                        
+                        // Award bonus points for defeating powered-up villains
+                        if (isVillainUsingSpecialPower) {
+                            score += 300; // Triple points for defeating powered-up villain
+                        } else {
+                            score += 100; // Normal points for defeating regular villain
+                        }
                     } else {
-                        // Player loses life
-                        lives--;
+                        // Check if villain is using special power
+                        let isVillainUsingSpecialPower = false;
+                        
+                        if (villain.type === 'Doc Ock' && villainAbilities.alleyBlock.active) {
+                            isVillainUsingSpecialPower = true;
+                        } else if (villain.type === 'Green Goblin' && villainAbilities.pumpkinBomb.active) {
+                            isVillainUsingSpecialPower = true;
+                        } else if (villain.type === 'Vulture' && villainAbilities.windGust.active) {
+                            isVillainUsingSpecialPower = true;
+                        } else if (villain.type === 'Venom' && villainAbilities.darkTendrils.active) {
+                            isVillainUsingSpecialPower = true;
+                        }
+                        
+                        // Player loses life (2 if villain is using special power, 1 otherwise)
+                        if (isVillainUsingSpecialPower) {
+                            lives -= 2;
+                        } else {
+                            lives--;
+                        }
+                        
                         playerX = 13; // Reset to spawn
                         playerY = 12;
                     }
@@ -1907,22 +1925,6 @@ GAME_HTML = """
             if (villainAbilities.darkTendrils.active) {
                 ctx.fillStyle = '#800080';
                 ctx.fillText('Venom: Dark Tendrils!', tileSize * 0.5, statusY + 20);
-            }
-            if (villainAbilities.razorBats.active) {
-                ctx.fillStyle = '#ff6600';
-                ctx.fillText('Hobgoblin: Razor Bats!', canvas.width/2 - tileSize * 2.5, statusY + 20);
-            }
-            if (villainAbilities.clawsOfDarkness.active) {
-                ctx.fillStyle = '#000080';
-                ctx.fillText('Prowler: Claws of Darkness!', canvas.width - tileSize * 10, statusY + 20);
-            }
-            if (villainAbilities.illusionGas.active) {
-                ctx.fillStyle = '#00ff00';
-                ctx.fillText('Mysterio: Illusion Gas!', tileSize * 0.5, statusY + 40);
-            }
-            if (villainAbilities.tailWhip.active) {
-                ctx.fillStyle = '#008000';
-                ctx.fillText('Lizard: Tail Whip!', canvas.width/2 - tileSize * 2.5, statusY + 40);
             }
             if (webShooterActive) {
                 ctx.fillStyle = '#00bfff';
