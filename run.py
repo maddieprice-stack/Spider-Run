@@ -173,24 +173,53 @@ GAME_HTML = """
             position: relative;
         }
 
-        /* Pixel art Spider-Man sprite */
+        /* Pixel art Spider-Man sprite - Running pose */
         .spider-man-sprite .pixel-sprite {
             width: 100px;
             height: 100px;
             background: 
-                /* Head */
-                linear-gradient(to right, transparent 20%, #ff0000 20%, #ff0000 80%, transparent 80%),
-                linear-gradient(to bottom, transparent 10%, #ff0000 10%, #ff0000 30%, transparent 30%),
-                /* Eyes */
+                /* Head - Red with white eyes */
+                linear-gradient(to right, transparent 15%, #ff0000 15%, #ff0000 85%, transparent 85%),
+                linear-gradient(to bottom, transparent 5%, #ff0000 5%, #ff0000 35%, transparent 35%),
+                /* White eyes */
                 linear-gradient(to right, transparent 25%, #ffffff 25%, #ffffff 35%, transparent 35%),
                 linear-gradient(to right, transparent 65%, #ffffff 65%, #ffffff 75%, transparent 75%),
-                linear-gradient(to bottom, transparent 15%, #ffffff 15%, #ffffff 25%, transparent 25%),
-                /* Body */
-                linear-gradient(to right, transparent 15%, #0000ff 15%, #0000ff 85%, transparent 85%),
-                linear-gradient(to bottom, transparent 30%, #0000ff 30%, #0000ff 70%, transparent 70%),
-                /* Web pattern */
-                linear-gradient(45deg, transparent 40%, #000000 40%, #000000 45%, transparent 45%),
-                linear-gradient(-45deg, transparent 40%, #000000 40%, #000000 45%, transparent 45%);
+                linear-gradient(to bottom, transparent 10%, #ffffff 10%, #ffffff 25%, transparent 25%),
+                /* Black eye outlines */
+                linear-gradient(to right, transparent 20%, #000000 20%, #000000 40%, transparent 40%),
+                linear-gradient(to right, transparent 60%, #000000 60%, #000000 80%, transparent 80%),
+                linear-gradient(to bottom, transparent 5%, #000000 5%, #000000 30%, transparent 30%),
+                /* Torso - Red with blue center V-shape */
+                linear-gradient(to right, transparent 10%, #ff0000 10%, #ff0000 90%, transparent 90%),
+                linear-gradient(to bottom, transparent 35%, #ff0000 35%, #ff0000 75%, transparent 75%),
+                /* Blue center section */
+                linear-gradient(to right, transparent 35%, #0000ff 35%, #0000ff 65%, transparent 65%),
+                linear-gradient(to bottom, transparent 45%, #0000ff 45%, #0000ff 65%, transparent 65%),
+                /* Right arm - bent forward */
+                linear-gradient(to right, transparent 5%, #ff0000 5%, #ff0000 25%, transparent 25%),
+                linear-gradient(to bottom, transparent 25%, #ff0000 25%, #ff0000 45%, transparent 45%),
+                linear-gradient(to right, transparent 10%, #0000ff 10%, #0000ff 20%, transparent 20%),
+                linear-gradient(to bottom, transparent 30%, #0000ff 30%, #0000ff 40%, transparent 40%),
+                /* Left arm - extended backward */
+                linear-gradient(to right, transparent 75%, #ff0000 75%, #ff0000 95%, transparent 95%),
+                linear-gradient(to bottom, transparent 20%, #ff0000 20%, #ff0000 50%, transparent 50%),
+                linear-gradient(to right, transparent 80%, #0000ff 80%, #0000ff 90%, transparent 90%),
+                linear-gradient(to bottom, transparent 25%, #0000ff 25%, #0000ff 45%, transparent 45%),
+                /* Right leg - bent forward */
+                linear-gradient(to right, transparent 20%, #ff0000 20%, #ff0000 40%, transparent 40%),
+                linear-gradient(to bottom, transparent 75%, #ff0000 75%, #ff0000 95%, transparent 95%),
+                linear-gradient(to right, transparent 25%, #0000ff 25%, #0000ff 35%, transparent 35%),
+                linear-gradient(to bottom, transparent 80%, #0000ff 80%, #0000ff 90%, transparent 90%),
+                /* Left leg - extended backward */
+                linear-gradient(to right, transparent 60%, #ff0000 60%, #ff0000 80%, transparent 80%),
+                linear-gradient(to bottom, transparent 70%, #ff0000 70%, #ff0000 95%, transparent 95%),
+                linear-gradient(to right, transparent 65%, #0000ff 65%, #0000ff 75%, transparent 75%),
+                linear-gradient(to bottom, transparent 75%, #0000ff 75%, #0000ff 90%, transparent 90%),
+                /* Web patterns on red areas */
+                linear-gradient(45deg, transparent 30%, #000000 30%, #000000 35%, transparent 35%),
+                linear-gradient(-45deg, transparent 30%, #000000 30%, #000000 35%, transparent 35%),
+                linear-gradient(45deg, transparent 70%, #000000 70%, #000000 75%, transparent 75%),
+                linear-gradient(-45deg, transparent 70%, #000000 70%, #000000 75%, transparent 75%);
             background-size: 100% 100%;
             image-rendering: pixelated;
             animation: pixelGlow 3s ease-in-out infinite;
