@@ -686,7 +686,7 @@ GAME_HTML = """
         let playerY = 12;
         let playerDirection = 'right';
         let score = 0;
-        let lives = 3;
+        let lives = 5;
         let dustCollected = 0;
         let totalDust = 0;
         let webShooterActive = false;
@@ -704,6 +704,8 @@ GAME_HTML = """
         
         // Swing animation system
         let swingAnimationCounter = 0;
+        let lastPlayerX = 13;
+        let lastPlayerY = 12;
         
         // Level 1 map data based on classic Pac-Man layout (25x15)
         const level1Map = [
@@ -1703,8 +1705,14 @@ GAME_HTML = """
             if (isRidingTaxi && taxiSpiderManLoaded && taxiSpiderManSprite) {
                 currentPlayerSprite = taxiSpiderManSprite;
             } else if (webShooterActive && swingSpiderManLoaded && swingSpiderManSprite1 && swingSpiderManSprite2) {
-                // Alternate between swing sprites when web shooter is active
-                swingAnimationCounter++;
+                // Check if player moved to a new square
+                if (playerX !== lastPlayerX || playerY !== lastPlayerY) {
+                    swingAnimationCounter++;
+                    lastPlayerX = playerX;
+                    lastPlayerY = playerY;
+                }
+                
+                // Alternate between swing sprites based on movement
                 if (swingAnimationCounter % 2 === 0) {
                     currentPlayerSprite = swingSpiderManSprite1;
                 } else {
@@ -1755,6 +1763,26 @@ GAME_HTML = """
                 // Get the villain sprite
                 const villainSprite = villainSprites[villain.type];
                 
+                // Check if villain is using special power and set glow color
+                let glowColor = null;
+                if (villain.type === 'Doc Ock' && villainAbilities.alleyBlock.active) {
+                    glowColor = '#ff0000'; // Red glow for Doc Ock
+                } else if (villain.type === 'Green Goblin' && villainAbilities.pumpkinBomb.active) {
+                    glowColor = '#ff8800'; // Orange glow for Green Goblin
+                } else if (villain.type === 'Vulture' && villainAbilities.windGust.active) {
+                    glowColor = '#00ffff'; // Cyan glow for Vulture
+                } else if (villain.type === 'Venom' && villainAbilities.darkTendrils.active) {
+                    glowColor = '#800080'; // Purple glow for Venom
+                } else if (villain.type === 'Hobgoblin' && villainAbilities.razorBats.active) {
+                    glowColor = '#ff6600'; // Dark orange glow for Hobgoblin
+                } else if (villain.type === 'Prowler' && villainAbilities.clawsOfDarkness.active) {
+                    glowColor = '#000080'; // Dark blue glow for Prowler
+                } else if (villain.type === 'Mysterio' && villainAbilities.illusionGas.active) {
+                    glowColor = '#00ff00'; // Green glow for Mysterio
+                } else if (villain.type === 'Sandman' && villainAbilities.tailWhip.active) {
+                    glowColor = '#008000'; // Dark green glow for Lizard
+                }
+                
                 if (villainSprite && villainSpritesLoaded >= 9) {
                     // Draw villain sprite
                     if (villain.stunned) {
@@ -1769,6 +1797,15 @@ GAME_HTML = """
                     }
                     
                     ctx.save();
+                    
+                    // Add glow effect if villain is using special power
+                    if (glowColor) {
+                        ctx.shadowColor = glowColor;
+                        ctx.shadowBlur = 15;
+                        ctx.shadowOffsetX = 0;
+                        ctx.shadowOffsetY = 0;
+                    }
+                    
                     if (villain.direction === 'left') {
                         // Flip horizontally when moving left
                         ctx.scale(-1, 1);
@@ -1781,6 +1818,16 @@ GAME_HTML = """
                     ctx.globalAlpha = 1.0; // Reset alpha
                 } else {
                     // Fallback to colored block if sprite not loaded
+                    ctx.save();
+                    
+                    // Add glow effect if villain is using special power
+                    if (glowColor) {
+                        ctx.shadowColor = glowColor;
+                        ctx.shadowBlur = 15;
+                        ctx.shadowOffsetX = 0;
+                        ctx.shadowOffsetY = 0;
+                    }
+                    
                     if (villain.stunned) {
                         // Draw stunned villain (flashing)
                         if (Math.floor(Date.now() / 100) % 2 === 0) {
@@ -1793,6 +1840,7 @@ GAME_HTML = """
                     }
                     
                     ctx.fillRect(villain.x * tileSize + 0.5, villain.y * tileSize + 0.5 + hudHeight, tileSize - 1, tileSize - 1);
+                    ctx.restore();
                 }
                 
                 // Draw villain name
@@ -2143,7 +2191,7 @@ GAME_HTML = """
             playerX = 13;
             playerY = 12;
             score = 0;
-            lives = 3;
+            lives = 5;
             dustCollected = 0;
             webShooterActive = false;
             webShooterTimer = 0;
@@ -2158,6 +2206,8 @@ GAME_HTML = """
             
             // Reset swing animation
             swingAnimationCounter = 0;
+            lastPlayerX = 13;
+            lastPlayerY = 12;
         }
         
         function resetGame() {
