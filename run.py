@@ -171,18 +171,24 @@ GAME_HTML = """
             align-items: center;
             justify-content: center;
             position: relative;
+            border: 1px solid #00bfff;
+            background-color: rgba(0, 0, 0, 0.3);
         }
 
         /* Pixel art Spider-Man sprite - Using PNG image */
         .spider-man-sprite .pixel-sprite {
-            width: 100px;
-            height: 100px;
-            background: url('/static/Designs/Spider-man sprite.png') no-repeat center center;
-            background-size: contain;
+            width: 120px;
+            height: 120px;
+            background: url('/static/Spider-man sprite.png') no-repeat center center;
+            background-size: 100% 100%;
             image-rendering: pixelated;
             image-rendering: -moz-crisp-edges;
             image-rendering: crisp-edges;
             animation: pixelGlow 3s ease-in-out infinite;
+            border: 2px solid #00bfff;
+            background-color: rgba(255, 255, 255, 0.1);
+            min-height: 120px;
+            min-width: 120px;
         }
 
         @keyframes pixelGlow {
@@ -302,7 +308,7 @@ GAME_HTML = """
                 
                 <!-- Spider-Man Sprite (replacing Pac-Man ghosts) -->
                 <div class="spider-man-sprite">
-                    <div class="pixel-sprite"></div>
+                    <div class="pixel-sprite" title="Spider-Man"></div>
                 </div>
                 
                 <!-- Instructions Section -->
