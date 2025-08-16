@@ -194,7 +194,7 @@ GAME_HTML = """
 
         .title-screen .subtitle {
             font-size: 1.2em;
-            margin-bottom: 60px;
+            margin-bottom: 30px;
             color: #fff;
             font-family: 'Courier New', monospace;
         }
@@ -202,7 +202,7 @@ GAME_HTML = """
         .spider-man-sprite {
             width: 120px;
             height: 120px;
-            margin: 60px auto;
+            margin: 30px auto;
             background: url('/static/Spider-man sprite.png') no-repeat center center;
             background-size: 100% 100%;
             image-rendering: pixelated;
@@ -237,11 +237,26 @@ GAME_HTML = """
             }
         }
 
+        .spider-man-sprite-above-instructions {
+            text-align: center;
+            margin: 5px auto;
+            padding: 5px;
+        }
+        
+        .spider-man-sprite-above-instructions img {
+            border-radius: 10px;
+            transition: transform 0.3s ease;
+        }
+        
+        .spider-man-sprite-above-instructions img:hover {
+            transform: scale(1.1);
+        }
+
         .instructions {
             background: #000;
             border: 2px solid #ffff00;
             padding: 20px;
-            margin: 60px auto;
+            margin: 10px auto;
             max-width: 600px;
             color: #fff;
             font-family: 'Courier New', monospace;
@@ -523,6 +538,11 @@ GAME_HTML = """
                 
                 <!-- Spider-Man Sprite (replacing Pac-Man ghosts) -->
                 <div class="spider-man-sprite" title="Spider-Man"></div>
+                
+                <!-- Additional Spider-Man Sprite above instructions -->
+                <div class="spider-man-sprite-above-instructions">
+                    <img src="/static/Spider-man-sprite.png" alt="Spider-Man" style="width: 80px; height: 80px;">
+                </div>
                 
                 <!-- Instructions Section -->
                 <div class="instructions">
