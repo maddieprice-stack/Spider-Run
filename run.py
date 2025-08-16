@@ -167,18 +167,6 @@ GAME_HTML = """
             width: 120px;
             height: 120px;
             margin: 20px auto;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            border: 1px solid #00bfff;
-            background-color: rgba(0, 0, 0, 0.3);
-        }
-
-        /* Pixel art Spider-Man sprite - Using PNG image */
-        .spider-man-sprite .pixel-sprite {
-            width: 120px;
-            height: 120px;
             background: url('/static/Spider-man sprite.png') no-repeat center center;
             background-size: 100% 100%;
             image-rendering: pixelated;
@@ -187,8 +175,6 @@ GAME_HTML = """
             animation: pixelGlow 3s ease-in-out infinite;
             border: 2px solid #00bfff;
             background-color: rgba(255, 255, 255, 0.1);
-            min-height: 120px;
-            min-width: 120px;
         }
 
         @keyframes pixelGlow {
@@ -307,9 +293,7 @@ GAME_HTML = """
                 <div class="subtitle">A Pac-Man-Inspired Adventure</div>
                 
                 <!-- Spider-Man Sprite (replacing Pac-Man ghosts) -->
-                <div class="spider-man-sprite">
-                    <div class="pixel-sprite" title="Spider-Man"></div>
-                </div>
+                <div class="spider-man-sprite" title="Spider-Man"></div>
                 
                 <!-- Instructions Section -->
                 <div class="instructions">
