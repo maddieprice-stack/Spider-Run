@@ -423,6 +423,53 @@ GAME_HTML = """
             100% { text-shadow: 2px 2px 20px rgba(255, 0, 0, 0.8); }
         }
         
+        .victory-text {
+            font-family: 'Courier New', monospace;
+            font-size: 56px;
+            font-weight: bold;
+            color: #00ff00;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.5);
+            margin-bottom: 30px;
+            animation: victoryGlow 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes victoryGlow {
+            0% { text-shadow: 3px 3px 6px rgba(0, 255, 0, 0.5); }
+            100% { text-shadow: 3px 3px 20px rgba(0, 255, 0, 0.9); }
+        }
+        
+        .spider-man-victory {
+            width: 200px;
+            height: 200px;
+            margin: 20px auto;
+            background: url('/static/Spider-man_victory_scene_1.png') no-repeat center center;
+            background-size: contain;
+        }
+        
+        .victory-message {
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid #00ff00;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px auto;
+            max-width: 500px;
+        }
+        
+        .victory-message h2 {
+            color: #00ff00;
+            font-size: 28px;
+            margin-bottom: 15px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .victory-message p {
+            color: #fff;
+            font-size: 16px;
+            line-height: 1.5;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+        }
+        
         .win-text {
             font-family: 'Courier New', monospace;
             font-size: 36px;
@@ -737,6 +784,16 @@ GAME_HTML = """
             </div>
         </div>
 
+        <div id="victoryPanel4" class="victory-panel">
+            <div class="panel-content">
+                <div class="dr-strange-times-square"></div>
+                <div class="speech-bubble">
+                    Beware, Spider-Man! Mysterio and Electro are also there, and they know how to use Times Square to their advantage.
+                </div>
+                <div class="click-prompt">Click to continue</div>
+            </div>
+        </div>
+
 
 
         <!-- Game Canvas -->
@@ -775,6 +832,21 @@ GAME_HTML = """
                 </div>
             </div>
         </div>
+        
+        <div id="level2WinScreen" class="win-loss-cutscene">
+            <div class="cutscene-panel">
+                <div class="victory-text">YOU WIN!</div>
+                <div class="spider-man-victory"></div>
+                <div class="victory-message">
+                    <h2>Times Square Saved!</h2>
+                    <p>You've successfully collected all the dimensional fragments and defeated the villains!</p>
+                    <p>New York is safe once again thanks to Spider-Man!</p>
+                </div>
+                <div class="cutscene-buttons">
+                    <button class="cutscene-button" onclick="returnToTitle()">EXIT TO MENU</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -783,7 +855,7 @@ GAME_HTML = """
         let currentPanel = 0;
         const totalPanels = 7;
         let currentVictoryPanel = 0;
-        const totalVictoryPanels = 4;
+        const totalVictoryPanels = 5;
         
         // Level 1 game variables
         let level1State = 'intro'; // intro, splash, gameplay, win, lose
@@ -932,6 +1004,14 @@ GAME_HTML = """
                    char === 'V' || char === '-' || char === 'S' || char === 'E' || char === 'R';
         }
         
+        function hasBomb(x, y) {
+            return bombPositions.some(bomb => bomb.x === x && bomb.y === y);
+        }
+        
+        function hasCrash(x, y) {
+            return crashPositions.some(crash => crash.x === x && crash.y === y);
+        }
+        
         // Dust positions (calculated from map)
         let dustPositions = [];
         let webShooterPositions = [];
@@ -977,6 +1057,16 @@ GAME_HTML = """
         let mysterioFlashTimer = 0;
         let mysterioFlashX = 0;
         let mysterioFlashY = 0;
+        
+        // Green Goblin bomb system
+        let bombPositions = [];
+        let bombImage = null;
+        let bombImageLoaded = false;
+        
+        // Doc Ock crash system
+        let crashPositions = [];
+        let crashImage = null;
+        let crashImageLoaded = false;
         
         // Building images
         let buildingImages = [];
@@ -1164,6 +1254,34 @@ GAME_HTML = """
                 img.src = villainPaths[villainName];
                 villainSprites[villainName] = img;
             });
+        }
+        
+        // Load bomb image
+        function loadBombImage() {
+            bombImage = new Image();
+            bombImage.onload = function() {
+                bombImageLoaded = true;
+                console.log('Loaded bomb image successfully');
+            };
+            bombImage.onerror = function() {
+                console.error('Failed to load bomb image');
+                bombImageLoaded = false;
+            };
+            bombImage.src = '/static/Green%20Goblin%20Bomb.png';
+        }
+        
+        // Load crash image
+        function loadCrashImage() {
+            crashImage = new Image();
+            crashImage.onload = function() {
+                crashImageLoaded = true;
+                console.log('Loaded crash image successfully');
+            };
+            crashImage.onerror = function() {
+                console.error('Failed to load crash image');
+                crashImageLoaded = false;
+            };
+            crashImage.src = '/static/Doc%20Oc%20Crash.png';
         }
         
         // Initialize villains
@@ -1426,10 +1544,11 @@ GAME_HTML = """
                     const neighborY = current.y + dy;
                     const neighborKey = `${neighborX},${neighborY}`;
                     
-                    // Check bounds and if it's a wall
+                    // Check bounds and if it's a wall or has a crash
                     if (neighborX < 0 || neighborX >= map[0].length || 
                         neighborY < 0 || neighborY >= map.length || 
                         map[neighborY][neighborX] === '#' || 
+                        hasCrash(neighborX, neighborY) ||
                         closedSet.has(neighborKey)) {
                         continue;
                     }
@@ -1475,11 +1594,33 @@ GAME_HTML = """
                 // Doc Ock blocks nearest alley
                 villainAbilities.alleyBlock.active = true;
                 villainAbilities.alleyBlock.timer = 180; // 3 seconds
-            } else if (villain.ability === 'pumpkinBomb') {
-                // Green Goblin drops bomb at random intersection
-                villainAbilities.pumpkinBomb.active = true;
-                villainAbilities.pumpkinBomb.timer = 240; // 4 seconds
-            } else if (villain.ability === 'windGust') {
+                            } else if (villain.ability === 'pumpkinBomb') {
+                    // Green Goblin drops bomb at his current position
+                    villainAbilities.pumpkinBomb.active = true;
+                    villainAbilities.pumpkinBomb.timer = 240; // 4 seconds
+                    
+                    // Place bomb at villain's current position
+                    const bomb = {
+                        x: villain.x,
+                        y: villain.y,
+                        timer: 600 // 10 seconds (600 frames at 60fps)
+                    };
+                    bombPositions.push(bomb);
+                    console.log(`Green Goblin placed bomb at (${villain.x}, ${villain.y})`);
+                } else if (villain.ability === 'alleyBlock') {
+                    // Doc Ock creates crash at his current position
+                    villainAbilities.alleyBlock.active = true;
+                    villainAbilities.alleyBlock.timer = 240; // 4 seconds
+                    
+                    // Place crash at villain's current position
+                    const crash = {
+                        x: villain.x,
+                        y: villain.y,
+                        timer: 600 // 10 seconds (600 frames at 60fps)
+                    };
+                    crashPositions.push(crash);
+                    console.log(`Doc Ock created crash at (${villain.x}, ${villain.y})`);
+                } else if (villain.ability === 'windGust') {
                 // Vulture creates wind gust
                 villainAbilities.windGust.active = true;
                 villainAbilities.windGust.timer = 180; // 3 seconds
@@ -1514,6 +1655,8 @@ GAME_HTML = """
             dustPositions = [];
             webShooterPositions = [];
             taxiStopPositions = [];
+            bombPositions = []; // Clear bombs when level starts
+            crashPositions = []; // Clear crashes when level starts
             
             for (let y = 0; y < processedMap.length; y++) {
                 for (let x = 0; x < processedMap[y].length; x++) {
@@ -1537,6 +1680,8 @@ GAME_HTML = """
             loadTaxiSpiderManSprite();
             loadSwingSpiderManSprites();
             loadVillainSprites();
+            loadBombImage();
+            loadCrashImage();
             
             // Initialize villains
             initVillains();
@@ -2103,6 +2248,8 @@ GAME_HTML = """
             webShooterPositions = [];
             villainPositions = [];
             taxiStopPositions = [];
+            bombPositions = []; // Clear bombs when level starts
+            crashPositions = []; // Clear crashes when level starts
             villains = []; // Clear villains array
             
             // Initialize Level 2 map elements
@@ -2152,6 +2299,8 @@ GAME_HTML = """
             loadTaxiSpiderManSprite();
             loadSwingSpiderManSprites();
             loadVillainSprites();
+            loadBombImage();
+            loadCrashImage();
             
             // Initialize villains for Level 2
             initVillains();
@@ -2229,6 +2378,24 @@ GAME_HTML = """
                 }
             });
             
+            // Update bomb timers
+            for (let i = bombPositions.length - 1; i >= 0; i--) {
+                bombPositions[i].timer--;
+                if (bombPositions[i].timer <= 0) {
+                    console.log(`Bomb at (${bombPositions[i].x}, ${bombPositions[i].y}) exploded`);
+                    bombPositions.splice(i, 1);
+                }
+            }
+            
+            // Update crash timers
+            for (let i = crashPositions.length - 1; i >= 0; i--) {
+                crashPositions[i].timer--;
+                if (crashPositions[i].timer <= 0) {
+                    console.log(`Crash at (${crashPositions[i].x}, ${crashPositions[i].y}) cleared`);
+                    crashPositions.splice(i, 1);
+                }
+            }
+            
             // Update player slow effect
             if (playerSlowed) {
                 playerSlowTimer--;
@@ -2252,18 +2419,21 @@ GAME_HTML = """
                 console.log('🔥 Dust collected:', dustCollected);
                 console.log('🔥 Total dust:', totalDust);
                 console.log('🔥 Lives remaining:', lives);
-                console.log('🔥 Calling continueToNextLevel() directly (skip win screen)...');
                 
                 // Stop background music when level is completed
                 stopBackgroundMusic();
                 
                 if (currentLevel === 1) {
+                    console.log('🔥 Level 1 win - going to victory comic...');
                     level1State = 'win';
+                    clearInterval(gameLoop);
+                    continueToNextLevel();
                 } else {
+                    console.log('🔥 Level 2 win - showing win screen...');
                     level2State = 'win';
+                    clearInterval(gameLoop);
+                    showLevel2WinScreen();
                 }
-                clearInterval(gameLoop);
-                continueToNextLevel();
                 return;
             }
             
@@ -2535,6 +2705,12 @@ GAME_HTML = """
             // Draw villains
             drawVillains();
             
+            // Draw bombs
+            drawBombs();
+            
+            // Draw crashes
+            drawCrashes();
+            
             // Draw taxi if riding
             if (isRidingTaxi && taxiImageLoaded && taxiImage) {
                 const drawTaxiX = taxiX * tileSize;
@@ -2720,6 +2896,82 @@ GAME_HTML = """
             });
         }
         
+        function drawBombs() {
+            const tileSize = window.gameTileSize || 30;
+            const hudHeight = 80; // Height of HUD area
+            
+            bombPositions.forEach(bomb => {
+                const drawX = bomb.x * tileSize;
+                const drawY = bomb.y * tileSize + hudHeight;
+                
+                if (bombImageLoaded && bombImage) {
+                    // Draw bomb with image
+                    ctx.drawImage(bombImage, drawX, drawY, tileSize, tileSize);
+                    console.log('Drawing bomb image at:', drawX, drawY);
+                } else {
+                    // Fallback to green circle while image loads
+                    ctx.fillStyle = '#00ff00';
+                    ctx.beginPath();
+                    ctx.arc(drawX + tileSize/2, drawY + tileSize/2, tileSize/3, 0, 2 * Math.PI);
+                    ctx.fill();
+                    ctx.strokeStyle = '#000';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                    console.log('Drawing fallback green circle - image not loaded');
+                }
+                
+                // Add pulsing effect as bomb gets closer to exploding
+                const timeLeft = bomb.timer / 600; // Normalize to 0-1
+                const pulseIntensity = 0.3 + 0.7 * (1 - timeLeft); // More intense as timer decreases
+                
+                ctx.save();
+                ctx.globalAlpha = pulseIntensity * 0.5;
+                ctx.fillStyle = '#ff0000';
+                ctx.beginPath();
+                ctx.arc(drawX + tileSize/2, drawY + tileSize/2, tileSize/2, 0, 2 * Math.PI);
+                ctx.fill();
+                ctx.restore();
+            });
+        }
+        
+        function drawCrashes() {
+            const tileSize = window.gameTileSize || 30;
+            const hudHeight = 80; // Height of HUD area
+            
+            crashPositions.forEach(crash => {
+                const drawX = crash.x * tileSize;
+                const drawY = crash.y * tileSize + hudHeight;
+                
+                if (crashImageLoaded && crashImage) {
+                    // Draw crash with image
+                    ctx.drawImage(crashImage, drawX, drawY, tileSize, tileSize);
+                    console.log('Drawing crash image at:', drawX, drawY);
+                } else {
+                    // Fallback to orange circle while image loads
+                    ctx.fillStyle = '#ff8c00';
+                    ctx.beginPath();
+                    ctx.arc(drawX + tileSize/2, drawY + tileSize/2, tileSize/3, 0, 2 * Math.PI);
+                    ctx.fill();
+                    ctx.strokeStyle = '#000';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                    console.log('Drawing fallback orange circle - image not loaded');
+                }
+                
+                // Add pulsing effect as crash gets closer to clearing
+                const timeLeft = crash.timer / 600; // Normalize to 0-1
+                const pulseIntensity = 0.3 + 0.7 * (1 - timeLeft); // More intense as timer decreases
+                
+                ctx.save();
+                ctx.globalAlpha = pulseIntensity * 0.5;
+                ctx.fillStyle = '#ff4500';
+                ctx.beginPath();
+                ctx.arc(drawX + tileSize/2, drawY + tileSize/2, tileSize/2, 0, 2 * Math.PI);
+                ctx.fill();
+                ctx.restore();
+            });
+        }
+        
         function checkVillainCollision() {
             // Spider-Man is immune to villains when riding a taxi
             if (isRidingTaxi) return;
@@ -2865,7 +3117,7 @@ GAME_HTML = """
                 case 'ArrowUp':
                 case 'w':
                 case 'W':
-                    if (newY > 0 && processedMap[newY - 1][newX] !== '#') {
+                    if (newY > 0 && processedMap[newY - 1][newX] !== '#' && !hasCrash(newX, newY - 1)) {
                         playerY = newY - 1;
                         playerDirection = 'up';
                     }
@@ -2873,7 +3125,7 @@ GAME_HTML = """
                 case 'ArrowDown':
                 case 's':
                 case 'S':
-                    if (newY < processedMap.length - 1 && processedMap[newY + 1][newX] !== '#') {
+                    if (newY < processedMap.length - 1 && processedMap[newY + 1][newX] !== '#' && !hasCrash(newX, newY + 1)) {
                         playerY = newY + 1;
                         playerDirection = 'down';
                     }
@@ -2881,7 +3133,7 @@ GAME_HTML = """
                 case 'ArrowLeft':
                 case 'a':
                 case 'A':
-                    if (newX > 0 && processedMap[newY][newX - 1] !== '#') {
+                    if (newX > 0 && processedMap[newY][newX - 1] !== '#' && !hasCrash(newX - 1, newY)) {
                         playerX = newX - 1;
                         playerDirection = 'left';
                     } else if (currentLevel === 1) {
@@ -2908,7 +3160,7 @@ GAME_HTML = """
                 case 'ArrowRight':
                 case 'd':
                 case 'D':
-                    if (newX < processedMap[0].length - 1 && processedMap[newY][newX + 1] !== '#') {
+                    if (newX < processedMap[0].length - 1 && processedMap[newY][newX + 1] !== '#' && !hasCrash(newX + 1, newY)) {
                         playerX = newX + 1;
                         playerDirection = 'right';
                     } else if (currentLevel === 1) {
@@ -2938,6 +3190,7 @@ GAME_HTML = """
             checkDustCollection();
             checkWebShooterCollection();
             checkTaxiStopCollection();
+            checkBombCollision();
         }
         
         function checkDustCollection() {
@@ -2994,6 +3247,31 @@ GAME_HTML = """
                 
                 // Remove taxi from collection list
                 taxiStopPositions.splice(taxiIndex, 1);
+            }
+        }
+        
+        function checkBombCollision() {
+            // Check if player is on a bomb position
+            const bombIndex = bombPositions.findIndex(bomb => bomb.x === playerX && bomb.y === playerY);
+            if (bombIndex !== -1) {
+                console.log(`Spider-Man hit a bomb at (${playerX}, ${playerY})!`);
+                
+                // Player loses a life
+                lives--;
+                
+                // Remove the bomb that was hit
+                bombPositions.splice(bombIndex, 1);
+                
+                // Reset player position based on current level
+                if (currentLevel === 1) {
+                    playerX = 13; // Level 1 spawn position
+                    playerY = 12;
+                } else {
+                    playerX = 15; // Level 2 spawn position (S in ASCII)
+                    playerY = 9;
+                }
+                
+                console.log(`Spider-Man respawned at (${playerX}, ${playerY}) with ${lives} lives remaining`);
             }
         }
         
@@ -3139,18 +3417,76 @@ GAME_HTML = """
             console.log('🔥 Game over quip set to:', currentQuip);
         }
         
+        function showLevel2WinScreen() {
+            console.log('🎉🎉🎉 === showLevel2WinScreen() called === 🎉🎉🎉');
+            console.log('🎉 Current state before:', currentState);
+            console.log('🎉 Level 2 state:', level2State);
+            
+            currentState = 'level2Win';
+            
+            console.log('🎉 State set to:', currentState);
+            
+            // Stop background music
+            stopBackgroundMusic();
+            
+            // Hide all panels and cutscenes
+            console.log('🎉 Hiding all panels...');
+            document.querySelectorAll('.comic-panel, .victory-panel').forEach(panel => {
+                panel.classList.remove('active');
+                panel.style.display = 'none';
+            });
+            
+            document.querySelectorAll('.win-loss-cutscene').forEach(cutscene => {
+                cutscene.classList.remove('active');
+                cutscene.style.display = 'none';
+            });
+            
+            // Hide canvas
+            const canvas = document.getElementById('gameCanvas');
+            if (canvas) {
+                canvas.style.display = 'none';
+                console.log('🎉 Canvas hidden');
+            }
+            
+            // Show Level 2 win screen
+            console.log('🎉 SHOWING LEVEL 2 WIN SCREEN...');
+            const level2WinElement = document.getElementById('level2WinScreen');
+            
+            if (level2WinElement) {
+                level2WinElement.classList.add('active');
+                level2WinElement.style.display = 'flex';
+                console.log('🎉 Level 2 win screen shown');
+            } else {
+                console.error('❌ Level 2 win screen element not found!');
+            }
+            
+            console.log('🎉🎉🎉 === showLevel2WinScreen() completed === 🎉🎉🎉');
+        }
+        
         // Cut scene button functions
         function returnToTitle() {
             console.log('returnToTitle called!');
             // Reset the entire game state
             resetGame();
             
-            // Hide all cutscenes
-            document.querySelectorAll('.win-loss-cutscene').forEach(cutscene => cutscene.classList.remove('active'));
+            // Hide all cutscenes (including Level 2 win screen)
+            document.querySelectorAll('.win-loss-cutscene').forEach(cutscene => {
+                cutscene.classList.remove('active');
+                cutscene.style.display = 'none';
+            });
+            
             // Hide all comic panels
-            document.querySelectorAll('.comic-panel, .victory-panel').forEach(panel => panel.classList.remove('active'));
+            document.querySelectorAll('.comic-panel, .victory-panel').forEach(panel => {
+                panel.classList.remove('active');
+                panel.style.display = 'none';
+            });
+            
             // Show title screen
-            document.getElementById('titleScreen').classList.add('active');
+            const titleScreen = document.getElementById('titleScreen');
+            if (titleScreen) {
+                titleScreen.classList.add('active');
+                titleScreen.style.display = 'flex';
+            }
             
             // Stop any running game loop
             if (gameLoop) {
@@ -3165,6 +3501,12 @@ GAME_HTML = """
             if (canvas) {
                 canvas.style.display = 'none';
             }
+            
+            // Reset state to title
+            currentState = 'title';
+            currentLevel = 1;
+            level1State = 'intro';
+            level2State = 'intro';
             
             console.log('returnToTitle completed!');
         }
@@ -3642,7 +3984,7 @@ GAME_HTML = """
             // Set up victory comic state
             currentState = 'victoryComic';
             currentVictoryPanel = 0;
-            totalVictoryPanels = 4; // 4 panels: 0, 1, 2, 3
+            totalVictoryPanels = 5; // 5 panels: 0, 1, 2, 3, 4
             
             console.log('🔥 Cheat: Setting up Times Square comic...');
             console.log('🔥 Current state:', currentState);
