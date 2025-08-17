@@ -85,6 +85,7 @@ GAME_HTML = """
             align-items: center;
             justify-content: center;
             z-index: 1100; /* Higher than win cutscene */
+            cursor: pointer; /* Make it clear it's clickable */
         }
 
         .victory-panel.active {
@@ -696,7 +697,7 @@ GAME_HTML = """
         </div>
 
         <!-- Post-Level 1 Victory Comic Panels -->
-        <div id="victoryPanel0" class="victory-panel" onclick="nextVictoryPanel()">
+        <div id="victoryPanel0" class="victory-panel">
             <div class="panel-content">
                 <div class="dr-strange-times-square"></div>
                 <div class="speech-bubble">
@@ -706,7 +707,7 @@ GAME_HTML = """
             </div>
         </div>
 
-        <div id="victoryPanel1" class="victory-panel" onclick="nextVictoryPanel()">
+        <div id="victoryPanel1" class="victory-panel">
             <div class="panel-content">
                 <div class="spider-man-victory-scene"></div>
                 <div class="speech-bubble">
@@ -716,11 +717,21 @@ GAME_HTML = """
             </div>
         </div>
 
-        <div id="victoryPanel2" class="victory-panel" onclick="nextVictoryPanel()">
+        <div id="victoryPanel2" class="victory-panel">
             <div class="panel-content">
                 <div class="dr-strange-times-square"></div>
                 <div class="speech-bubble">
                     The dust has spread to Times Square. You must head there next — before chaos erupts.
+                </div>
+                <div class="click-prompt">Click to continue</div>
+            </div>
+        </div>
+
+        <div id="victoryPanel3" class="victory-panel">
+            <div class="panel-content">
+                <div class="spider-man-victory-scene"></div>
+                <div class="speech-bubble">
+                    I'll try... but I'm not making any promises about the chaos part.
                 </div>
                 <div class="click-prompt">Click to continue</div>
             </div>
@@ -772,7 +783,7 @@ GAME_HTML = """
         let currentPanel = 0;
         const totalPanels = 7;
         let currentVictoryPanel = 0;
-        const totalVictoryPanels = 3;
+        const totalVictoryPanels = 4;
         
         // Level 1 game variables
         let level1State = 'intro'; // intro, splash, gameplay, win, lose
@@ -826,34 +837,21 @@ GAME_HTML = """
         
         // Level 2 map data - Times Square layout (27x28) based on design documents
         const level2Map = [
-            "###########################",
-            "#W........###...........W#",
-            "#.####.#.###.###.#.####.#",
-            "#T#  #.#..... .....#  #T#",
-            "#.#  #.#####-#####.#  #.#",
-            "#.#  #.#   V V   #.#  #.#",
-            "#.#  #.#  V   V  #.#  #.#",
-            "#.#  #.#   V V   #.#  #.#",
-            "#.#  #.#####-#####.#  #.#",
-            "#T#  #.#..... .....#  #T#",
-            "#.####.#.###.###.#.####.#",
-            "#W........###...........#",
-            "#########  S  ###########",
-            "#...............T........#",
-            "#.####.#####.#####.####.#",
-            "#.#  #.#   #.#   #.#  #.#",
-            "#.#  #.# W #.# W #.#  #.#",
-            "#.#  #.#####.#####.#  #.#",
-            "#.#  #.............#  #.#",
-            "#.####.###.#.#.###.####.#",
-            "#.....T...#.#.#...T.....#",
-            "###.#####.#.#.#.#####.###",
-            "#...#   #.......#   #...#",
-            "#.#.# W ####### W #.#.#.#",
-            "#.#.#   #.....#   #.#.#.#",
-            "#.#.#####.#.#.#####.#.#.#",
-            "#T.......T.#.#.T.......T#",
-            "###########################"
+            "##############################",
+            "#W...........####...........W#",
+            "#.####.###...####...###.####.#",
+            "##.#....#.#...##...#.#....#.##",
+            "#.....##....######....##.....#",
+            "####..###..##....##..###..####",
+            "#########..###--###..#########",
+            "#########..#VVVVVV#..#########",
+            "#########..########..#########",
+            "####..###..##..S.##..###..####",
+            "#.....##....######....##.....#",
+            "##.#....#.#...##...#.#....#.##",
+            "#.####.###...####...###.####.#",
+            "#W...........####...........W#",
+            "##############################"
         ];
         
         // Function to process ASCII maze with flood-fill
@@ -985,14 +983,30 @@ GAME_HTML = """
         
         // Load building images
         function loadBuildingImages() {
-            const buildingPaths = [
-                '/static/Building_1.png',
-                '/static/Building_2.png',
-                '/static/Building_3.png',
-                '/static/Building_4.png',
-                '/static/Building_5.png',
-                '/static/Building_6.png'
-            ];
+            // Choose building paths based on current level
+            let buildingPaths;
+            if (currentLevel === 1) {
+                buildingPaths = [
+                    '/static/Building_1.png',
+                    '/static/Building_2.png',
+                    '/static/Building_3.png',
+                    '/static/Building_4.png',
+                    '/static/Building_5.png',
+                    '/static/Building_6.png'
+                ];
+            } else {
+                // Level 2: Use Times Building images
+                buildingPaths = [
+                    '/static/Times_Building_1.png',
+                    '/static/Times_Building_2.png',
+                    '/static/Times_Building_3.png',
+                    '/static/Times_Building_4.png',
+                    '/static/Times_Building_5.png',
+                    '/static/Times_Building_6.png',
+                    '/static/Times_Building_7.png',
+                    '/static/Times_Building_8.png'
+                ];
+            }
             
             buildingPaths.forEach((path, index) => {
                 const img = new Image();
@@ -1006,7 +1020,15 @@ GAME_HTML = """
         
         // Load street image
         function loadStreetImage() {
-            const streetPath = '/static/Street_6.png';
+            // Choose street path based on current level
+            let streetPath;
+            if (currentLevel === 1) {
+                streetPath = '/static/Street_6.png';
+            } else {
+                // Level 2: Use New Street image
+                streetPath = '/static/New_Street.png';
+            }
+            
             const img = new Image();
             img.onload = function() {
                 streetImageLoaded = true;
@@ -1601,6 +1623,15 @@ GAME_HTML = """
                 console.log('🔥 Panel visibility after force:', getComputedStyle(targetPanel).visibility);
                 console.log('🔥 Panel z-index after force:', getComputedStyle(targetPanel).zIndex);
                 
+                // Add click event listener to this victory panel
+                console.log('🔥 Adding click event listener to victory panel...');
+                targetPanel.addEventListener('click', function(e) {
+                    console.log('🔥🔥🔥 Victory panel clicked!');
+                    e.preventDefault();
+                    e.stopPropagation();
+                    nextVictoryPanel();
+                });
+                
                 // Double-check that title screen is still hidden
                 const titleScreen = document.getElementById('titleScreen');
                 if (titleScreen && (titleScreen.classList.contains('active') || getComputedStyle(titleScreen).display !== 'none')) {
@@ -1615,22 +1646,29 @@ GAME_HTML = """
         }
         
         function nextVictoryPanel() {
-            console.log('=== nextVictoryPanel() called ===');
-            console.log('Current state:', currentState);
-            console.log('Current victory panel:', currentVictoryPanel);
-            console.log('Total victory panels:', totalVictoryPanels);
-            console.log('Current level:', currentLevel);
+            console.log('🔥🔥🔥 === nextVictoryPanel() called === 🔥🔥🔥');
+            console.log('🔥 Current state:', currentState);
+            console.log('🔥 Current victory panel:', currentVictoryPanel);
+            console.log('🔥 Total victory panels:', totalVictoryPanels);
+            console.log('🔥 Current level:', currentLevel);
+            console.log('🔥 Condition check: currentVictoryPanel >= totalVictoryPanels - 1:', currentVictoryPanel >= totalVictoryPanels - 1);
             
+            // Check if we're on the last panel (panel 3 of 4)
             if (currentState === 'victoryComic' && currentVictoryPanel < totalVictoryPanels - 1) {
-                console.log('Advancing to next victory panel...');
+                console.log('🔥🔥🔥 Advancing to next victory panel...');
                 currentVictoryPanel++;
                 showVictoryPanel(currentVictoryPanel);
-            } else if (currentState === 'victoryComic' && currentVictoryPanel === totalVictoryPanels - 1) {
-                console.log('Last victory panel reached, showing Level 2 splash...');
+            } else if (currentState === 'victoryComic' && currentVictoryPanel >= totalVictoryPanels - 1) {
+                console.log('🔥🔥🔥 Last victory panel reached, showing Level 2 splash...');
+                console.log('🔥🔥🔥 Panel check: currentVictoryPanel =', currentVictoryPanel, 'totalVictoryPanels =', totalVictoryPanels);
                 // End of victory comic, show Level 2 splash screen without resetting anything
                 showLevel2Splash();
             } else {
-                console.log('No condition met - currentVictoryPanel:', currentVictoryPanel, 'totalVictoryPanels:', totalVictoryPanels);
+                console.log('🔥🔥🔥 No condition met - currentVictoryPanel:', currentVictoryPanel, 'totalVictoryPanels:', totalVictoryPanels);
+                console.log('🔥🔥🔥 State check failed - currentState:', currentState, 'expected: victoryComic');
+                // Force advance to Level 2 splash as fallback
+                console.log('🔥🔥🔥 FORCE ADVANCING to Level 2 splash as fallback...');
+                showLevel2Splash();
             }
         }
         
@@ -1688,21 +1726,10 @@ GAME_HTML = """
         
         function startLevel2Gameplay() {
             console.log('=== startLevel2Gameplay() called ===');
-            console.log('Starting Level 2 gameplay without resetting...');
+            console.log('Starting Level 2 gameplay...');
             
-            // Initialize Level 2 without resetting player progress
-            currentState = 'gameplay';
-            level2State = 'gameplay';
-            
-            // Set up Level 2 specific data
-            initLevel2();
-            
-            // Start the game loop
-            if (!gameLoop) {
-                gameLoop = setInterval(updateGame, 1000/60); // 60 FPS
-                // Add keyboard controls
-                document.addEventListener('keydown', handleKeyPress);
-            }
+            // Use the proper Level 2 start function
+            startLevel2();
         }
 
         function startGameplay() {
@@ -1716,6 +1743,83 @@ GAME_HTML = """
         }
 
         // Level 1 functions
+        function initLevel1() {
+            console.log('=== initLevel1() called ===');
+            
+            // Reset game state for Level 1
+            dustCollected = 0;
+            totalDust = 0;
+            lives = 3;
+            score = 0;
+            webShooterActive = false;
+            webShooterTimer = 0;
+            isRidingTaxi = false;
+            winLock = false;
+            
+            // Reset player position to Level 1 spawn point
+            playerX = 13; // Level 1 spawn X
+            playerY = 12; // Level 1 spawn Y (just below villain pen)
+            
+            // Clear all arrays
+            dustPositions = [];
+            webShooterPositions = [];
+            villainPositions = [];
+            taxiStopPositions = [];
+            villains = []; // Clear villains array
+            
+            // Initialize Level 1 map elements
+            const currentMap = level1Map;
+            const processedMap = processMazeWithFloodFill(currentMap);
+            
+            // Count total dust and place dust pellets
+            for (let y = 0; y < processedMap.length; y++) {
+                for (let x = 0; x < processedMap[y].length; x++) {
+                    const tile = processedMap[y][x];
+                    if (tile === '.') {
+                        dustPositions.push({x: x, y: y});
+                        totalDust++;
+                    } else if (tile === 'W') {
+                        webShooterPositions.push({x: x, y: y});
+                    } else if (tile === 'T') {
+                        // In Level 1, T represents Taxi Stops
+                        taxiStopPositions.push({x: x, y: y});
+                    } else if (tile === 'V') {
+                        villainPositions.push({x: x, y: y, type: 'villain'});
+                    }
+                }
+            }
+            
+            console.log('Level 1 initialized:');
+            console.log('- Total dust:', totalDust);
+            console.log('- Web shooters:', webShooterPositions.length);
+            console.log('- Taxi stops:', taxiStopPositions.length);
+            console.log('- Villains:', villainPositions.length);
+            console.log('- Player spawn:', playerX, playerY);
+            
+            // Reload building images for Level 1 (East Village Buildings)
+            buildingImages = [];
+            buildingImagesLoaded = 0;
+            loadBuildingImages();
+            
+            // Reload street image for Level 1
+            streetImageLoaded = false;
+            streetImage = null;
+            loadStreetImage();
+            
+            // Load all sprites and images for Level 1
+            loadTaxiImage();
+            loadWebImage();
+            loadTaxiSpiderManSprite();
+            loadSwingSpiderManSprites();
+            loadVillainSprites();
+            
+            // Initialize villains for Level 1
+            initVillains();
+            
+            // Initialize background music
+            initBackgroundMusic();
+        }
+        
         function startLevel1() {
             level1State = 'splash';
             currentLevel = 1;
@@ -1771,6 +1875,8 @@ GAME_HTML = """
             currentLevel = 2;
             currentState = 'gameplay'; // Set currentState to gameplay
             console.log('Level 2 state set - level2State:', level2State, 'currentLevel:', currentLevel, 'currentState:', currentState);
+            
+            // Initialize Level 2 specific settings
             initLevel2();
             
             // Show Level 2 splash screen
@@ -1817,6 +1923,70 @@ GAME_HTML = """
                 currentState = 'gameplay'; // Make sure currentState is set to gameplay
                 initGameplay();
             }, 2000);
+        }
+        
+        function initLevel2() {
+            console.log('=== initLevel2() called ===');
+            
+            // Reset game state for Level 2
+            dustCollected = 0;
+            totalDust = 0;
+            lives = 3;
+            score = 0;
+            webShooterActive = false;
+            webShooterTimer = 0;
+            isRidingTaxi = false;
+            winLock = false;
+            
+            // Reset player position to Level 2 spawn point
+            playerX = 15; // Level 2 spawn X (center of map)
+            playerY = 9; // Level 2 spawn Y (center of map)
+            
+            // Clear all arrays
+            dustPositions = [];
+            webShooterPositions = [];
+            villainPositions = [];
+            taxiStopPositions = [];
+            villains = []; // Clear villains array
+            
+            // Initialize Level 2 map elements
+            const currentMap = level2Map;
+            const processedMap = processMazeWithFloodFill(currentMap);
+            
+            // Count total dust and place dust pellets
+            for (let y = 0; y < processedMap.length; y++) {
+                for (let x = 0; x < processedMap[y].length; x++) {
+                    const tile = processedMap[y][x];
+                    if (tile === '.') {
+                        dustPositions.push({x: x, y: y});
+                        totalDust++;
+                    } else if (tile === 'W') {
+                        webShooterPositions.push({x: x, y: y});
+                    } else if (tile === 'T') {
+                        // In Level 2, T represents Dimensional Fragments (not taxi stops)
+                        dustPositions.push({x: x, y: y});
+                        totalDust++;
+                    } else if (tile === 'V') {
+                        villainPositions.push({x: x, y: y, type: 'villain'});
+                    }
+                }
+            }
+            
+            console.log('Level 2 initialized:');
+            console.log('- Total dust/fragments:', totalDust);
+            console.log('- Web shooters:', webShooterPositions.length);
+            console.log('- Villains:', villainPositions.length);
+            console.log('- Player spawn:', playerX, playerY);
+            
+            // Reload building images for Level 2 (Times Buildings)
+            buildingImages = [];
+            buildingImagesLoaded = 0;
+            loadBuildingImages();
+            
+            // Reload street image for Level 2
+            streetImageLoaded = false;
+            streetImage = null;
+            loadStreetImage();
         }
         
         function initGameplay() {
@@ -2002,9 +2172,10 @@ GAME_HTML = """
                     
                     if (tile === '#') {
                         // Draw building with image
-                        if (buildingImagesLoaded >= 6) {
+                        const requiredImages = currentLevel === 1 ? 6 : 8;
+                        if (buildingImagesLoaded >= requiredImages) {
                             // Select building image based on position for variety
-                            const buildingIndex = (x + y * 3) % 6;
+                            const buildingIndex = (x + y * 3) % requiredImages;
                             const buildingImg = buildingImages[buildingIndex];
                             if (buildingImg) {
                                 ctx.drawImage(buildingImg, drawX, drawY, tileSize, tileSize);
@@ -2982,6 +3153,115 @@ GAME_HTML = """
             console.log('Win/Loss state:', winLossState);
         }
         window.debugCheckVisible = debugCheckVisible;
+        
+        // CHEAT CODE: Jump directly to Times Square victory sequence
+        function cheatToTimesSquare() {
+            console.log('🔥🔥🔥 CHEAT CODE ACTIVATED: Jumping to Times Square victory sequence! 🔥🔥🔥');
+            
+            // Hide everything first
+            document.querySelectorAll('.comic-panel, .victory-panel, #titleScreen').forEach(panel => {
+                panel.classList.remove('active');
+                panel.style.display = 'none';
+            });
+            
+            // Hide game canvas
+            const canvas = document.getElementById('gameCanvas');
+            if (canvas) canvas.style.display = 'none';
+            
+            // Set up victory comic state
+            currentState = 'victoryComic';
+            currentVictoryPanel = 0;
+            currentLevel = 1; // Ensure we're in Level 1 context
+            
+            console.log('🔥 Cheat: State set to victoryComic, panel 0');
+            
+            // Show the first victory panel (Times Square sequence)
+            showVictoryPanel(0);
+            
+            console.log('🔥🔥🔥 CHEAT COMPLETE: You should now see the first Times Square victory panel! 🔥🔥🔥');
+            console.log('🔥 Click on the panel to advance through the sequence');
+        }
+        window.cheatToTimesSquare = cheatToTimesSquare;
+        
+        // CHEAT CODE: Jump directly to Level 2 splash screen
+        function cheatToLevel2Splash() {
+            console.log('🔥🔥🔥 CHEAT CODE ACTIVATED: Jumping directly to Level 2 splash! 🔥🔥🔥');
+            
+            // Hide everything first
+            document.querySelectorAll('.comic-panel, .victory-panel, #titleScreen').forEach(panel => {
+                panel.classList.remove('active');
+                panel.style.display = 'none';
+            });
+            
+            // Hide game canvas
+            const canvas = document.getElementById('gameCanvas');
+            if (canvas) canvas.style.display = 'none';
+            
+            // Set up Level 2 splash state
+            currentLevel = 2;
+            currentState = 'level2Splash';
+            
+            console.log('🔥 Cheat: State set to level2Splash, level 2');
+            
+            // Show the Level 2 splash screen
+            showLevel2Splash();
+            
+            console.log('🔥🔥🔥 CHEAT COMPLETE: You should now see the Level 2 splash screen! 🔥🔥🔥');
+            console.log('🔥 Press SPACE to start Level 2 gameplay');
+        }
+        window.cheatToLevel2Splash = cheatToLevel2Splash;
+        
+        // CHEAT CODE: Test the victory panel transition
+        function testVictoryPanelTransition() {
+            console.log('🔥🔥🔥 TESTING VICTORY PANEL TRANSITION 🔥🔥🔥');
+            console.log('Current victory panel:', currentVictoryPanel);
+            console.log('Total victory panels:', totalVictoryPanels);
+            console.log('Current state:', currentState);
+            
+            // Simulate being on the last panel
+            currentVictoryPanel = 3;
+            currentState = 'victoryComic';
+            
+            console.log('🔥🔥🔥 Simulated last panel - calling nextVictoryPanel()...');
+            nextVictoryPanel();
+        }
+        
+        window.testVictoryPanelTransition = testVictoryPanelTransition;
+        
+        // CHEAT CODE: Jump directly to Level 2 gameplay
+        function cheatToLevel2() {
+            console.log('🔥🔥🔥 CHEAT CODE ACTIVATED: Jumping directly to Level 2 gameplay! 🔥🔥🔥');
+            
+            // Hide all screens first
+            document.querySelectorAll('.comic-panel, .victory-panel, #titleScreen').forEach(panel => {
+                panel.classList.remove('active');
+                panel.style.display = 'none';
+            });
+            
+            // Hide game canvas if it exists
+            const canvas = document.getElementById('gameCanvas');
+            if (canvas) canvas.style.display = 'none';
+            
+            // Set up Level 2 state
+            currentLevel = 2;
+            currentState = 'gameplay';
+            level2State = 'gameplay';
+            
+            console.log('🔥 Cheat: Setting up Level 2...');
+            console.log('🔥 Current level:', currentLevel);
+            console.log('🔥 Current state:', currentState);
+            console.log('🔥 Level 2 state:', level2State);
+            
+            // Initialize Level 2
+            initLevel2();
+            
+            // Start Level 2 gameplay directly (skip splash screen)
+            startLevel2Gameplay();
+            
+            console.log('🔥🔥🔥 CHEAT COMPLETE: You are now in Level 2 gameplay! 🔥🔥🔥');
+        }
+        
+        window.cheatToLevel2 = cheatToLevel2;
         
         // Add event listener for start button
         document.addEventListener('DOMContentLoaded', function() {
