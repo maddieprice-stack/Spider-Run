@@ -816,6 +816,11 @@ GAME_HTML = """
         let lastPlayerX = 13;
         let lastPlayerY = 12;
         
+        // Waka waka sound system (disabled)
+        // let wakaWakaAudio = null;
+        // let isWakaWakaPlaying = false;
+        // let wakaWakaTimeout = null;
+        
         // Level 1 map data based on classic Pac-Man layout (25x15)
         const level1Map = [
             "#########################",
@@ -954,12 +959,24 @@ GAME_HTML = """
             pumpkinBomb: { active: false, timer: 0, cooldown: 720 },
             windGust: { active: false, timer: 0, cooldown: 720 },
             darkTendrils: { active: false, timer: 0, cooldown: 720 }, // Venom
-            illusion: { active: false, timer: 0, cooldown: 720 }, // Mysterio
-            lightning: { active: false, timer: 0, cooldown: 720 } // Electro
+            illusion: { active: false, timer: 0, cooldown: 1800 }, // Mysterio - 30 seconds (much less frequent)
+            lightning: { active: false, timer: 0, cooldown: 1200 } // Electro - 20 seconds (less frequent)
         };
         
         let playerSlowed = false;
         let playerSlowTimer = 0;
+        
+        // Electro lightning flash effect
+        let electroFlashActive = false;
+        let electroFlashTimer = 0;
+        let electroFlashX = 0;
+        let electroFlashY = 0;
+        
+        // Mysterio illusion flash effect
+        let mysterioFlashActive = false;
+        let mysterioFlashTimer = 0;
+        let mysterioFlashX = 0;
+        let mysterioFlashY = 0;
         
         // Building images
         let buildingImages = [];
@@ -1468,6 +1485,24 @@ GAME_HTML = """
                 villainAbilities.windGust.timer = 180; // 3 seconds
                 playerSlowed = true;
                 playerSlowTimer = 180; // 3 seconds
+            } else if (villain.ability === 'illusion') {
+                // Mysterio creates illusion gas
+                villainAbilities.illusion.active = true;
+                villainAbilities.illusion.timer = 600; // 10 seconds
+                // Trigger massive purple flash effect
+                mysterioFlashActive = true;
+                mysterioFlashTimer = 600; // 10 seconds total
+                mysterioFlashX = villain.x;
+                mysterioFlashY = villain.y;
+            } else if (villain.ability === 'lightning') {
+                // Electro uses lightning power
+                villainAbilities.lightning.active = true;
+                villainAbilities.lightning.timer = 600; // 10 seconds
+                // Trigger massive white flash effect
+                electroFlashActive = true;
+                electroFlashTimer = 600; // 10 seconds total
+                electroFlashX = villain.x;
+                electroFlashY = villain.y;
             }
         }
         
@@ -1524,30 +1559,75 @@ GAME_HTML = """
         }
         
         // Background music functions
+        let currentBackgroundMusic = null;
+        
         function initBackgroundMusic() {
-            const bgMusic = document.getElementById('backgroundMusic');
-            if (bgMusic) {
-                bgMusic.volume = 0.3; // Set volume to 30%
-                bgMusic.loop = true;
+            // Initialize with Level 1 music by default
+            if (!currentBackgroundMusic) {
+                currentBackgroundMusic = new Audio('/static/background_music.mp3');
+                currentBackgroundMusic.volume = 0.3; // Set volume to 30%
+                currentBackgroundMusic.loop = true;
             }
         }
         
         function startBackgroundMusic() {
-            const bgMusic = document.getElementById('backgroundMusic');
-            if (bgMusic) {
-                bgMusic.play().catch(error => {
+            if (currentBackgroundMusic) {
+                currentBackgroundMusic.play().catch(error => {
                     console.log('Background music autoplay blocked:', error);
                 });
             }
         }
         
         function stopBackgroundMusic() {
-            const bgMusic = document.getElementById('backgroundMusic');
-            if (bgMusic) {
-                bgMusic.pause();
-                bgMusic.currentTime = 0;
+            if (currentBackgroundMusic) {
+                currentBackgroundMusic.pause();
+                currentBackgroundMusic.currentTime = 0;
             }
         }
+        
+        function switchToLevel2Music() {
+            // Stop current music
+            if (currentBackgroundMusic) {
+                currentBackgroundMusic.pause();
+                currentBackgroundMusic.currentTime = 0;
+            }
+            
+            // Switch to Level 2 music
+            currentBackgroundMusic = new Audio('/static/Spider song 2.mp3');
+            currentBackgroundMusic.volume = 0.3; // Set volume to 30%
+            currentBackgroundMusic.loop = true;
+            
+            // Start playing the new music
+            currentBackgroundMusic.play().catch(error => {
+                console.log('Level 2 background music autoplay blocked:', error);
+            });
+        }
+        
+        // Waka waka sound functions (disabled)
+        /*
+        function initWakaWakaSound() {
+            wakaWakaAudio = new Audio('/static/Waka Waka (PacMan) - QuickSounds.com.mp3');
+            wakaWakaAudio.volume = 0.06; // Set volume to 6% (30% of previous 20%)
+            wakaWakaAudio.loop = true;
+        }
+        
+        function startWakaWakaSound() {
+            if (wakaWakaAudio && !isWakaWakaPlaying) {
+                wakaWakaAudio.play().catch(error => {
+                    console.log('Waka waka sound autoplay blocked:', error);
+                });
+                isWakaWakaPlaying = true;
+            }
+        }
+        
+        function stopWakaWakaSound() {
+            if (wakaWakaAudio && isWakaWakaPlaying) {
+                wakaWakaAudio.pause();
+                wakaWakaAudio.currentTime = 0;
+                isWakaWakaPlaying = false;
+            }
+        }
+        */
 
         // Panel navigation
         function showPanel(panelNumber) {
@@ -1779,6 +1859,9 @@ GAME_HTML = """
                 titleScreen.style.display = 'none';
             }
             
+            // Switch to Level 2 music
+            switchToLevel2Music();
+            
             // Start Level 2 (like startGameplay calls startLevel1)
             startLevel2();
         }
@@ -1788,6 +1871,10 @@ GAME_HTML = """
             document.querySelectorAll('.comic-panel').forEach(panel => {
                 panel.classList.remove('active');
             });
+            
+            // Ensure Level 1 music is playing
+            initBackgroundMusic();
+            startBackgroundMusic();
             
             // Start Level 1
             startLevel1();
@@ -1869,6 +1956,9 @@ GAME_HTML = """
             
             // Initialize background music
             initBackgroundMusic();
+            
+            // Initialize waka waka sound (disabled)
+            // initWakaWakaSound();
         }
         
         function startLevel1() {
@@ -2068,6 +2158,9 @@ GAME_HTML = """
             
             // Initialize background music
             initBackgroundMusic();
+            
+            // Initialize waka waka sound (disabled)
+            // initWakaWakaSound();
         }
         
         function initGameplay() {
@@ -2160,6 +2253,10 @@ GAME_HTML = """
                 console.log('🔥 Total dust:', totalDust);
                 console.log('🔥 Lives remaining:', lives);
                 console.log('🔥 Calling continueToNextLevel() directly (skip win screen)...');
+                
+                // Stop background music when level is completed
+                stopBackgroundMusic();
+                
                 if (currentLevel === 1) {
                     level1State = 'win';
                 } else {
@@ -2222,6 +2319,92 @@ GAME_HTML = """
             
             // Draw map elements (which will handle background drawing)
             drawMapElements();
+            
+            // Draw Electro lightning flash effect
+            if (electroFlashActive && electroFlashTimer > 0) {
+                const tileSize = window.gameTileSize || 30;
+                const hudHeight = 80;
+                
+                // Calculate flash area (6 surrounding squares)
+                const flashRadius = 3; // 3 tiles in each direction = 6 surrounding squares
+                const flashCenterX = electroFlashX * tileSize + tileSize / 2;
+                const flashCenterY = electroFlashY * tileSize + hudHeight + tileSize / 2;
+                const flashSize = flashRadius * tileSize * 2;
+                
+                // Calculate opacity based on timer
+                let opacity = 1.0;
+                if (electroFlashTimer <= 120) { // Last 2 seconds = fade out
+                    opacity = electroFlashTimer / 120;
+                }
+                
+                // Create radial gradient for the flash effect
+                const gradient = ctx.createRadialGradient(
+                    flashCenterX, flashCenterY, 0,
+                    flashCenterX, flashCenterY, flashSize
+                );
+                gradient.addColorStop(0, `rgba(255, 255, 255, ${opacity})`);
+                gradient.addColorStop(0.3, `rgba(255, 255, 255, ${opacity * 0.8})`);
+                gradient.addColorStop(0.7, `rgba(255, 255, 255, ${opacity * 0.4})`);
+                gradient.addColorStop(1, `rgba(255, 255, 255, 0)`);
+                
+                // Draw the flash effect
+                ctx.fillStyle = gradient;
+                ctx.fillRect(
+                    flashCenterX - flashSize,
+                    flashCenterY - flashSize,
+                    flashSize * 2,
+                    flashSize * 2
+                );
+                
+                // Decrease timer
+                electroFlashTimer--;
+                if (electroFlashTimer <= 0) {
+                    electroFlashActive = false;
+                }
+            }
+            
+            // Draw Mysterio illusion flash effect
+            if (mysterioFlashActive && mysterioFlashTimer > 0) {
+                const tileSize = window.gameTileSize || 30;
+                const hudHeight = 80;
+                
+                // Calculate flash area (6 surrounding squares)
+                const flashRadius = 3; // 3 tiles in each direction = 6 surrounding squares
+                const flashCenterX = mysterioFlashX * tileSize + tileSize / 2;
+                const flashCenterY = mysterioFlashY * tileSize + hudHeight + tileSize / 2;
+                const flashSize = flashRadius * tileSize * 2;
+                
+                // Calculate opacity based on timer
+                let opacity = 1.0;
+                if (mysterioFlashTimer <= 120) { // Last 2 seconds = fade out
+                    opacity = mysterioFlashTimer / 120;
+                }
+                
+                // Create radial gradient for the purple flash effect
+                const gradient = ctx.createRadialGradient(
+                    flashCenterX, flashCenterY, 0,
+                    flashCenterX, flashCenterY, flashSize
+                );
+                gradient.addColorStop(0, `rgba(75, 0, 130, ${opacity})`); // Purple center
+                gradient.addColorStop(0.3, `rgba(75, 0, 130, ${opacity * 0.8})`);
+                gradient.addColorStop(0.7, `rgba(75, 0, 130, ${opacity * 0.4})`);
+                gradient.addColorStop(1, `rgba(75, 0, 130, 0)`);
+                
+                // Draw the flash effect
+                ctx.fillStyle = gradient;
+                ctx.fillRect(
+                    flashCenterX - flashSize,
+                    flashCenterY - flashSize,
+                    flashSize * 2,
+                    flashSize * 2
+                );
+                
+                // Decrease timer
+                mysterioFlashTimer--;
+                if (mysterioFlashTimer <= 0) {
+                    mysterioFlashActive = false;
+                }
+            }
         }
         
         function drawMapElements() {
@@ -2449,6 +2632,10 @@ GAME_HTML = """
                     glowColor = '#00ffff'; // Cyan glow for Vulture
                 } else if (villain.type === 'Venom' && villainAbilities.darkTendrils.active) {
                     glowColor = '#800080'; // Purple glow for Venom
+                } else if (villain.type === 'Mysterio' && villainAbilities.illusion.active) {
+                    glowColor = '#4B0082'; // Intense purple glow for Mysterio
+                } else if (villain.type === 'Electro' && villainAbilities.lightning.active) {
+                    glowColor = '#FFD700'; // Intense golden glow for Electro
                 }
                 
                 if (villainSprite && villainSpritesLoaded >= 4) {
@@ -2469,7 +2656,14 @@ GAME_HTML = """
                     // Add glow effect if villain is using special power
                     if (glowColor) {
                         ctx.shadowColor = glowColor;
-                        ctx.shadowBlur = 15;
+                        // Much more intense glow for Electro and Mysterio
+                        if (villain.type === 'Electro' && villainAbilities.lightning.active) {
+                            ctx.shadowBlur = 50; // Very intense golden glow
+                        } else if (villain.type === 'Mysterio' && villainAbilities.illusion.active) {
+                            ctx.shadowBlur = 45; // Very intense purple glow
+                        } else {
+                            ctx.shadowBlur = 15; // Normal glow for other villains
+                        }
                         ctx.shadowOffsetX = 0;
                         ctx.shadowOffsetY = 0;
                     }
@@ -2491,7 +2685,14 @@ GAME_HTML = """
                     // Add glow effect if villain is using special power
                     if (glowColor) {
                         ctx.shadowColor = glowColor;
-                        ctx.shadowBlur = 15;
+                        // Much more intense glow for Electro and Mysterio
+                        if (villain.type === 'Electro' && villainAbilities.lightning.active) {
+                            ctx.shadowBlur = 50; // Very intense golden glow
+                        } else if (villain.type === 'Mysterio' && villainAbilities.illusion.active) {
+                            ctx.shadowBlur = 45; // Very intense purple glow
+                        } else {
+                            ctx.shadowBlur = 15; // Normal glow for other villains
+                        }
                         ctx.shadowOffsetX = 0;
                         ctx.shadowOffsetY = 0;
                     }
@@ -2541,7 +2742,9 @@ GAME_HTML = """
                             isVillainUsingSpecialPower = true;
                         } else if (villain.type === 'Prowler' && villainAbilities.clawsOfDarkness.active) {
                             isVillainUsingSpecialPower = true;
-                        } else if (villain.type === 'Mysterio' && villainAbilities.illusionGas.active) {
+                        } else if (villain.type === 'Mysterio' && villainAbilities.illusion.active) {
+                            isVillainUsingSpecialPower = true;
+                        } else if (villain.type === 'Electro' && villainAbilities.lightning.active) {
                             isVillainUsingSpecialPower = true;
                         } else if (villain.type === 'Sandman' && villainAbilities.tailWhip.active) {
                             isVillainUsingSpecialPower = true;
@@ -2568,6 +2771,10 @@ GAME_HTML = """
                         } else if (villain.type === 'Vulture' && villainAbilities.windGust.active) {
                             isVillainUsingSpecialPower = true;
                         } else if (villain.type === 'Venom' && villainAbilities.darkTendrils.active) {
+                            isVillainUsingSpecialPower = true;
+                        } else if (villain.type === 'Mysterio' && villainAbilities.illusion.active) {
+                            isVillainUsingSpecialPower = true;
+                        } else if (villain.type === 'Electro' && villainAbilities.lightning.active) {
                             isVillainUsingSpecialPower = true;
                         }
                         
@@ -2627,6 +2834,14 @@ GAME_HTML = """
             if (villainAbilities.darkTendrils.active) {
                 ctx.fillStyle = '#800080';
                 ctx.fillText('Venom: Dark Tendrils!', tileSize * 0.5, statusY + 20);
+            }
+            if (villainAbilities.illusion.active) {
+                ctx.fillStyle = '#4B0082';
+                ctx.fillText('Mysterio: Illusion Gas!', canvas.width/2 - tileSize * 2.5, statusY + 20);
+            }
+            if (villainAbilities.lightning.active) {
+                ctx.fillStyle = '#FFD700';
+                ctx.fillText('Electro: Lights On!', canvas.width - tileSize * 10, statusY + 20);
             }
             if (webShooterActive) {
                 ctx.fillStyle = '#00bfff';
@@ -2731,6 +2946,19 @@ GAME_HTML = """
                 dustPositions.splice(dustIndex, 1);
                 dustCollected++;
                 score += 10;
+                
+                // Start waka waka sound when collecting dust (disabled)
+                // startWakaWakaSound();
+                
+                // Clear any existing timeout (disabled)
+                // if (wakaWakaTimeout) {
+                //     clearTimeout(wakaWakaTimeout);
+                // }
+                
+                // Stop waka waka sound after 500ms if no more dust is collected (disabled)
+                // wakaWakaTimeout = setTimeout(() => {
+                //     stopWakaWakaSound();
+                // }, 500);
             }
         }
         
@@ -3042,6 +3270,14 @@ GAME_HTML = """
             
             // Reset villains
             villains = [];
+            
+            // Reset Electro flash effect
+            electroFlashActive = false;
+            electroFlashTimer = 0;
+            
+            // Reset Mysterio flash effect
+            mysterioFlashActive = false;
+            mysterioFlashTimer = 0;
             
             console.log('Level completely reset');
         }
