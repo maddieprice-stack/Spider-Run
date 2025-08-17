@@ -59,7 +59,7 @@ GAME_HTML = """
             left: 0;
             width: 100vw;
             height: 100vh;
-            background: url('/static/New_York_5.webp') no-repeat center center;
+            background: url('/static/Times Square 1.png') no-repeat center center;
             background-size: cover;
             display: none;
             flex-direction: column;
@@ -69,6 +69,25 @@ GAME_HTML = """
         }
 
         .comic-panel.active {
+            display: flex;
+        }
+
+        .victory-panel {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: url('/static/Times Square 3.png') no-repeat center center;
+            background-size: cover;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        .victory-panel.active {
             display: flex;
         }
 
@@ -113,6 +132,32 @@ GAME_HTML = """
             height: 300px;
             margin: 20px auto;
             background: url('/static/Dr_Strange_Comic.webp') no-repeat center center;
+            background-size: contain;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+            border: 4px solid #000;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .spider-man-victory-scene {
+            width: 300px;
+            height: 300px;
+            margin: 20px auto;
+            background: url('/static/Spider-man victory scene 1.png') no-repeat center center;
+            background-size: contain;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+            border: 4px solid #000;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .dr-strange-times-square {
+            width: 300px;
+            height: 300px;
+            margin: 20px auto;
+            background: url('/static/Dr. Strange Times Square.png') no-repeat center center;
             background-size: contain;
             image-rendering: pixelated;
             image-rendering: -moz-crisp-edges;
@@ -280,6 +325,16 @@ GAME_HTML = """
             color: #000;
             transform: scale(1.05);
         }
+        
+
+        
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
 
         .page-flip {
             position: fixed;
@@ -349,6 +404,7 @@ GAME_HTML = """
                 rgba(0, 0, 0, 0.1) 4px
             );
             pointer-events: none;
+            z-index: -1;
         }
         
         .game-over-text {
@@ -471,6 +527,8 @@ GAME_HTML = """
             display: flex;
             justify-content: center;
             gap: 20px;
+            position: relative;
+            z-index: 10;
         }
         
         .cutscene-button {
@@ -485,6 +543,8 @@ GAME_HTML = """
             cursor: pointer;
             transition: all 0.3s ease;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 10;
         }
         
         .cutscene-button:hover {
@@ -524,7 +584,7 @@ GAME_HTML = """
                     </ul>
                 </div>
                 
-                <div>
+                <div class="button-container">
                     <button class="menu-button" id="startButton">PRESS ANYWHERE TO BEGIN</button>
                 </div>
             </div>
@@ -595,38 +655,47 @@ GAME_HTML = """
         </div>
 
         <!-- Post-Level 1 Victory Comic Panels -->
-        <div id="victoryPanel0" class="comic-panel">
+        <div id="victoryPanel0" class="victory-panel">
             <div class="panel-content">
-                <div class="dr-strange-image"></div>
+                <div class="dr-strange-times-square"></div>
                 <div class="speech-bubble">
                     Excellent work, Spider-Man! The East Village is clean!
                 </div>
             </div>
         </div>
 
-        <div id="victoryPanel1" class="comic-panel">
+        <div id="victoryPanel1" class="victory-panel">
             <div class="panel-content">
-                <div class="dr-strange-webp-image"></div>
+                <div class="dr-strange-times-square"></div>
                 <div class="speech-bubble">
                     But the space dust has spread to Times Square! We need to act fast!
                 </div>
             </div>
         </div>
 
-        <div id="victoryPanel2" class="comic-panel">
+        <div id="victoryPanel2" class="victory-panel">
             <div class="panel-content">
-                <div class="dr-strange-image"></div>
+                <div class="spider-man-victory-scene"></div>
                 <div class="speech-bubble">
                     Times Square? That's going to be a lot more crowded with villains...
                 </div>
             </div>
         </div>
 
-        <div id="victoryPanel3" class="comic-panel">
+        <div id="victoryPanel3" class="victory-panel">
             <div class="panel-content">
-                <div class="dr-strange-webp-image"></div>
+                <div class="dr-strange-times-square"></div>
                 <div class="speech-bubble">
                     The stakes are higher now, Spider-Man. Can you handle Times Square?
+                </div>
+            </div>
+        </div>
+
+        <div id="victoryPanel4" class="victory-panel">
+            <div class="panel-content">
+                <div class="spider-man-victory-scene"></div>
+                <div class="speech-bubble">
+                    I'll try my best...
                 </div>
             </div>
         </div>
@@ -649,8 +718,8 @@ GAME_HTML = """
                 <div class="spider-man-victory"></div>
                 <div class="quip-bubble" id="winQuip"></div>
                 <div class="cutscene-buttons">
-                    <button class="cutscene-button retry" onclick="continueToNextLevel()">CONTINUE</button>
-                    <button class="cutscene-button" onclick="returnToTitle()">EXIT</button>
+                    <button class="cutscene-button retry" id="continueButton">CONTINUE</button>
+                    <button class="cutscene-button" id="winExitButton">EXIT</button>
                 </div>
             </div>
         </div>
@@ -686,7 +755,7 @@ GAME_HTML = """
         let currentPanel = 0;
         const totalPanels = 7;
         let currentVictoryPanel = 0;
-        const totalVictoryPanels = 4;
+        const totalVictoryPanels = 5;
         
         // Level 1 game variables
         let level1State = 'intro'; // intro, splash, gameplay, win, lose
@@ -701,6 +770,10 @@ GAME_HTML = """
         let webShooterTimer = 0;
         let gameLoop;
         let canvas, ctx;
+        
+        // Level 2 game variables
+        let level2State = 'intro'; // intro, splash, gameplay, win, lose
+        let currentLevel = 1; // Track current level
         
         // Taxi riding system
         let isRidingTaxi = false;
@@ -732,6 +805,38 @@ GAME_HTML = """
             "#########  S  ###########",
             "...............T.........",
             "#########################"
+        ];
+        
+        // Level 2 map data - Times Square layout (27x28) based on design documents
+        const level2Map = [
+            "###########################",
+            "#W........###...........W#",
+            "#.####.#.###.###.#.####.#",
+            "#T#  #.#..... .....#  #T#",
+            "#.#  #.#####-#####.#  #.#",
+            "#.#  #.#   V V   #.#  #.#",
+            "#.#  #.#  V   V  #.#  #.#",
+            "#.#  #.#   V V   #.#  #.#",
+            "#.#  #.#####-#####.#  #.#",
+            "#T#  #.#..... .....#  #T#",
+            "#.####.#.###.###.#.####.#",
+            "#W........###...........#",
+            "#########  S  ###########",
+            "#...............T........#",
+            "#.####.#####.#####.####.#",
+            "#.#  #.#   #.#   #.#  #.#",
+            "#.#  #.# W #.# W #.#  #.#",
+            "#.#  #.#####.#####.#  #.#",
+            "#.#  #.............#  #.#",
+            "#.####.###.#.#.###.####.#",
+            "#.....T...#.#.#...T.....#",
+            "###.#####.#.#.#.#####.###",
+            "#...#   #.......#   #...#",
+            "#.#.# W ####### W #.#.#.#",
+            "#.#.#   #.....#   #.#.#.#",
+            "#.#.#####.#.#.#####.#.#.#",
+            "#T.......T.#.#.T.......T#",
+            "###########################"
         ];
         
         // Function to process ASCII maze with flood-fill
@@ -1285,6 +1390,49 @@ GAME_HTML = """
             // Initialize background music
             initBackgroundMusic();
         }
+        
+        // Initialize level 2 data
+        function initLevel2() {
+            console.log('=== initLevel2() called ===');
+            // Process the maze with flood-fill to close off enclosed spaces
+            const processedMap = processMazeWithFloodFill(level2Map);
+            
+            dustPositions = [];
+            webShooterPositions = [];
+            taxiStopPositions = [];
+            
+            for (let y = 0; y < processedMap.length; y++) {
+                for (let x = 0; x < processedMap[y].length; x++) {
+                    const tile = processedMap[y][x];
+                    if (tile === '.') {
+                        dustPositions.push({x, y});
+                    } else if (tile === 'W') {
+                        webShooterPositions.push({x, y});
+                    } else if (tile === 'T') {
+                        // In Level 2, T represents Dimensional Fragments, not taxi stops
+                        // For now, treat them as collectible items like dust
+                        dustPositions.push({x, y});
+                    }
+                }
+            }
+            totalDust = dustPositions.length;
+            console.log('Level 2 initialized with', totalDust, 'collectible items');
+            
+            // Load building images
+            loadBuildingImages();
+            loadStreetImage();
+            loadTaxiImage();
+            loadWebImage();
+            loadTaxiSpiderManSprite();
+            loadSwingSpiderManSprites();
+            loadVillainSprites();
+            
+            // Initialize villains (will be added later)
+            // initVillains();
+            
+            // Initialize background music
+            initBackgroundMusic();
+        }
 
         // Audio effects (placeholder)
         function playPageFlipSound() {
@@ -1325,6 +1473,7 @@ GAME_HTML = """
 
         // Panel navigation
         function showPanel(panelNumber) {
+            console.log('=== showPanel() called with panelNumber:', panelNumber, '===');
             // Hide all panels including title screen
             document.querySelectorAll('.comic-panel, #titleScreen').forEach(panel => {
                 panel.classList.remove('active');
@@ -1332,19 +1481,51 @@ GAME_HTML = """
 
             // Show new panel immediately without page flip effect
             if (panelNumber === 0) {
-                document.getElementById('comicPanel0').classList.add('active');
+                const panel0 = document.getElementById('comicPanel0');
+                console.log('Showing comicPanel0:', panel0);
+                panel0.classList.add('active');
             } else {
-                document.getElementById(`comicPanel${panelNumber}`).classList.add('active');
+                const panel = document.getElementById(`comicPanel${panelNumber}`);
+                console.log('Showing comicPanel' + panelNumber + ':', panel);
+                panel.classList.add('active');
             }
+            console.log('=== showPanel() completed ===');
         }
 
         // Game flow functions
         function startGame() {
-            console.log('Start game clicked!');
+            console.log('=== startGame() function called ===');
+            console.log('Current state before:', currentState);
             playClickSound();
             currentState = 'comic';
             currentPanel = 0;
+            console.log('Current state after:', currentState);
+            console.log('Current panel:', currentPanel);
             showPanel(0);
+            console.log('=== startGame() function completed ===');
+        }
+        
+        function skipToVictoryComic() {
+            console.log('=== skipToVictoryComic() function called ===');
+            console.log('Current state before:', currentState);
+            playClickSound();
+            
+            // Hide title screen explicitly
+            const titleScreen = document.getElementById('titleScreen');
+            console.log('Hiding title screen:', titleScreen);
+            titleScreen.classList.remove('active');
+            
+            // Hide all comic panels
+            document.querySelectorAll('.comic-panel, .victory-panel').forEach(panel => {
+                panel.classList.remove('active');
+            });
+            
+            currentState = 'victoryComic';
+            currentVictoryPanel = 0;
+            console.log('Current state after:', currentState);
+            console.log('Current victory panel:', currentVictoryPanel);
+            showVictoryPanel(0);
+            console.log('=== skipToVictoryComic() function completed ===');
         }
 
         function showInstructions() {
@@ -1365,7 +1546,7 @@ GAME_HTML = """
         
         function showVictoryPanel(panelNumber) {
             // Hide all panels including title screen
-            document.querySelectorAll('.comic-panel, #titleScreen').forEach(panel => {
+            document.querySelectorAll('.comic-panel, .victory-panel, #titleScreen').forEach(panel => {
                 panel.classList.remove('active');
             });
 
@@ -1374,20 +1555,39 @@ GAME_HTML = """
         }
         
         function nextVictoryPanel() {
+            console.log('=== nextVictoryPanel() called ===');
+            console.log('Current state:', currentState);
+            console.log('Current victory panel:', currentVictoryPanel);
+            console.log('Total victory panels:', totalVictoryPanels);
+            console.log('Current level:', currentLevel);
+            
             if (currentState === 'victoryComic' && currentVictoryPanel < totalVictoryPanels - 1) {
+                console.log('Advancing to next victory panel...');
                 currentVictoryPanel++;
                 showVictoryPanel(currentVictoryPanel);
             } else if (currentState === 'victoryComic' && currentVictoryPanel === totalVictoryPanels - 1) {
+                console.log('Last victory panel reached, starting next level...');
                 // End of victory comic, start next level
                 startNextLevel();
+            } else {
+                console.log('No condition met - currentVictoryPanel:', currentVictoryPanel, 'totalVictoryPanels:', totalVictoryPanels);
             }
         }
         
         function startNextLevel() {
-            // Start next level without resetting lives
-            startNewLevel();
-            currentState = 'gameplay';
-            startLevel1();
+            console.log('=== startNextLevel() called ===');
+            console.log('Current level before:', currentLevel);
+            
+            // Determine which level to start next
+            if (currentLevel === 1) {
+                console.log('Starting Level 2...');
+                currentLevel = 2; // Set to Level 2
+                startLevel2();
+            } else {
+                console.log('Starting Level 1 (fallback)...');
+                currentLevel = 1; // Set to Level 1
+                startLevel1(); // Fallback or loop back to level 1
+            }
         }
 
         function startGameplay() {
@@ -1403,6 +1603,7 @@ GAME_HTML = """
         // Level 1 functions
         function startLevel1() {
             level1State = 'splash';
+            currentLevel = 1;
             initLevel1();
             
             // Show Level 1 splash screen
@@ -1449,21 +1650,81 @@ GAME_HTML = """
             }, 2000);
         }
         
+        function startLevel2() {
+            console.log('=== startLevel2() called ===');
+            level2State = 'splash';
+            currentLevel = 2;
+            currentState = 'gameplay'; // Set currentState to gameplay
+            console.log('Level 2 state set - level2State:', level2State, 'currentLevel:', currentLevel, 'currentState:', currentState);
+            initLevel2();
+            
+            // Show Level 2 splash screen
+            const canvas = document.getElementById('gameCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Set canvas style for comic book look
+            canvas.style.border = '5px solid #000';
+            canvas.style.boxShadow = '5px 5px 0px rgba(0,0,0,0.3)';
+            
+            // Draw splash screen
+            ctx.fillStyle = '#1a1a2e';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw comic-style title
+            ctx.fillStyle = '#ffff00';
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 3;
+            ctx.font = 'bold 48px Comic Sans MS';
+            ctx.textAlign = 'center';
+            
+            const title = 'LEVEL 2: TIMES SQUARE';
+            ctx.strokeText(title, canvas.width/2, 100);
+            ctx.fillText(title, canvas.width/2, 100);
+            
+            // Draw Times Square background
+            const bgImage = new Image();
+            bgImage.onload = function() {
+                ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
+                // Redraw title over background
+                ctx.fillStyle = '#ffff00';
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 3;
+                ctx.font = 'bold 48px Comic Sans MS';
+                ctx.textAlign = 'center';
+                ctx.strokeText(title, canvas.width/2, 100);
+                ctx.fillText(title, canvas.width/2, 100);
+            };
+            bgImage.src = '/static/Times Square Pixel.png';
+            
+            setTimeout(() => {
+                console.log('Level 2 splash timeout - starting gameplay');
+                level2State = 'gameplay';
+                currentState = 'gameplay'; // Make sure currentState is set to gameplay
+                initGameplay();
+            }, 2000);
+        }
+        
         function initGameplay() {
+            console.log('=== initGameplay() called ===');
+            console.log('Current level:', currentLevel);
+            console.log('Current state:', currentState);
             canvas = document.getElementById('gameCanvas');
             ctx = canvas.getContext('2d');
+            
+            // Get current level map
+            const currentMap = currentLevel === 1 ? level1Map : level2Map;
             
             // Calculate optimal tile size to fit screen horizontally
             const maxWidth = window.innerWidth * 0.98; // 98% of screen width for maximum horizontal coverage
             const maxHeight = window.innerHeight * 0.85; // 85% of screen height
             
-            const tileSizeX = Math.floor(maxWidth / level1Map[0].length);
-            const tileSizeY = Math.floor(maxHeight / level1Map.length);
+            const tileSizeX = Math.floor(maxWidth / currentMap[0].length);
+            const tileSizeY = Math.floor(maxHeight / currentMap.length);
             const tileSize = Math.min(tileSizeX, tileSizeY, 45); // Cap at 45px, minimum of 20px for better fit
             
             // Set canvas size to fit the map with space above for HUD
-            canvas.width = level1Map[0].length * tileSize;
-            canvas.height = level1Map.length * tileSize + 80; // Add 80px for HUD above
+            canvas.width = currentMap[0].length * tileSize;
+            canvas.height = currentMap.length * tileSize + 80; // Add 80px for HUD above
             
             // Store tile size globally for rendering
             window.gameTileSize = tileSize;
@@ -1479,7 +1740,8 @@ GAME_HTML = """
         }
         
         function updateGame() {
-            if (level1State !== 'gameplay') return;
+            const currentLevelState = currentLevel === 1 ? level1State : level2State;
+            if (currentLevelState !== 'gameplay') return;
             
             // Update web shooter timer
             if (webShooterActive) {
@@ -1518,7 +1780,11 @@ GAME_HTML = """
             
             // Check win condition
             if (dustCollected >= totalDust) {
-                level1State = 'win';
+                if (currentLevel === 1) {
+                    level1State = 'win';
+                } else {
+                    level2State = 'win';
+                }
                 clearInterval(gameLoop);
                 showWinScreen();
                 return;
@@ -1526,7 +1792,11 @@ GAME_HTML = """
             
             // Check lose condition
             if (lives <= 0) {
-                level1State = 'lose';
+                if (currentLevel === 1) {
+                    level1State = 'lose';
+                } else {
+                    level2State = 'lose';
+                }
                 clearInterval(gameLoop);
                 showGameOverScreen(); // Use game over screen when all lives are lost
                 return;
@@ -1547,13 +1817,17 @@ GAME_HTML = """
             // Draw HUD above the game board
             drawHUD();
             
-            // Draw background (East Village pixel art) - only once
+            // Draw background based on current level
             if (!window.backgroundImage) {
                 window.backgroundImage = new Image();
                 window.backgroundImage.onload = function() {
                     // Background is loaded, but we'll draw it in drawMapElements
                 };
-                window.backgroundImage.src = '/static/East_Village_Pixel_Scape.png';
+                if (currentLevel === 1) {
+                    window.backgroundImage.src = '/static/East_Village_Pixel_Scape.png';
+                } else {
+                    window.backgroundImage.src = '/static/Times Square Pixel.png';
+                }
             }
             
             // Draw map elements (which will handle background drawing)
@@ -1569,8 +1843,9 @@ GAME_HTML = """
                 ctx.drawImage(window.backgroundImage, 0, hudHeight, canvas.width, canvas.height - hudHeight);
             }
             
-            // Get processed map
-            const processedMap = processMazeWithFloodFill(level1Map);
+            // Get processed map based on current level
+            const currentMap = currentLevel === 1 ? level1Map : level2Map;
+            const processedMap = processMazeWithFloodFill(currentMap);
             
             // Draw map elements
             for (let y = 0; y < processedMap.length; y++) {
@@ -1631,21 +1906,43 @@ GAME_HTML = """
                             }
                         }
                     } else if (tile === 'T') {
-                        // Draw taxi stop with image (only if not riding and taxi still exists)
-                        if (!isRidingTaxi) {
-                            // Check if this taxi position still exists in taxiStopPositions
-                            const taxiExists = taxiStopPositions.some(taxi => taxi.x === x && taxi.y === y);
-                            if (taxiExists) {
-                                if (taxiImageLoaded && taxiImage) {
-                                    ctx.drawImage(taxiImage, drawX, drawY, tileSize, tileSize);
-                                } else {
-                                    // Fallback to yellow square while image loads
-                                    ctx.fillStyle = '#ffff00';
-                                    ctx.fillRect(drawX + 2, drawY + 2, tileSize - 4, tileSize - 4);
-                                    ctx.strokeStyle = '#000';
-                                    ctx.lineWidth = 1;
-                                    ctx.strokeRect(drawX + 2, drawY + 2, tileSize - 4, tileSize - 4);
+                        if (currentLevel === 1) {
+                            // Level 1: Draw taxi stop with image (only if not riding and taxi still exists)
+                            if (!isRidingTaxi) {
+                                // Check if this taxi position still exists in taxiStopPositions
+                                const taxiExists = taxiStopPositions.some(taxi => taxi.x === x && taxi.y === y);
+                                if (taxiExists) {
+                                    if (taxiImageLoaded && taxiImage) {
+                                        ctx.drawImage(taxiImage, drawX, drawY, tileSize, tileSize);
+                                    } else {
+                                        // Fallback to yellow square while image loads
+                                        ctx.fillStyle = '#ffff00';
+                                        ctx.fillRect(drawX + 2, drawY + 2, tileSize - 4, tileSize - 4);
+                                        ctx.strokeStyle = '#000';
+                                        ctx.lineWidth = 1;
+                                        ctx.strokeRect(drawX + 2, drawY + 2, tileSize - 4, tileSize - 4);
+                                    }
                                 }
+                            }
+                        } else {
+                            // Level 2: Draw Dimensional Fragment (rainbow crystal shard)
+                            const fragmentExists = dustPositions.some(dust => dust.x === x && dust.y === y);
+                            if (fragmentExists) {
+                                // Draw rainbow crystal shard effect
+                                ctx.fillStyle = '#ff00ff'; // Magenta base
+                                ctx.beginPath();
+                                ctx.arc(drawX + tileSize/2, drawY + tileSize/2, 6, 0, 2 * Math.PI);
+                                ctx.fill();
+                                ctx.strokeStyle = '#00ffff'; // Cyan outline
+                                ctx.lineWidth = 2;
+                                ctx.stroke();
+                                // Add rainbow glow effect
+                                ctx.shadowColor = '#ff00ff';
+                                ctx.shadowBlur = 8;
+                                ctx.beginPath();
+                                ctx.arc(drawX + tileSize/2, drawY + tileSize/2, 4, 0, 2 * Math.PI);
+                                ctx.fill();
+                                ctx.shadowBlur = 0;
                             }
                         }
                     }
@@ -1931,12 +2228,14 @@ GAME_HTML = """
         }
         
         function handleKeyPress(event) {
-            if (level1State !== 'gameplay') return;
+            const currentLevelState = currentLevel === 1 ? level1State : level2State;
+            if (currentLevelState !== 'gameplay') return;
             
             // Don't allow movement while riding taxi
             if (isRidingTaxi) return;
             
-            const processedMap = processMazeWithFloodFill(level1Map);
+            const currentMap = currentLevel === 1 ? level1Map : level2Map;
+            const processedMap = processMazeWithFloodFill(currentMap);
             const newX = playerX;
             const newY = playerY;
             
@@ -2112,6 +2411,8 @@ GAME_HTML = """
         ];
         
         function showWinScreen() {
+            console.log('=== showWinScreen() called ===');
+            console.log('Current level:', currentLevel);
             currentState = 'win';
             winLossState = 'win';
             currentQuip = winQuips['level1']; // For now, hardcoded to level 1
@@ -2158,6 +2459,7 @@ GAME_HTML = """
         
         // Cut scene button functions
         function returnToTitle() {
+            console.log('returnToTitle called!');
             // Hide all cutscenes
             document.querySelectorAll('.win-loss-cutscene').forEach(cutscene => cutscene.classList.remove('active'));
             // Hide all comic panels
@@ -2166,6 +2468,7 @@ GAME_HTML = """
             document.getElementById('titleScreen').classList.add('active');
             currentState = 'title';
             currentPanel = 0;
+            console.log('returnToTitle completed!');
         }
         
         function retryLevel() {
@@ -2187,12 +2490,14 @@ GAME_HTML = """
         }
         
         function continueToNextLevel() {
+            console.log('continueToNextLevel called!');
             // Hide win cutscene
             document.getElementById('winCutscene').classList.remove('active');
             // Show victory comic panels
             currentState = 'victoryComic';
             currentVictoryPanel = 0;
             showVictoryPanel(0);
+            console.log('continueToNextLevel completed!');
         }
         
         function resetLevel() {
@@ -2220,6 +2525,8 @@ GAME_HTML = """
         }
         
         function startNewLevel() {
+            console.log('=== startNewLevel() called ===');
+            console.log('Current level before reset:', currentLevel);
             // Start a new level without resetting lives
             playerX = 13;
             playerY = 12;
@@ -2241,6 +2548,9 @@ GAME_HTML = """
             swingAnimationCounter = 0;
             lastPlayerX = 13;
             lastPlayerY = 12;
+            
+            // Don't reset currentLevel - it should persist for level progression
+            console.log('Current level after reset:', currentLevel);
         }
         
         function resetGame() {
@@ -2283,8 +2593,13 @@ GAME_HTML = """
                 nextVictoryPanel();
             } else if (currentState === 'gameplay') {
                 // Skip splash screen on click
-                if (level1State === 'splash') {
-                    level1State = 'gameplay';
+                const currentLevelState = currentLevel === 1 ? level1State : level2State;
+                if (currentLevelState === 'splash') {
+                    if (currentLevel === 1) {
+                        level1State = 'gameplay';
+                    } else {
+                        level2State = 'gameplay';
+                    }
                     initGameplay();
                 }
             } else if (currentState === 'win' || currentState === 'lose' || currentState === 'gameOver') {
@@ -2296,16 +2611,23 @@ GAME_HTML = """
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
-                if (currentState === 'comic') {
+                if (currentState === 'title') {
+                    startGame();
+                } else if (currentState === 'comic') {
                     nextPanel();
                 } else if (currentState === 'victoryComic') {
                     nextVictoryPanel();
-                } else if (currentState === 'title') {
-                    startGame();
-                } else if (currentState === 'gameplay' && level1State === 'splash') {
-                    // Skip splash screen
-                    level1State = 'gameplay';
-                    initGameplay();
+                } else if (currentState === 'gameplay') {
+                    const currentLevelState = currentLevel === 1 ? level1State : level2State;
+                    if (currentLevelState === 'splash') {
+                        // Skip splash screen
+                        if (currentLevel === 1) {
+                            level1State = 'gameplay';
+                        } else {
+                            level2State = 'gameplay';
+                        }
+                        initGameplay();
+                    }
                 }
             }
         });
@@ -2316,18 +2638,52 @@ GAME_HTML = """
         
         // Add event listener for start button
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM loaded, setting up start button...');
+            console.log('DOM loaded, setting up buttons...');
+            
+            // Start button
             const startButton = document.getElementById('startButton');
+            console.log('Looking for start button...', startButton);
             if (startButton) {
                 console.log('Start button found, adding click listener...');
                 startButton.addEventListener('click', function(e) {
+                    console.log('Start button clicked!');
                     e.preventDefault();
                     e.stopPropagation();
                     console.log('Start button clicked via event listener');
                     startGame();
                 });
+                console.log('Start button event listener added successfully');
             } else {
                 console.error('Start button not found!');
+            }
+            
+
+            
+            // Win cutscene buttons
+            const continueButton = document.getElementById('continueButton');
+            if (continueButton) {
+                console.log('Continue button found, adding click listener...');
+                continueButton.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Continue button clicked via event listener');
+                    continueToNextLevel();
+                });
+            } else {
+                console.error('Continue button not found!');
+            }
+            
+            const winExitButton = document.getElementById('winExitButton');
+            if (winExitButton) {
+                console.log('Win exit button found, adding click listener...');
+                winExitButton.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Win exit button clicked via event listener');
+                    returnToTitle();
+                });
+            } else {
+                console.error('Win exit button not found!');
             }
         });
     </script>
