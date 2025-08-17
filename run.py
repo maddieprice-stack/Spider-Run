@@ -1715,12 +1715,8 @@ GAME_HTML = """
             ctx.lineWidth = 3;
             ctx.font = 'bold 48px Comic Sans MS';
             ctx.textAlign = 'center';
-            ctx.strokeText('LEVEL 2', canvas.width/2, canvas.height/2 - 50);
-            ctx.fillText('LEVEL 2', canvas.width/2, canvas.height/2 - 50);
-            
-            ctx.font = 'bold 24px Comic Sans MS';
-            ctx.strokeText('TIMES SQUARE', canvas.width/2, canvas.height/2);
-            ctx.fillText('TIMES SQUARE', canvas.width/2, canvas.height/2);
+            ctx.strokeText('Level 2: Times Square', canvas.width/2, canvas.height/2 - 25);
+            ctx.fillText('Level 2: Times Square', canvas.width/2, canvas.height/2 - 25);
             
             ctx.font = '16px Comic Sans MS';
             ctx.fillStyle = '#ffffff';
@@ -1778,7 +1774,7 @@ GAME_HTML = """
             // Reset game state for Level 1
             dustCollected = 0;
             totalDust = 0;
-            lives = 3;
+            lives = 5; // Spider-Man starts with 5 lives on each level
             score = 0;
             webShooterActive = false;
             webShooterTimer = 0;
@@ -1900,6 +1896,7 @@ GAME_HTML = """
         
         function startLevel2() {
             console.log('=== startLevel2() called ===');
+            console.log('🔥🔥🔥 Starting Level 2 splash screen! 🔥🔥🔥');
             level2State = 'splash';
             currentLevel = 2;
             initLevel2();
@@ -1908,11 +1905,15 @@ GAME_HTML = """
             const canvas = document.getElementById('gameCanvas');
             const ctx = canvas.getContext('2d');
             
-            // Set canvas style for comic book look
+            console.log('🔥🔥🔥 Canvas found:', canvas);
+            console.log('🔥🔥🔥 Canvas dimensions:', canvas.width, 'x', canvas.height);
+            
+            // Make sure canvas is visible
+            canvas.style.display = 'block';
             canvas.style.border = '5px solid #000';
             canvas.style.boxShadow = '5px 5px 0px rgba(0,0,0,0.3)';
             
-            // Draw splash screen
+            // Draw splash screen background
             ctx.fillStyle = '#1a1a2e';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
@@ -1924,14 +1925,28 @@ GAME_HTML = """
             ctx.textAlign = 'center';
             
             const title = 'LEVEL 2: TIMES SQUARE';
+            console.log('🔥🔥🔥 Drawing title:', title);
             ctx.strokeText(title, canvas.width/2, 100);
             ctx.fillText(title, canvas.width/2, 100);
             
             // Draw Times Square background
             const bgImage = new Image();
             bgImage.onload = function() {
+                console.log('🔥🔥🔥 Times Square background image loaded!');
                 ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
                 // Redraw title over background
+                ctx.fillStyle = '#ffff00';
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 3;
+                ctx.font = 'bold 48px Comic Sans MS';
+                ctx.textAlign = 'center';
+                ctx.strokeText(title, canvas.width/2, 100);
+                ctx.fillText(title, canvas.width/2, 100);
+                console.log('🔥🔥🔥 Level 2 splash screen complete!');
+            };
+            bgImage.onerror = function() {
+                console.error('🔥🔥🔥 ERROR: Could not load Times Square background image!');
+                // Still show the title even if background fails
                 ctx.fillStyle = '#ffff00';
                 ctx.strokeStyle = '#000';
                 ctx.lineWidth = 3;
@@ -1942,7 +1957,9 @@ GAME_HTML = """
             };
             bgImage.src = '/static/Times Square Pixel.png';
             
+            console.log('🔥🔥🔥 Level 2 splash screen will show for 2 seconds...');
             setTimeout(() => {
+                console.log('🔥🔥🔥 Level 2 splash screen timeout - starting gameplay...');
                 level2State = 'gameplay';
                 initGameplay();
             }, 2000);
@@ -1954,7 +1971,7 @@ GAME_HTML = """
             // Reset game state for Level 2
             dustCollected = 0;
             totalDust = 0;
-            lives = 3;
+            lives = 5; // Spider-Man starts with 5 lives on each level
             score = 0;
             webShooterActive = false;
             webShooterTimer = 0;
@@ -2532,7 +2549,8 @@ GAME_HTML = """
             ctx.fillText(`Score: ${score}`, canvas.width/2 - tileSize * 2.5, hudY);
             
             // Level
-            ctx.fillText('Level 1: East Village', canvas.width - tileSize * 10, hudY);
+            const levelText = currentLevel === 1 ? 'Level 1: East Village' : 'Level 2: Times Square';
+            ctx.fillText(levelText, canvas.width - tileSize * 10, hudY);
             
             // Villain ability status
             const statusY = hudY + fontSize + 8;
