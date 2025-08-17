@@ -835,36 +835,23 @@ GAME_HTML = """
             "#########################"
         ];
         
-        // Level 2 map data - Times Square layout (27x28) based on design documents
+        // Level 2 map data - Times Square layout with proper spacing
         const level2Map = [
-            "###########################",
-            "#W........###...........W#",
-            "#.####.#.###.###.#.####.#",
-            "#T#  #.#.........#.#  #T#",
-            "#.#  #.#####-#####.#  #.#",
-            "#.#  #.#  V V V  #.#  #.#",
-            "#.#  #.# V     V #.#  #.#",
-            "#.#  #.#  V V V  #.#  #.#",
-            "#.#  #.#####-#####.#  #.#",
-            "#T#  #.#.........#.#  #T#",
-            "#.####.#.###.###.#.####.#",
-            "#W........###..........W#",
-            "#########  S  ###########",
-            "#...............T........#",
-            "#.####.#####.#####.####.#",
-            "#.#  #.#   #.#   #.#  #.#",
-            "#.#  #.# W #.# W #.#  #.#",
-            "#.#  #.#####.#####.#  #.#",
-            "#.#  #.............#  #.#",
-            "#.####.###.#.#.###.####.#",
-            "#.....T...#.#.#...T.....#",
-            "###.#####.#.#.#.#####.###",
-            "#...#   #.......#   #...#",
-            "#.#.# W ####### W #.#.#.#",
-            "#.#.#   #.....#   #.#.#.#",
-            "#.#.#####.#.#.#####.#.#.#",
-            "#T.......T.#.#.T.......T#",
-            "###########################"
+            "##############################",
+            "#W...........####...........W#",
+            "#.####.###...####...###.####.#",
+            "##.#....#.#...##...#.#....#.##",
+            "#.....##....######....##.....#",
+            "####..###..##....##..###..####",
+            "#########..###--###..#########",
+            "#########..#VVVVVV#..#########",
+            "#########..########..#########",
+            "####..###..##..S.##..###..####",
+            "#.....##....######....##.....#",
+            "##.#....#.#...##..#.#....#.##",
+            "#.####.###...####...###.####.#",
+            "#W...........####...........W#",
+            "##############################"
         ];
         
         // Function to process ASCII maze with flood-fill
@@ -891,9 +878,9 @@ GAME_HTML = """
             }
             
             // Add player spawn point to queue (if not already added)
-            const spawnKey = `${12},${13}`; // Player spawn position
-            if (!reachable.has(spawnKey) && isWalkable(grid[12][13])) {
-                queue.push([12, 13]);
+            const spawnKey = `${9},${15}`; // Player spawn position (row 9, column 15)
+            if (!reachable.has(spawnKey) && isWalkable(grid[9][15])) {
+                queue.push([9, 15]);
                 reachable.add(spawnKey);
             }
             
@@ -1446,8 +1433,8 @@ GAME_HTML = """
         // Initialize level 2 data
         function initLevel2() {
             console.log('=== initLevel2() called ===');
-            // Process the maze with flood-fill to close off enclosed spaces
-            const processedMap = processMazeWithFloodFill(level2Map);
+            // Use the original map without flood-fill to preserve all dust pellets
+            const processedMap = level2Map;
             
             dustPositions = [];
             webShooterPositions = [];
@@ -1991,7 +1978,7 @@ GAME_HTML = """
             
             // Initialize Level 2 map elements
             const currentMap = level2Map;
-            const processedMap = processMazeWithFloodFill(currentMap);
+            const processedMap = currentMap; // Use original map without flood-fill
             
             // Count total dust and place dust pellets
             for (let y = 0; y < processedMap.length; y++) {
@@ -2194,7 +2181,7 @@ GAME_HTML = """
             
             // Get processed map based on current level
             const currentMap = currentLevel === 1 ? level1Map : level2Map;
-            const processedMap = processMazeWithFloodFill(currentMap);
+            const processedMap = currentLevel === 1 ? processMazeWithFloodFill(currentMap) : currentMap;
             
             // Draw map elements
             for (let y = 0; y < processedMap.length; y++) {
@@ -2586,7 +2573,7 @@ GAME_HTML = """
             if (isRidingTaxi) return;
             
             const currentMap = currentLevel === 1 ? level1Map : level2Map;
-            const processedMap = processMazeWithFloodFill(currentMap);
+            const processedMap = currentLevel === 1 ? processMazeWithFloodFill(currentMap) : currentMap;
             const newX = playerX;
             const newY = playerY;
             
