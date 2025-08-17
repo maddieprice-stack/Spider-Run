@@ -935,22 +935,17 @@ GAME_HTML = """
         // Villain system
         let villains = [];
         let villainPen = { x: 13, y: 6 }; // Center of villain pen
-        let villainSpawns = [
-            { x: 12, y: 5 }, { x: 14, y: 5 },
-            { x: 11, y: 6 }, { x: 15, y: 6 },
-            { x: 12, y: 7 }, { x: 14, y: 7 },
-            { x: 13, y: 5 }, { x: 13, y: 7 }, // Additional spawns for more villains
-            { x: 11, y: 5 }, { x: 15, y: 5 },
-            { x: 12, y: 6 }, { x: 14, y: 6 }, // More spawns for 9 villains
-            { x: 11, y: 7 }, { x: 15, y: 7 }
-        ];
+        // Villain spawn positions - these will be set dynamically based on V positions in the map
+        let villainSpawns = [];
         
-        // Villain types for Level 1
+        // Villain types for both levels
         const villainTypes = [
             { name: 'Doc Ock', color: '#228B22', speed: 0.9, ability: 'alleyBlock' },
             { name: 'Green Goblin', color: '#32CD32', speed: 1.0, ability: 'pumpkinBomb' },
             { name: 'Vulture', color: '#006400', speed: 1.1, ability: 'windGust' },
-            { name: 'Venom', color: '#000000', speed: 1.1, ability: 'windGust' }
+            { name: 'Venom', color: '#000000', speed: 1.1, ability: 'windGust' },
+            { name: 'Mysterio', color: '#4B0082', speed: 0.8, ability: 'illusion' },
+            { name: 'Electro', color: '#FFD700', speed: 1.2, ability: 'lightning' }
         ];
         
         // Villain state
@@ -958,7 +953,9 @@ GAME_HTML = """
             alleyBlock: { active: false, timer: 0, cooldown: 720 }, // 12 seconds at 60fps
             pumpkinBomb: { active: false, timer: 0, cooldown: 720 },
             windGust: { active: false, timer: 0, cooldown: 720 },
-            darkTendrils: { active: false, timer: 0, cooldown: 720 } // Venom
+            darkTendrils: { active: false, timer: 0, cooldown: 720 }, // Venom
+            illusion: { active: false, timer: 0, cooldown: 720 }, // Mysterio
+            lightning: { active: false, timer: 0, cooldown: 720 } // Electro
         };
         
         let playerSlowed = false;
@@ -977,7 +974,9 @@ GAME_HTML = """
             'Doc Ock': null,
             'Green Goblin': null,
             'Vulture': null,
-            'Venom': null
+            'Venom': null,
+            'Mysterio': null,
+            'Electro': null
         };
         let villainSpritesLoaded = 0;
         
@@ -1131,13 +1130,19 @@ GAME_HTML = """
                 'Doc Ock': '/static/Doc_Oc.png',
                 'Green Goblin': '/static/Green_Goblin.png',
                 'Vulture': '/static/Vulture.png',
-                'Venom': '/static/Venom.png' // Now using actual Venom sprite
+                'Venom': '/static/Venom.png',
+                'Mysterio': '/static/Mysterio.png',
+                'Electro': '/static/Electro.png'
             };
             
             Object.keys(villainPaths).forEach(villainName => {
                 const img = new Image();
                 img.onload = function() {
                     villainSpritesLoaded++;
+                    console.log(`Loaded villain sprite: ${villainName}`);
+                };
+                img.onerror = function() {
+                    console.error(`Failed to load villain sprite: ${villainName}`);
                 };
                 img.src = villainPaths[villainName];
                 villainSprites[villainName] = img;
@@ -1148,10 +1153,36 @@ GAME_HTML = """
         function initVillains() {
             villains = [];
             
-            // Create 4 villains for Level 1
-            for (let i = 0; i < 4; i++) {
+            // Get current map to find V positions
+            const currentMap = currentLevel === 1 ? level1Map : level2Map;
+            
+            // Find all V positions in the map
+            villainSpawns = [];
+            for (let y = 0; y < currentMap.length; y++) {
+                for (let x = 0; x < currentMap[y].length; x++) {
+                    if (currentMap[y][x] === 'V') {
+                        villainSpawns.push({ x: x, y: y });
+                    }
+                }
+            }
+            
+            console.log(`Found ${villainSpawns.length} villain spawn positions:`, villainSpawns);
+            
+            // Level-specific villain selection
+            let levelVillainTypes;
+            if (currentLevel === 1) {
+                // Level 1: Only the original 4 villains
+                levelVillainTypes = villainTypes.slice(0, 4);
+            } else {
+                // Level 2: All 6 villains including Electro and Mysterio
+                levelVillainTypes = villainTypes;
+            }
+            
+            // Create villains based on level and available spawn positions
+            const numVillains = Math.min(levelVillainTypes.length, villainSpawns.length);
+            for (let i = 0; i < numVillains; i++) {
                 const spawn = villainSpawns[i];
-                const villainType = villainTypes[i];
+                const villainType = levelVillainTypes[i];
                 
                 villains.push({
                     x: spawn.x,
@@ -1169,6 +1200,8 @@ GAME_HTML = """
                     targetY: spawn.y
                 });
             }
+            
+            console.log(`Created ${villains.length} villains for Level ${currentLevel}:`, villains.map(v => v.type));
         }
         
         // Villain AI movement
@@ -1178,9 +1211,11 @@ GAME_HTML = """
                     villain.stunnedTimer--;
                     if (villain.stunnedTimer <= 0) {
                         villain.stunned = false;
-                        // Return to pen
-                        villain.x = villainPen.x;
-                        villain.y = villainPen.y;
+                        // Return to pen - use the first V position from current level
+                        if (villainSpawns.length > 0) {
+                            villain.x = villainSpawns[0].x;
+                            villain.y = villainSpawns[0].y;
+                        }
                     }
                     return;
                 }
@@ -1228,6 +1263,20 @@ GAME_HTML = """
                     villain.targetX = Math.floor(Math.random() * processedMap[0].length);
                     villain.targetY = Math.floor(Math.random() * processedMap.length);
                 }
+            } else if (villain.type === 'Electro') {
+                // Electro is fast and prefers open areas
+                villain.targetX = Math.floor(Math.random() * processedMap[0].length);
+                villain.targetY = Math.floor(Math.random() * processedMap.length);
+            } else if (villain.type === 'Mysterio') {
+                // Mysterio prefers to stay in the center areas
+                const centerX = Math.floor(processedMap[0].length / 2);
+                const centerY = Math.floor(processedMap.length / 2);
+                const radius = Math.min(centerX, centerY) / 2;
+                
+                villain.targetX = Math.floor(centerX + (Math.random() - 0.5) * radius * 2);
+                villain.targetY = Math.floor(centerY + (Math.random() - 0.5) * radius * 2);
+                
+                console.log(`Mysterio targeting: (${villain.targetX}, ${villain.targetY}) from center (${centerX}, ${centerY})`);
             } else {
                 // All other villains (Doc Ock, Vulture, Venom) can go anywhere
                 villain.targetX = Math.floor(Math.random() * processedMap[0].length);
@@ -1285,7 +1334,8 @@ GAME_HTML = """
         }
         
         function moveTowardsTarget(villain) {
-            const processedMap = processMazeWithFloodFill(level1Map);
+            const currentMap = currentLevel === 1 ? level1Map : level2Map;
+            const processedMap = currentLevel === 1 ? processMazeWithFloodFill(currentMap) : currentMap;
             
             // Find the best path to target using A* pathfinding
             const path = findPathToTarget(villain.x, villain.y, villain.targetX, villain.targetY, processedMap);
@@ -1303,8 +1353,15 @@ GAME_HTML = """
                 
                 villain.x = nextStep.x;
                 villain.y = nextStep.y;
+                
+                if (villain.type === 'Mysterio') {
+                    console.log(`Mysterio moved from (${villain.x}, ${villain.y}) to (${nextStep.x}, ${nextStep.y})`);
+                }
             } else {
                 // No path found or already at target, set new target
+                if (villain.type === 'Mysterio') {
+                    console.log(`Mysterio no path found, setting new target. Current: (${villain.x}, ${villain.y}), Target: (${villain.targetX}, ${villain.targetY})`);
+                }
                 setNewTarget(villain);
             }
         }
@@ -2521,8 +2578,14 @@ GAME_HTML = """
                             lives--;
                         }
                         
-                        playerX = 13; // Reset to spawn
-                        playerY = 12;
+                        // Reset to spawn based on current level
+                        if (currentLevel === 1) {
+                            playerX = 13; // Level 1 spawn position
+                            playerY = 12;
+                        } else {
+                            playerX = 15; // Level 2 spawn position (S in ASCII)
+                            playerY = 9;
+                        }
                     }
                 }
             });
