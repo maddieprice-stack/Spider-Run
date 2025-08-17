@@ -1056,13 +1056,30 @@ GAME_HTML = """
         let webImageLoaded = false;
         
         function loadWebImage() {
-            const webPath = '/static/webs.png';
+            const webPath = '/static/Web.png';
+            console.log('Loading web image from:', webPath);
             const img = new Image();
             img.onload = function() {
                 webImageLoaded = true;
+                webImage = img;
+                console.log('Web image loaded successfully! webImageLoaded:', webImageLoaded, 'webImage:', !!webImage);
+            };
+            img.onerror = function() {
+                console.error('Failed to load web image from:', webPath);
+                // Try fallback to webs.png
+                console.log('Trying fallback to webs.png...');
+                const fallbackImg = new Image();
+                fallbackImg.onload = function() {
+                    webImageLoaded = true;
+                    webImage = fallbackImg;
+                    console.log('Fallback web image loaded successfully!');
+                };
+                fallbackImg.onerror = function() {
+                    console.error('Failed to load fallback web image from /static/webs.png');
+                };
+                fallbackImg.src = '/static/webs.png';
             };
             img.src = webPath;
-            webImage = img;
         }
         
         // Load taxi Spider-Man sprite
@@ -1430,48 +1447,7 @@ GAME_HTML = """
             initBackgroundMusic();
         }
         
-        // Initialize level 2 data
-        function initLevel2() {
-            console.log('=== initLevel2() called ===');
-            // Use the original map without flood-fill to preserve all dust pellets
-            const processedMap = level2Map;
-            
-            dustPositions = [];
-            webShooterPositions = [];
-            taxiStopPositions = [];
-            
-            for (let y = 0; y < processedMap.length; y++) {
-                for (let x = 0; x < processedMap[y].length; x++) {
-                    const tile = processedMap[y][x];
-                    if (tile === '.') {
-                        dustPositions.push({x, y});
-                    } else if (tile === 'W') {
-                        webShooterPositions.push({x, y});
-                    } else if (tile === 'T') {
-                        // In Level 2, T represents Dimensional Fragments, not taxi stops
-                        // For now, treat them as collectible items like dust
-                        dustPositions.push({x, y});
-                    }
-                }
-            }
-            totalDust = dustPositions.length;
-            console.log('Level 2 initialized with', totalDust, 'collectible items');
-            
-            // Load building images
-            loadBuildingImages();
-            loadStreetImage();
-            loadTaxiImage();
-            loadWebImage();
-            loadTaxiSpiderManSprite();
-            loadSwingSpiderManSprites();
-            loadVillainSprites();
-            
-            // Initialize villains (will be added later)
-            // initVillains();
-            
-            // Initialize background music
-            initBackgroundMusic();
-        }
+
 
         // Audio effects (placeholder)
         function playPageFlipSound() {
@@ -2016,6 +1992,15 @@ GAME_HTML = """
             streetImageLoaded = false;
             streetImage = null;
             loadStreetImage();
+            
+            // Load web image and other sprites
+            loadWebImage();
+            loadTaxiSpiderManSprite();
+            loadSwingSpiderManSprites();
+            loadVillainSprites();
+            
+            // Initialize background music
+            initBackgroundMusic();
         }
         
         function initGameplay() {
@@ -2233,6 +2218,10 @@ GAME_HTML = """
                         if (webShooterExists) {
                             if (webImageLoaded && webImage) {
                                 ctx.drawImage(webImage, drawX, drawY, tileSize, tileSize);
+                                // Debug info for successful rendering
+                                if (x === 1 && y === 1) {
+                                    console.log('Web shooter at (1,1) - RENDERED WITH IMAGE!');
+                                }
                             } else {
                                 // Fallback to blue circle while image loads
                                 ctx.fillStyle = '#00bfff';
@@ -2242,6 +2231,10 @@ GAME_HTML = """
                                 ctx.strokeStyle = '#ffffff';
                                 ctx.lineWidth = 2;
                                 ctx.stroke();
+                                // Debug info
+                                if (x === 1 && y === 1) {
+                                    console.log('Web shooter at (1,1) - FALLBACK RENDERED - webImageLoaded:', webImageLoaded, 'webImage:', !!webImage);
+                                }
                             }
                         }
                     } else if (tile === 'T') {
