@@ -838,7 +838,7 @@ GAME_HTML = """
         // Level 2 map data - New Times Square layout with wraparound mechanics
         const level2Map = [
             "##############################",
-            "#W...........####...........W#",
+            "#W..........T####...........W#",
             "R.####.###...####...###.####.R",
             "#..#....#.#...##...#.#....#..#",
             "#.....##....#.##.#....##.....#",
@@ -846,7 +846,7 @@ GAME_HTML = """
             "#########..###EE###..#########",
             "#########..#VVVVVV#..#########",
             "#########..########..#########",
-            "####..###..##..S.##..###..####",
+            "####..###..##..S.##.T###..####",
             "#.....##....#.##.#....##.....#",
             "#..#....#.#...##...#.#....#..#",
             "R.####.###...####...###.####.R",
@@ -1042,13 +1042,18 @@ GAME_HTML = """
         let taxiImageLoaded = false;
         
         function loadTaxiImage() {
-            const taxiPath = '/static/taxi.png';
+            const taxiPath = '/static/Taxi.png';
+            console.log('Loading taxi image from:', taxiPath);
             const img = new Image();
             img.onload = function() {
                 taxiImageLoaded = true;
+                taxiImage = img;
+                console.log('Taxi image loaded successfully! taxiImageLoaded:', taxiImageLoaded, 'taxiImage:', !!taxiImage);
+            };
+            img.onerror = function() {
+                console.error('Failed to load taxi image from:', taxiPath);
             };
             img.src = taxiPath;
-            taxiImage = img;
         }
         
         // Load web image
@@ -1203,7 +1208,8 @@ GAME_HTML = """
         }
         
         function setNewTarget(villain) {
-            const processedMap = processMazeWithFloodFill(level1Map);
+            const currentMap = currentLevel === 1 ? level1Map : level2Map;
+            const processedMap = currentLevel === 1 ? processMazeWithFloodFill(currentMap) : currentMap;
             
             // All villains can move freely - just pick random valid positions
             // Different villains have slight preferences but can go anywhere
@@ -1966,9 +1972,9 @@ GAME_HTML = """
                     } else if (tile === 'W') {
                         webShooterPositions.push({x: x, y: y});
                     } else if (tile === 'T') {
-                        // In Level 2, T represents Dimensional Fragments (not taxi stops)
-                        dustPositions.push({x: x, y: y});
-                        totalDust++;
+                        // In Level 2, T represents Taxi stops (not dimensional fragments)
+                        taxiStopPositions.push({x: x, y: y});
+                        console.log(`Added taxi stop at (${x}, ${y})`);
                     } else if (tile === 'V') {
                         villainPositions.push({x: x, y: y, type: 'villain'});
                     }
@@ -1995,9 +2001,13 @@ GAME_HTML = """
             
             // Load web image and other sprites
             loadWebImage();
+            loadTaxiImage();
             loadTaxiSpiderManSprite();
             loadSwingSpiderManSprites();
             loadVillainSprites();
+            
+            // Initialize villains for Level 2
+            initVillains();
             
             // Initialize background music
             initBackgroundMusic();
@@ -2257,24 +2267,25 @@ GAME_HTML = """
                                 }
                             }
                         } else {
-                            // Level 2: Draw Dimensional Fragment (rainbow crystal shard)
-                            const fragmentExists = dustPositions.some(dust => dust.x === x && dust.y === y);
-                            if (fragmentExists) {
-                                // Draw rainbow crystal shard effect
-                                ctx.fillStyle = '#ff00ff'; // Magenta base
-                                ctx.beginPath();
-                                ctx.arc(drawX + tileSize/2, drawY + tileSize/2, 6, 0, 2 * Math.PI);
-                                ctx.fill();
-                                ctx.strokeStyle = '#00ffff'; // Cyan outline
-                                ctx.lineWidth = 2;
-                                ctx.stroke();
-                                // Add rainbow glow effect
-                                ctx.shadowColor = '#ff00ff';
-                                ctx.shadowBlur = 8;
-                                ctx.beginPath();
-                                ctx.arc(drawX + tileSize/2, drawY + tileSize/2, 4, 0, 2 * Math.PI);
-                                ctx.fill();
-                                ctx.shadowBlur = 0;
+                            // Level 2: Draw Taxi stop (only if not riding and taxi still exists)
+                            if (!isRidingTaxi) {
+                                // Check if this taxi position still exists in taxiStopPositions
+                                const taxiExists = taxiStopPositions.some(taxi => taxi.x === x && taxi.y === y);
+                                if (taxiExists) {
+                                    console.log(`Drawing taxi at (${x}, ${y}) - taxiImageLoaded: ${taxiImageLoaded}, taxiImage: ${!!taxiImage}, currentLevel: ${currentLevel}`);
+                                    if (taxiImageLoaded && taxiImage) {
+                                        console.log(`Drawing Taxi.png image at (${drawX}, ${drawY})`);
+                                        ctx.drawImage(taxiImage, drawX, drawY, tileSize, tileSize);
+                                    } else {
+                                        console.log(`Drawing yellow fallback square at (${drawX}, ${drawY})`);
+                                        // Fallback to yellow square while image loads
+                                        ctx.fillStyle = '#ffff00';
+                                        ctx.fillRect(drawX + 2, drawY + 2, tileSize - 4, tileSize - 4);
+                                        ctx.strokeStyle = '#000';
+                                        ctx.lineWidth = 1;
+                                        ctx.strokeRect(drawX + 2, drawY + 2, tileSize - 4, tileSize - 4);
+                                    }
+                                }
                             }
                         }
                     }
@@ -2677,7 +2688,16 @@ GAME_HTML = """
                 isRidingTaxi = true;
                 taxiX = playerX;
                 taxiY = playerY;
-                taxiDirection = playerDirection;
+                
+                // Set specific taxi direction based on level and position
+                if (currentLevel === 2 && playerX === 12 && playerY === 1) {
+                    // Level 2 left-side taxi (top) - always go left
+                    taxiDirection = 'left';
+                } else {
+                    // All other taxis: Use player direction
+                    taxiDirection = playerDirection;
+                }
+                
                 taxiMoveTimer = 0;
                 score += 25;
                 
@@ -2694,7 +2714,7 @@ GAME_HTML = """
             if (taxiMoveTimer >= 1) {
                 taxiMoveTimer = 0;
                 
-                const processedMap = processMazeWithFloodFill(level1Map);
+                const processedMap = currentLevel === 1 ? processMazeWithFloodFill(level1Map) : level2Map;
                 let newTaxiX = taxiX;
                 let newTaxiY = taxiY;
                 
