@@ -59,7 +59,7 @@ GAME_HTML = """
             left: 0;
             width: 100vw;
             height: 100vh;
-            background: url('/static/Times Square 1.png') no-repeat center center;
+            background: url('/static/New York Comic.webp') no-repeat center center;
             background-size: cover;
             display: none;
             flex-direction: column;
@@ -78,13 +78,13 @@ GAME_HTML = """
             left: 0;
             width: 100vw;
             height: 100vh;
-            background: url('/static/Times Square 3.png') no-repeat center center;
+            background: url('/static/Times%20Square%203.png') no-repeat center center;
             background-size: cover;
             display: none;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            z-index: 10;
+            z-index: 1100; /* Higher than win cutscene */
         }
 
         .victory-panel.active {
@@ -144,7 +144,7 @@ GAME_HTML = """
             width: 300px;
             height: 300px;
             margin: 20px auto;
-            background: url('/static/Spider-man victory scene 1.png') no-repeat center center;
+            background: url('/static/Spider-man%20victory%20scene%201.png') no-repeat center center;
             background-size: contain;
             image-rendering: pixelated;
             image-rendering: -moz-crisp-edges;
@@ -157,7 +157,7 @@ GAME_HTML = """
             width: 300px;
             height: 300px;
             margin: 20px auto;
-            background: url('/static/Dr. Strange Times Square.png') no-repeat center center;
+            background: url('/static/Dr.%20Strange%20Times%20Square.png') no-repeat center center;
             background-size: contain;
             image-rendering: pixelated;
             image-rendering: -moz-crisp-edges;
@@ -545,6 +545,7 @@ GAME_HTML = """
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
             position: relative;
             z-index: 10;
+            pointer-events: auto;
         }
         
         .cutscene-button:hover {
@@ -559,6 +560,46 @@ GAME_HTML = """
         
         .cutscene-button.retry:hover {
             background: #e55a2b;
+        }
+        
+        .cutscene-button.continue {
+            background: #28a745;
+        }
+        
+        .cutscene-button.continue:hover {
+            background: #218838;
+        }
+        
+        .click-prompt {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+        
+        .click-anywhere-prompt {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            animation: pulse 2s infinite;
+            pointer-events: none; /* Ensure clicks pass through to parent */
         }
     </style>
 </head>
@@ -655,50 +696,37 @@ GAME_HTML = """
         </div>
 
         <!-- Post-Level 1 Victory Comic Panels -->
-        <div id="victoryPanel0" class="victory-panel">
+        <div id="victoryPanel0" class="victory-panel" onclick="nextVictoryPanel()">
             <div class="panel-content">
                 <div class="dr-strange-times-square"></div>
                 <div class="speech-bubble">
-                    Excellent work, Spider-Man! The East Village is clean!
+                    Excellent work, Spider-Man. The East Village is safe — for now.
                 </div>
+                <div class="click-prompt">Click to continue</div>
             </div>
         </div>
 
-        <div id="victoryPanel1" class="victory-panel">
-            <div class="panel-content">
-                <div class="dr-strange-times-square"></div>
-                <div class="speech-bubble">
-                    But the space dust has spread to Times Square! We need to act fast!
-                </div>
-            </div>
-        </div>
-
-        <div id="victoryPanel2" class="victory-panel">
+        <div id="victoryPanel1" class="victory-panel" onclick="nextVictoryPanel()">
             <div class="panel-content">
                 <div class="spider-man-victory-scene"></div>
                 <div class="speech-bubble">
-                    Times Square? That's going to be a lot more crowded with villains...
+                    Glad I could help. Got any other cosmic chores for me to run while I'm at it?
                 </div>
+                <div class="click-prompt">Click to continue</div>
             </div>
         </div>
 
-        <div id="victoryPanel3" class="victory-panel">
+        <div id="victoryPanel2" class="victory-panel" onclick="nextVictoryPanel()">
             <div class="panel-content">
                 <div class="dr-strange-times-square"></div>
                 <div class="speech-bubble">
-                    The stakes are higher now, Spider-Man. Can you handle Times Square?
+                    The dust has spread to Times Square. You must head there next — before chaos erupts.
                 </div>
+                <div class="click-prompt">Click to continue</div>
             </div>
         </div>
 
-        <div id="victoryPanel4" class="victory-panel">
-            <div class="panel-content">
-                <div class="spider-man-victory-scene"></div>
-                <div class="speech-bubble">
-                    I'll try my best...
-                </div>
-            </div>
-        </div>
+
 
         <!-- Game Canvas -->
         <canvas id="gameCanvas" width="800" height="600"></canvas>
@@ -711,18 +739,7 @@ GAME_HTML = """
         <!-- Page Flip Effect -->
         <div id="pageFlip" class="page-flip"></div>
         
-        <!-- Win/Loss Cut Scenes -->
-        <div id="winCutscene" class="win-loss-cutscene">
-            <div class="cutscene-panel">
-                <div class="win-text">LEVEL COMPLETE!</div>
-                <div class="spider-man-victory"></div>
-                <div class="quip-bubble" id="winQuip"></div>
-                <div class="cutscene-buttons">
-                    <button class="cutscene-button retry" id="continueButton">CONTINUE</button>
-                    <button class="cutscene-button" id="winExitButton">EXIT</button>
-                </div>
-            </div>
-        </div>
+        <!-- Win/Loss Cut Scenes (win cut scene removed) -->
         
         <div id="loseCutscene" class="win-loss-cutscene">
             <div class="cutscene-panel">
@@ -755,7 +772,7 @@ GAME_HTML = """
         let currentPanel = 0;
         const totalPanels = 7;
         let currentVictoryPanel = 0;
-        const totalVictoryPanels = 5;
+        const totalVictoryPanels = 3;
         
         // Level 1 game variables
         let level1State = 'intro'; // intro, splash, gameplay, win, lose
@@ -1545,13 +1562,56 @@ GAME_HTML = """
         }
         
         function showVictoryPanel(panelNumber) {
+            console.log('🔥🔥🔥 === showVictoryPanel() called with panel:', panelNumber, '=== 🔥🔥🔥');
+            console.log('🔥 Current state:', currentState);
+            console.log('🔥 Current victory panel:', currentVictoryPanel);
+            
             // Hide all panels including title screen
-            document.querySelectorAll('.comic-panel, .victory-panel, #titleScreen').forEach(panel => {
+            console.log('🔥 Hiding all panels...');
+            const allPanels = document.querySelectorAll('.comic-panel, .victory-panel, #titleScreen');
+            console.log('🔥 Found panels to hide:', allPanels.length);
+            allPanels.forEach((panel, index) => {
+                console.log(`🔥 Hiding panel ${index}:`, panel.id || panel.className);
                 panel.classList.remove('active');
             });
 
             // Show new victory panel
-            document.getElementById(`victoryPanel${panelNumber}`).classList.add('active');
+            const targetPanel = document.getElementById(`victoryPanel${panelNumber}`);
+            console.log('🔥 Target victory panel element:', targetPanel);
+            console.log('🔥 Target panel ID:', `victoryPanel${panelNumber}`);
+            
+            if (targetPanel) {
+                console.log('🔥 Adding active class to victory panel...');
+                targetPanel.classList.add('active');
+                console.log('🔥 Victory panel now has active class:', targetPanel.classList.contains('active'));
+                
+                // FORCE show the victory panel with explicit styles
+                targetPanel.style.display = 'flex';
+                targetPanel.style.zIndex = '9999';
+                targetPanel.style.position = 'fixed';
+                targetPanel.style.top = '0';
+                targetPanel.style.left = '0';
+                targetPanel.style.width = '100vw';
+                targetPanel.style.height = '100vh';
+                targetPanel.style.visibility = 'visible';
+                targetPanel.style.opacity = '1';
+                
+                console.log('🔥 Victory panel styles FORCE-applied with maximum priority');
+                console.log('🔥 Panel display after force:', getComputedStyle(targetPanel).display);
+                console.log('🔥 Panel visibility after force:', getComputedStyle(targetPanel).visibility);
+                console.log('🔥 Panel z-index after force:', getComputedStyle(targetPanel).zIndex);
+                
+                // Double-check that title screen is still hidden
+                const titleScreen = document.getElementById('titleScreen');
+                if (titleScreen && (titleScreen.classList.contains('active') || getComputedStyle(titleScreen).display !== 'none')) {
+                    console.error('🔥 WARNING: Title screen is still visible! Force hiding it again...');
+                    titleScreen.classList.remove('active');
+                    titleScreen.style.display = 'none';
+                }
+            } else {
+                console.error('🔥 ERROR: Target victory panel not found!');
+                alert(`ERROR: Victory panel victoryPanel${panelNumber} not found!`);
+            }
         }
         
         function nextVictoryPanel() {
@@ -1566,27 +1626,82 @@ GAME_HTML = """
                 currentVictoryPanel++;
                 showVictoryPanel(currentVictoryPanel);
             } else if (currentState === 'victoryComic' && currentVictoryPanel === totalVictoryPanels - 1) {
-                console.log('Last victory panel reached, starting next level...');
-                // End of victory comic, start next level
-                startNextLevel();
+                console.log('Last victory panel reached, showing Level 2 splash...');
+                // End of victory comic, show Level 2 splash screen without resetting anything
+                showLevel2Splash();
             } else {
                 console.log('No condition met - currentVictoryPanel:', currentVictoryPanel, 'totalVictoryPanels:', totalVictoryPanels);
             }
         }
         
-        function startNextLevel() {
-            console.log('=== startNextLevel() called ===');
-            console.log('Current level before:', currentLevel);
+        function showLevel2Splash() {
+            console.log('=== showLevel2Splash() called ===');
+            console.log('Current level before splash:', currentLevel);
             
-            // Determine which level to start next
-            if (currentLevel === 1) {
-                console.log('Starting Level 2...');
-                currentLevel = 2; // Set to Level 2
-                startLevel2();
-            } else {
-                console.log('Starting Level 1 (fallback)...');
-                currentLevel = 1; // Set to Level 1
-                startLevel1(); // Fallback or loop back to level 1
+            // Hide all victory panels
+            document.querySelectorAll('.victory-panel').forEach(panel => panel.classList.remove('active'));
+            
+            // Set up for Level 2 but don't reset anything
+            currentLevel = 2;
+            currentState = 'level2Splash';
+            
+            // Show Level 2 splash screen on canvas
+            const canvas = document.getElementById('gameCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Set canvas style for comic book look
+            canvas.style.display = 'block';
+            canvas.style.border = '5px solid #000';
+            canvas.style.boxShadow = '5px 5px 0px rgba(0,0,0,0.3)';
+            
+            // Draw splash screen
+            ctx.fillStyle = '#1a1a2e';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw comic-style title
+            ctx.fillStyle = '#ffff00';
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 3;
+            ctx.font = 'bold 48px Comic Sans MS';
+            ctx.textAlign = 'center';
+            ctx.strokeText('LEVEL 2', canvas.width/2, canvas.height/2 - 50);
+            ctx.fillText('LEVEL 2', canvas.width/2, canvas.height/2 - 50);
+            
+            ctx.font = 'bold 24px Comic Sans MS';
+            ctx.strokeText('TIMES SQUARE', canvas.width/2, canvas.height/2);
+            ctx.fillText('TIMES SQUARE', canvas.width/2, canvas.height/2);
+            
+            ctx.font = '16px Comic Sans MS';
+            ctx.fillStyle = '#ffffff';
+            ctx.fillText('Press SPACE to start', canvas.width/2, canvas.height/2 + 50);
+            
+            console.log('Level 2 splash screen displayed - NO RESET CALLED');
+            
+            // Add keyboard listener for starting level 2 gameplay
+            document.addEventListener('keydown', function level2Start(event) {
+                if (event.code === 'Space' && currentState === 'level2Splash') {
+                    document.removeEventListener('keydown', level2Start);
+                    startLevel2Gameplay();
+                }
+            });
+        }
+        
+        function startLevel2Gameplay() {
+            console.log('=== startLevel2Gameplay() called ===');
+            console.log('Starting Level 2 gameplay without resetting...');
+            
+            // Initialize Level 2 without resetting player progress
+            currentState = 'gameplay';
+            level2State = 'gameplay';
+            
+            // Set up Level 2 specific data
+            initLevel2();
+            
+            // Start the game loop
+            if (!gameLoop) {
+                gameLoop = setInterval(updateGame, 1000/60); // 60 FPS
+                // Add keyboard controls
+                document.addEventListener('keydown', handleKeyPress);
             }
         }
 
@@ -1711,6 +1826,9 @@ GAME_HTML = """
             canvas = document.getElementById('gameCanvas');
             ctx = canvas.getContext('2d');
             
+            // Show canvas
+            canvas.style.display = 'block';
+            
             // Get current level map
             const currentMap = currentLevel === 1 ? level1Map : level2Map;
             
@@ -1735,11 +1853,17 @@ GAME_HTML = """
             // Add keyboard controls
             document.addEventListener('keydown', handleKeyPress);
             
+            // Ensure canvas doesn't interfere with UI overlays
+            if (canvas) {
+                canvas.style.pointerEvents = 'none';
+            }
+            
             // Start background music
             startBackgroundMusic();
         }
         
         function updateGame() {
+            if (currentState !== 'gameplay') return;
             const currentLevelState = currentLevel === 1 ? level1State : level2State;
             if (currentLevelState !== 'gameplay') return;
             
@@ -1780,18 +1904,28 @@ GAME_HTML = """
             
             // Check win condition
             if (dustCollected >= totalDust) {
+                console.log('🔥🔥🔥 WIN CONDITION TRIGGERED! 🔥🔥🔥');
+                console.log('🔥 Dust collected:', dustCollected);
+                console.log('🔥 Total dust:', totalDust);
+                console.log('🔥 Lives remaining:', lives);
+                console.log('🔥 Calling continueToNextLevel() directly (skip win screen)...');
                 if (currentLevel === 1) {
                     level1State = 'win';
                 } else {
                     level2State = 'win';
                 }
                 clearInterval(gameLoop);
-                showWinScreen();
+                continueToNextLevel();
                 return;
             }
             
             // Check lose condition
             if (lives <= 0) {
+                console.log('🔥🔥🔥 LOSE CONDITION TRIGGERED! 🔥🔥🔥');
+                console.log('🔥 Lives:', lives);
+                console.log('🔥 Dust collected:', dustCollected);
+                console.log('🔥 Total dust:', totalDust);
+                console.log('🔥 Calling showGameOverScreen()...');
                 if (currentLevel === 1) {
                     level1State = 'lose';
                 } else {
@@ -1807,6 +1941,11 @@ GAME_HTML = """
         
         function renderGame() {
             if (!ctx) return;
+            
+            // Don't render game when win/lose screens are active
+            if (currentState === 'win' || currentState === 'lose' || currentState === 'gameOver') {
+                return;
+            }
             
             const tileSize = window.gameTileSize || 30;
             
@@ -2411,20 +2550,9 @@ GAME_HTML = """
         ];
         
         function showWinScreen() {
-            console.log('=== showWinScreen() called ===');
-            console.log('Current level:', currentLevel);
-            currentState = 'win';
-            winLossState = 'win';
-            currentQuip = winQuips['level1']; // For now, hardcoded to level 1
-            quipTimer = 0;
-            
-            // Stop background music
-            stopBackgroundMusic();
-            
-            // Hide all panels and show win cutscene
-            document.querySelectorAll('.comic-panel').forEach(panel => panel.classList.remove('active'));
-            document.getElementById('winCutscene').classList.add('active');
-            document.getElementById('winQuip').textContent = currentQuip;
+            console.log('🔥🔥🔥 === showWinScreen() called (win cutscene removed) === 🔥🔥🔥');
+            // Skip win cutscene entirely and go straight to victory comic
+            continueToNextLevel();
         }
         
         function showLoseScreen() {
@@ -2443,31 +2571,76 @@ GAME_HTML = """
         }
         
         function showGameOverScreen() {
+            console.log('🔥🔥🔥 === showGameOverScreen() called === 🔥🔥🔥');
+            console.log('🔥 Current state before:', currentState);
+            console.log('🔥 Win/Loss state before:', winLossState);
+            
             currentState = 'gameOver';
             winLossState = 'gameOver';
             currentQuip = lossQuips[Math.floor(Math.random() * lossQuips.length)];
             quipTimer = 0;
             
+            console.log('🔥 State set to:', currentState);
+            console.log('🔥 Win/Loss state set to:', winLossState);
+            
             // Stop background music
             stopBackgroundMusic();
             
             // Hide all panels and show game over cutscene
+            console.log('🔥 Hiding all comic panels...');
             document.querySelectorAll('.comic-panel').forEach(panel => panel.classList.remove('active'));
-            document.getElementById('gameOverCutscene').classList.add('active');
+            
+            console.log('🔥 SHOWING GAME OVER CUTSCENE...');
+            const winElement = document.getElementById('winCutscene');
+            const loseElement = document.getElementById('loseCutscene');
+            const gameOverElement = document.getElementById('gameOverCutscene');
+            
+            // Make sure other cutscenes are hidden
+            if (winElement) {
+                winElement.classList.remove('active');
+                console.log('🔥 Win cutscene hidden');
+            }
+            if (loseElement) {
+                loseElement.classList.remove('active');
+                console.log('🔥 Lose cutscene hidden');
+            }
+            
+            if (gameOverElement) {
+                gameOverElement.classList.add('active');
+                console.log('🔥 Game over cutscene shown');
+            }
+            
             document.getElementById('gameOverQuip').textContent = currentQuip;
+            console.log('🔥 Game over quip set to:', currentQuip);
         }
         
         // Cut scene button functions
         function returnToTitle() {
             console.log('returnToTitle called!');
+            // Reset the entire game state
+            resetGame();
+            
             // Hide all cutscenes
             document.querySelectorAll('.win-loss-cutscene').forEach(cutscene => cutscene.classList.remove('active'));
             // Hide all comic panels
-            document.querySelectorAll('.comic-panel').forEach(panel => panel.classList.remove('active'));
+            document.querySelectorAll('.comic-panel, .victory-panel').forEach(panel => panel.classList.remove('active'));
             // Show title screen
             document.getElementById('titleScreen').classList.add('active');
-            currentState = 'title';
-            currentPanel = 0;
+            
+            // Stop any running game loop
+            if (gameLoop) {
+                clearInterval(gameLoop);
+                gameLoop = null;
+            }
+            
+            // Stop background music
+            stopBackgroundMusic();
+            
+            // Hide canvas if it exists
+            if (canvas) {
+                canvas.style.display = 'none';
+            }
+            
             console.log('returnToTitle completed!');
         }
         
@@ -2490,17 +2663,58 @@ GAME_HTML = """
         }
         
         function continueToNextLevel() {
-            console.log('continueToNextLevel called!');
-            // Hide win cutscene
-            document.getElementById('winCutscene').classList.remove('active');
+            console.log('🔥🔥🔥 === continueToNextLevel() called === 🔥🔥🔥');
+            console.log('🔥 Current state before:', currentState);
+            console.log('🔥 Current victory panel:', currentVictoryPanel);
+            console.log('🔥 Win cutscene element:', document.getElementById('winCutscene'));
+            console.log('🔥 VictoryPanel0 element:', document.getElementById('victoryPanel0'));
+            
+            // CRITICAL: Hide ALL screens first
+            console.log('🔥 HIDING ALL SCREENS FIRST...');
+            
+            // Hide title screen explicitly
+            const titleScreen = document.getElementById('titleScreen');
+            if (titleScreen) {
+                titleScreen.classList.remove('active');
+                titleScreen.style.display = 'none';
+                console.log('🔥 Title screen hidden');
+            }
+            
+            // Hide all cutscenes
+            document.querySelectorAll('.win-loss-cutscene').forEach(cutscene => {
+                cutscene.classList.remove('active');
+                cutscene.style.display = 'none';
+                console.log('🔥 Cutscene hidden:', cutscene.id);
+            });
+            
+            // Hide all comic panels
+            document.querySelectorAll('.comic-panel').forEach(panel => {
+                panel.classList.remove('active');
+                panel.style.display = 'none';
+                console.log('🔥 Comic panel hidden:', panel.id);
+            });
+            
+            // Hide canvas
+            const canvas = document.getElementById('gameCanvas');
+            if (canvas) {
+                canvas.style.display = 'none';
+                console.log('🔥 Canvas hidden');
+            }
+            
             // Show victory comic panels
+            console.log('🔥 Setting state to victoryComic...');
             currentState = 'victoryComic';
             currentVictoryPanel = 0;
+            console.log('🔥 State changed to:', currentState);
+            console.log('🔥 Victory panel set to:', currentVictoryPanel);
+            
+            console.log('🔥 Calling showVictoryPanel(0)...');
             showVictoryPanel(0);
-            console.log('continueToNextLevel completed!');
+            console.log('🔥🔥🔥 === continueToNextLevel() completed === 🔥🔥🔥');
         }
         
         function resetLevel() {
+            console.log('=== resetLevel() called ===');
             // Reset level-specific variables
             playerX = 13;
             playerY = 12;
@@ -2522,6 +2736,17 @@ GAME_HTML = """
             swingAnimationCounter = 0;
             lastPlayerX = 13;
             lastPlayerY = 12;
+            
+            // Reset level data (will be re-initialized when level starts)
+            dustPositions = [];
+            webShooterPositions = [];
+            taxiStopPositions = [];
+            totalDust = 0;
+            
+            // Reset villains
+            villains = [];
+            
+            console.log('Level completely reset');
         }
         
         function startNewLevel() {
@@ -2554,10 +2779,32 @@ GAME_HTML = """
         }
         
         function resetGame() {
+            console.log('=== resetGame() called ===');
             // Reset all game variables
             resetLevel();
+            
+            // Reset level 2 state
+            level2State = 'intro';
+            currentLevel = 1;
+            
+            // Reset victory comic state
+            currentVictoryPanel = 0;
+            
+            // Reset game state
             currentState = 'title';
             currentPanel = 0;
+            
+            // Reset villain abilities
+            Object.keys(villainAbilities).forEach(ability => {
+                villainAbilities[ability].active = false;
+                villainAbilities[ability].timer = 0;
+            });
+            
+            // Reset player effects
+            playerSlowed = false;
+            playerSlowTimer = 0;
+            
+            console.log('Game completely reset to initial state');
         }
 
         // Handle window resize
@@ -2636,6 +2883,106 @@ GAME_HTML = """
         console.log('Spider-Run game loaded!');
         console.log('Click to advance through comic panels');
         
+        // TEMPORARY DEBUG: Force win screen for testing
+        function debugForceWin() {
+            console.log('=== DEBUG: Forcing win screen ===');
+            
+            // Stop any running game loop that might interfere
+            if (gameLoop) {
+                clearInterval(gameLoop);
+                gameLoop = null;
+                console.log('Game loop stopped');
+            }
+            
+            // Set states
+            currentState = 'win';
+            winLossState = 'win';
+            level1State = 'win';
+            currentQuip = winQuips['level1'];
+            quipTimer = 0;
+            
+            // Stop background music
+            stopBackgroundMusic();
+            
+            // Hide all other elements
+            document.querySelectorAll('.comic-panel, .victory-panel').forEach(panel => panel.classList.remove('active'));
+            document.getElementById('titleScreen').classList.remove('active');
+            
+            // Show win cutscene
+            const winCutscene = document.getElementById('winCutscene');
+            console.log('🔥 SHOWING WIN CUTSCENE (FORCE WIN)...');
+            winCutscene.classList.add('active');
+            console.log('🔥 Win cutscene active class added (force):', winCutscene.classList.contains('active'));
+            document.getElementById('winQuip').textContent = currentQuip;
+            
+            console.log('Win screen forced - currentState:', currentState);
+            console.log('Win cutscene active:', winCutscene.classList.contains('active'));
+            console.log('Win screen should now be visible and persistent');
+        }
+        
+        // Add debug functions to window for console access
+        window.debugForceWin = debugForceWin;
+        
+        // Debug function to check current screen state
+        function debugCheckCurrentScreen() {
+            console.log('🔥🔥🔥 === CURRENT SCREEN DEBUG === 🔥🔥🔥');
+            console.log('🔥 Current state:', currentState);
+            console.log('🔥 Win/Loss state:', winLossState);
+            console.log('🔥 Current level:', currentLevel);
+            console.log('🔥 Lives:', lives);
+            console.log('🔥 Dust collected:', dustCollected);
+            console.log('🔥 Total dust:', totalDust);
+            
+            const winElement = document.getElementById('winCutscene');
+            const loseElement = document.getElementById('loseCutscene');
+            const gameOverElement = document.getElementById('gameOverCutscene');
+            
+            console.log('🔥 --- CUTSCENE ELEMENTS ---');
+            console.log('🔥 Win cutscene exists:', !!winElement);
+            console.log('🔥 Win cutscene active:', winElement?.classList.contains('active'));
+            console.log('🔥 Win cutscene visible:', winElement ? getComputedStyle(winElement).display !== 'none' : false);
+            
+            console.log('🔥 Lose cutscene exists:', !!loseElement);
+            console.log('🔥 Lose cutscene active:', loseElement?.classList.contains('active'));
+            console.log('🔥 Lose cutscene visible:', loseElement ? getComputedStyle(loseElement).display !== 'none' : false);
+            
+            console.log('🔥 Game over cutscene exists:', !!gameOverElement);
+            console.log('🔥 Game over cutscene active:', gameOverElement?.classList.contains('active'));
+            console.log('🔥 Game over cutscene visible:', gameOverElement ? getComputedStyle(gameOverElement).display !== 'none' : false);
+            
+            console.log('🔥 --- BUTTON CHECK ---');
+            const buttons = document.querySelectorAll('.cutscene-button');
+            buttons.forEach((button, index) => {
+                if (button.offsetParent !== null) { // Check if button is visible
+                    console.log(`🔥 Visible button ${index}:`, button.textContent, 'onclick:', button.getAttribute('onclick'));
+                }
+            });
+            console.log('🔥🔥🔥 === END SCREEN DEBUG === 🔥🔥🔥');
+        }
+        
+        window.debugCheckCurrentScreen = debugCheckCurrentScreen;
+        
+        // TEMPORARY DEBUG: Test continue function
+        function testContinue() {
+            console.log('=== TEST: testContinue() called ===');
+            alert('Continue function is accessible!');
+            continueToNextLevel();
+        }
+        window.testContinue = testContinue;
+        
+        // TEMPORARY DEBUG: Check what's currently visible
+        function debugCheckVisible() {
+            console.log('=== DEBUG: Checking visible elements ===');
+            console.log('Title screen active:', document.getElementById('titleScreen').classList.contains('active'));
+            console.log('Win cutscene active:', document.getElementById('winCutscene').classList.contains('active'));
+            console.log('Lose cutscene active:', document.getElementById('loseCutscene').classList.contains('active'));
+            console.log('Game over cutscene active:', document.getElementById('gameOverCutscene').classList.contains('active'));
+            console.log('Current state:', currentState);
+            console.log('Level 1 state:', level1State);
+            console.log('Win/Loss state:', winLossState);
+        }
+        window.debugCheckVisible = debugCheckVisible;
+        
         // Add event listener for start button
         document.addEventListener('DOMContentLoaded', function() {
             console.log('DOM loaded, setting up buttons...');
@@ -2659,32 +3006,7 @@ GAME_HTML = """
             
 
             
-            // Win cutscene buttons
-            const continueButton = document.getElementById('continueButton');
-            if (continueButton) {
-                console.log('Continue button found, adding click listener...');
-                continueButton.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    console.log('Continue button clicked via event listener');
-                    continueToNextLevel();
-                });
-            } else {
-                console.error('Continue button not found!');
-            }
-            
-            const winExitButton = document.getElementById('winExitButton');
-            if (winExitButton) {
-                console.log('Win exit button found, adding click listener...');
-                winExitButton.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    console.log('Win exit button clicked via event listener');
-                    returnToTitle();
-                });
-            } else {
-                console.error('Win exit button not found!');
-            }
+
         });
     </script>
 </body>
