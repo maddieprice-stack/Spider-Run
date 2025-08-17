@@ -835,21 +835,21 @@ GAME_HTML = """
             "#########################"
         ];
         
-        // Level 2 map data - Times Square layout with proper spacing
+        // Level 2 map data - New Times Square layout with wraparound mechanics
         const level2Map = [
             "##############################",
             "#W...........####...........W#",
-            "#.####.###...####...###.####.#",
-            "##.#....#.#...##...#.#....#.##",
-            "#.....##....######....##.....#",
+            "R.####.###...####...###.####.R",
+            "#..#....#.#...##...#.#....#..#",
+            "#.....##....#.##.#....##.....#",
             "####..###..##....##..###..####",
-            "#########..###--###..#########",
+            "#########..###EE###..#########",
             "#########..#VVVVVV#..#########",
             "#########..########..#########",
             "####..###..##..S.##..###..####",
-            "#.....##....######....##.....#",
-            "##.#....#.#...##..#.#....#.##",
-            "#.####.###...####...###.####.#",
+            "#.....##....#.##.#....##.....#",
+            "#..#....#.#...##...#.#....#..#",
+            "R.####.###...####...###.####.R",
             "#W...........####...........W#",
             "##############################"
         ];
@@ -919,12 +919,12 @@ GAME_HTML = """
         
         function isWalkable(char) {
             return char === '.' || char === ' ' || char === 'W' || char === 'T' || 
-                   char === 'V' || char === '-' || char === 'S';
+                   char === 'V' || char === '-' || char === 'S' || char === 'E' || char === 'R';
         }
         
         function isPassable(char) {
             return char === '.' || char === ' ' || char === 'W' || char === 'T' || 
-                   char === 'V' || char === '-' || char === 'S';
+                   char === 'V' || char === '-' || char === 'S' || char === 'E' || char === 'R';
         }
         
         // Dust positions (calculated from map)
@@ -1996,6 +1996,8 @@ GAME_HTML = """
                     } else if (tile === 'V') {
                         villainPositions.push({x: x, y: y, type: 'villain'});
                     }
+                    // Note: E tiles are walkable but don't spawn pellets
+                    // Note: R tiles are walkable and don't spawn pellets (wraparound mechanics)
                 }
             }
             
@@ -2600,15 +2602,25 @@ GAME_HTML = """
                     if (newX > 0 && processedMap[newY][newX - 1] !== '#') {
                         playerX = newX - 1;
                         playerDirection = 'left';
-                    } else if (newX === 0 && newY === 13) {
-                        // Wrap-around tunnel: left edge to right edge at row 14
-                        playerX = processedMap[0].length - 1;
-                        playerDirection = 'left';
-                    } else if (newX === 0 && newY === 2) {
-                        // Wrap-around tunnel: left edge row 3 to right edge row 2
-                        playerX = processedMap[0].length - 1;
-                        playerY = 1;
-                        playerDirection = 'left';
+                    } else if (currentLevel === 1) {
+                        // Level 1 wraparound logic
+                        if (newX === 0 && newY === 13) {
+                            // Wrap-around tunnel: left edge to right edge at row 14
+                            playerX = processedMap[0].length - 1;
+                            playerDirection = 'left';
+                        } else if (newX === 0 && newY === 2) {
+                            // Wrap-around tunnel: left edge row 3 to right edge row 2
+                            playerX = processedMap[0].length - 1;
+                            playerY = 1;
+                            playerDirection = 'left';
+                        }
+                    } else if (currentLevel === 2) {
+                        // Level 2 wraparound logic for R tiles
+                        if (newX === 0 && (newY === 2 || newY === 12)) {
+                            // Left R tile wraparound to right R tile
+                            playerX = processedMap[0].length - 1;
+                            playerDirection = 'left';
+                        }
                     }
                     break;
                 case 'ArrowRight':
@@ -2617,15 +2629,25 @@ GAME_HTML = """
                     if (newX < processedMap[0].length - 1 && processedMap[newY][newX + 1] !== '#') {
                         playerX = newX + 1;
                         playerDirection = 'right';
-                    } else if (newX === processedMap[0].length - 1 && newY === 13) {
-                        // Wrap-around tunnel: right edge to left edge at row 14
-                        playerX = 0;
-                        playerDirection = 'right';
-                    } else if (newX === processedMap[0].length - 1 && newY === 1) {
-                        // Wrap-around tunnel: right edge row 2 to left edge row 3
-                        playerX = 0;
-                        playerY = 2;
-                        playerDirection = 'right';
+                    } else if (currentLevel === 1) {
+                        // Level 1 wraparound logic
+                        if (newX === processedMap[0].length - 1 && newY === 13) {
+                            // Wrap-around tunnel: right edge to left edge at row 14
+                            playerX = 0;
+                            playerDirection = 'right';
+                        } else if (newX === processedMap[0].length - 1 && newY === 1) {
+                            // Wrap-around tunnel: right edge row 2 to left edge row 3
+                            playerX = 0;
+                            playerY = 2;
+                            playerDirection = 'right';
+                        }
+                    } else if (currentLevel === 2) {
+                        // Level 2 wraparound logic for R tiles
+                        if (newX === processedMap[0].length - 1 && (newY === 2 || newY === 12)) {
+                            // Right R tile wraparound to left R tile
+                            playerX = 0;
+                            playerDirection = 'right';
+                        }
                     }
                     break;
             }
