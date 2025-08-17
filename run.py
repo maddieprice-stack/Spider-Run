@@ -837,21 +837,34 @@ GAME_HTML = """
         
         // Level 2 map data - Times Square layout (27x28) based on design documents
         const level2Map = [
-            "##############################",
-            "#W...........####...........W#",
-            "#.####.###...####...###.####.#",
-            "##.#....#.#...##...#.#....#.##",
-            "#.....##....######....##.....#",
-            "####..###..##....##..###..####",
-            "#########..###--###..#########",
-            "#########..#VVVVVV#..#########",
-            "#########..########..#########",
-            "####..###..##..S.##..###..####",
-            "#.....##....######....##.....#",
-            "##.#....#.#...##...#.#....#.##",
-            "#.####.###...####...###.####.#",
-            "#W...........####...........W#",
-            "##############################"
+            "###########################",
+            "#W........###...........W#",
+            "#.####.#.###.###.#.####.#",
+            "#T#  #.#.........#.#  #T#",
+            "#.#  #.#####-#####.#  #.#",
+            "#.#  #.#  V V V  #.#  #.#",
+            "#.#  #.# V     V #.#  #.#",
+            "#.#  #.#  V V V  #.#  #.#",
+            "#.#  #.#####-#####.#  #.#",
+            "#T#  #.#.........#.#  #T#",
+            "#.####.#.###.###.#.####.#",
+            "#W........###..........W#",
+            "#########  S  ###########",
+            "#...............T........#",
+            "#.####.#####.#####.####.#",
+            "#.#  #.#   #.#   #.#  #.#",
+            "#.#  #.# W #.# W #.#  #.#",
+            "#.#  #.#####.#####.#  #.#",
+            "#.#  #.............#  #.#",
+            "#.####.###.#.#.###.####.#",
+            "#.....T...#.#.#...T.....#",
+            "###.#####.#.#.#.#####.###",
+            "#...#   #.......#   #...#",
+            "#.#.# W ####### W #.#.#.#",
+            "#.#.#   #.....#   #.#.#.#",
+            "#.#.#####.#.#.#####.#.#.#",
+            "#T.......T.#.#.T.......T#",
+            "###########################"
         ];
         
         // Function to process ASCII maze with flood-fill
@@ -1658,11 +1671,11 @@ GAME_HTML = """
                 console.log('🔥🔥🔥 Advancing to next victory panel...');
                 currentVictoryPanel++;
                 showVictoryPanel(currentVictoryPanel);
-            } else if (currentState === 'victoryComic' && currentVictoryPanel >= totalVictoryPanels - 1) {
-                console.log('🔥🔥🔥 Last victory panel reached, showing Level 2 splash...');
+            } else if (currentState === 'victoryComic' && currentVictoryPanel === totalVictoryPanels - 1) {
+                console.log('🔥🔥🔥 Last victory panel reached, starting Level 2 gameplay...');
                 console.log('🔥🔥🔥 Panel check: currentVictoryPanel =', currentVictoryPanel, 'totalVictoryPanels =', totalVictoryPanels);
-                // End of victory comic, show Level 2 splash screen without resetting anything
-                showLevel2Splash();
+                // End of victory comic, start Level 2 gameplay directly (like intro comic)
+                startLevel2Gameplay();
             } else {
                 console.log('🔥🔥🔥 No condition met - currentVictoryPanel:', currentVictoryPanel, 'totalVictoryPanels:', totalVictoryPanels);
                 console.log('🔥🔥🔥 State check failed - currentState:', currentState, 'expected: victoryComic');
@@ -1728,7 +1741,23 @@ GAME_HTML = """
             console.log('=== startLevel2Gameplay() called ===');
             console.log('Starting Level 2 gameplay...');
             
-            // Use the proper Level 2 start function
+            // Set state to gameplay (like startGameplay does)
+            currentState = 'gameplay';
+            
+            // Hide all victory panels AND comic panels (like startGameplay does)
+            document.querySelectorAll('.victory-panel, .comic-panel').forEach(panel => {
+                panel.classList.remove('active');
+                panel.style.display = 'none';
+            });
+            
+            // Hide title screen if it's still visible
+            const titleScreen = document.getElementById('titleScreen');
+            if (titleScreen) {
+                titleScreen.classList.remove('active');
+                titleScreen.style.display = 'none';
+            }
+            
+            // Start Level 2 (like startGameplay calls startLevel1)
             startLevel2();
         }
 
@@ -1873,10 +1902,6 @@ GAME_HTML = """
             console.log('=== startLevel2() called ===');
             level2State = 'splash';
             currentLevel = 2;
-            currentState = 'gameplay'; // Set currentState to gameplay
-            console.log('Level 2 state set - level2State:', level2State, 'currentLevel:', currentLevel, 'currentState:', currentState);
-            
-            // Initialize Level 2 specific settings
             initLevel2();
             
             // Show Level 2 splash screen
@@ -1918,9 +1943,7 @@ GAME_HTML = """
             bgImage.src = '/static/Times Square Pixel.png';
             
             setTimeout(() => {
-                console.log('Level 2 splash timeout - starting gameplay');
                 level2State = 'gameplay';
-                currentState = 'gameplay'; // Make sure currentState is set to gameplay
                 initGameplay();
             }, 2000);
         }
@@ -2072,8 +2095,8 @@ GAME_HTML = """
             // Check villain collision
             checkVillainCollision();
             
-            // Check win condition
-            if (dustCollected >= totalDust) {
+            // Check win condition (but not if we just came from victory comic)
+            if (dustCollected >= totalDust && dustCollected > 0) {
                 console.log('🔥🔥🔥 WIN CONDITION TRIGGERED! 🔥🔥🔥');
                 console.log('🔥 Dust collected:', dustCollected);
                 console.log('🔥 Total dust:', totalDust);
@@ -3262,6 +3285,39 @@ GAME_HTML = """
         }
         
         window.cheatToLevel2 = cheatToLevel2;
+        
+        // CHEAT CODE: Jump directly to Times Square comic sequence
+        function cheatToTimesSquareComic() {
+            console.log('🔥🔥🔥 CHEAT CODE ACTIVATED: Jumping to Times Square comic sequence! 🔥🔥🔥');
+            
+            // Hide all screens first
+            document.querySelectorAll('.comic-panel, .victory-panel, #titleScreen').forEach(panel => {
+                panel.classList.remove('active');
+                panel.style.display = 'none';
+            });
+            
+            // Hide game canvas if it exists
+            const canvas = document.getElementById('gameCanvas');
+            if (canvas) canvas.style.display = 'none';
+            
+            // Set up victory comic state
+            currentState = 'victoryComic';
+            currentVictoryPanel = 0;
+            totalVictoryPanels = 4; // 4 panels: 0, 1, 2, 3
+            
+            console.log('🔥 Cheat: Setting up Times Square comic...');
+            console.log('🔥 Current state:', currentState);
+            console.log('🔥 Current victory panel:', currentVictoryPanel);
+            console.log('🔥 Total victory panels:', totalVictoryPanels);
+            
+            // Show the first victory panel
+            showVictoryPanel(0);
+            
+            console.log('🔥🔥🔥 CHEAT COMPLETE: You should now see the Times Square comic sequence! 🔥🔥🔥');
+            console.log('🔥 Click to advance through the comic panels');
+        }
+        
+        window.cheatToTimesSquareComic = cheatToTimesSquareComic;
         
         // Add event listener for start button
         document.addEventListener('DOMContentLoaded', function() {
