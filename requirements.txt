@@ -1,4 +1,6 @@
-# Python dependencies for Spider-Run game
+# Python dependencies for Spider-Run game file server
 flask==3.0.0
+gunicorn==21.2.0
+sendfile==0.2.0
 
 

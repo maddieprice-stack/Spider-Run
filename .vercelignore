@@ -1,0 +1,47 @@
+# Development files
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Documentation
+Docs/
+README.md
+
+# Design files (keep only what's needed in static/)
+Designs/
+
+# Data files
+data/
+
+# Local development
+index.html
+*.html
+
+# Conflicting Flask app
+src/
+
+# Local development files
+local_dev.py
+test_api.py

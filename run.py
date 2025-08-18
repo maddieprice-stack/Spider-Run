@@ -423,53 +423,6 @@ GAME_HTML = """
             100% { text-shadow: 2px 2px 20px rgba(255, 0, 0, 0.8); }
         }
         
-        .victory-text {
-            font-family: 'Courier New', monospace;
-            font-size: 56px;
-            font-weight: bold;
-            color: #00ff00;
-            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.5);
-            margin-bottom: 30px;
-            animation: victoryGlow 2s ease-in-out infinite alternate;
-        }
-        
-        @keyframes victoryGlow {
-            0% { text-shadow: 3px 3px 6px rgba(0, 255, 0, 0.5); }
-            100% { text-shadow: 3px 3px 20px rgba(0, 255, 0, 0.9); }
-        }
-        
-        .spider-man-victory {
-            width: 200px;
-            height: 200px;
-            margin: 20px auto;
-            background: url('/static/Spider-man_victory_scene_1.png') no-repeat center center;
-            background-size: contain;
-        }
-        
-        .victory-message {
-            background: rgba(0, 0, 0, 0.7);
-            border: 2px solid #00ff00;
-            border-radius: 10px;
-            padding: 20px;
-            margin: 20px auto;
-            max-width: 500px;
-        }
-        
-        .victory-message h2 {
-            color: #00ff00;
-            font-size: 28px;
-            margin-bottom: 15px;
-            font-family: 'Courier New', monospace;
-        }
-        
-        .victory-message p {
-            color: #fff;
-            font-size: 16px;
-            line-height: 1.5;
-            margin: 10px 0;
-            font-family: 'Courier New', monospace;
-        }
-        
         .win-text {
             font-family: 'Courier New', monospace;
             font-size: 36px;
@@ -832,21 +785,6 @@ GAME_HTML = """
                 </div>
             </div>
         </div>
-        
-        <div id="level2WinScreen" class="win-loss-cutscene">
-            <div class="cutscene-panel">
-                <div class="victory-text">YOU WIN!</div>
-                <div class="spider-man-victory"></div>
-                <div class="victory-message">
-                    <h2>Times Square Saved!</h2>
-                    <p>You've successfully collected all the dimensional fragments and defeated the villains!</p>
-                    <p>New York is safe once again thanks to Spider-Man!</p>
-                </div>
-                <div class="cutscene-buttons">
-                    <button class="cutscene-button" onclick="returnToTitle()">EXIT TO MENU</button>
-                </div>
-            </div>
-        </div>
     </div>
 
     <script>
@@ -1017,11 +955,23 @@ GAME_HTML = """
         let webShooterPositions = [];
         let taxiStopPositions = [];
         
+        // Level 2 camera collectible
+        let cameraImage = null;
+        let cameraImageLoaded = false;
+        let cameraPosition = null; // {x, y}
+        
         // Villain system
         let villains = [];
         let villainPen = { x: 13, y: 6 }; // Center of villain pen
         // Villain spawn positions - these will be set dynamically based on V positions in the map
         let villainSpawns = [];
+        
+        // Global frame counter and last-ability timestamps to avoid simultaneous triggers
+        let globalFrameCounter = 0;
+        let lastDocOckAbilityFrame = -99999;
+        let lastGoblinAbilityFrame = -99999;
+        let lastMysterioAbilityFrame = -99999;
+        let lastElectroAbilityFrame = -99999;
         
         // Villain types for both levels
         const villainTypes = [
@@ -1093,13 +1043,13 @@ GAME_HTML = """
             let buildingPaths;
             if (currentLevel === 1) {
                 buildingPaths = [
-                    '/static/Building_1.png',
-                    '/static/Building_2.png',
-                    '/static/Building_3.png',
-                    '/static/Building_4.png',
-                    '/static/Building_5.png',
-                    '/static/Building_6.png'
-                ];
+                '/static/Building_1.png',
+                '/static/Building_2.png',
+                '/static/Building_3.png',
+                '/static/Building_4.png',
+                '/static/Building_5.png',
+                '/static/Building_6.png'
+            ];
             } else {
                 // Level 2: Use Times Building images
                 buildingPaths = [
@@ -1261,11 +1211,23 @@ GAME_HTML = """
             bombImage = new Image();
             bombImage.onload = function() {
                 bombImageLoaded = true;
-                console.log('Loaded bomb image successfully');
+                console.log('✅ Loaded bomb image successfully');
             };
             bombImage.onerror = function() {
-                console.error('Failed to load bomb image');
+                console.error('❌ Failed to load bomb image from:', bombImage.src);
                 bombImageLoaded = false;
+                
+                // Try alternative path without URL encoding
+                const fallbackImage = new Image();
+                fallbackImage.onload = function() {
+                    bombImage = fallbackImage;
+                    bombImageLoaded = true;
+                    console.log('✅ Loaded bomb image with fallback path');
+                };
+                fallbackImage.onerror = function() {
+                    console.error('❌ Failed to load bomb image with fallback path');
+                };
+                fallbackImage.src = '/static/Green Goblin Bomb.png';
             };
             bombImage.src = '/static/Green%20Goblin%20Bomb.png';
         }
@@ -1368,11 +1330,32 @@ GAME_HTML = """
                     }
                 }
                 
-                // Update abilities
+                // Update abilities with desynchronization to avoid simultaneous triggers
                 villain.abilityTimer++;
-                if (villain.abilityTimer >= 720) { // 12 seconds
+                const jitter = (villain.type === 'Green Goblin' ? 30 : 0)
+                              + (villain.type === 'Doc Ock' ? 60 : 0)
+                              + (villain.type === 'Mysterio' ? 45 : 0)
+                              + (villain.type === 'Electro' ? 75 : 0);
+                const baseCooldown = 720; // 12 seconds
+                if (villain.abilityTimer >= baseCooldown + jitter) {
+                    // Prevent paired villains from triggering on the same second window
+                    if (villain.type === 'Doc Ock' && Math.abs(globalFrameCounter - lastGoblinAbilityFrame) < 60) {
+                        // Defer by one second if Goblin just used ability
+                        villain.abilityTimer = baseCooldown + jitter - 1;
+                    } else if (villain.type === 'Green Goblin' && Math.abs(globalFrameCounter - lastDocOckAbilityFrame) < 60) {
+                        villain.abilityTimer = baseCooldown + jitter - 1;
+                    } else if (villain.type === 'Mysterio' && Math.abs(globalFrameCounter - lastElectroAbilityFrame) < 60) {
+                        villain.abilityTimer = baseCooldown + jitter - 1;
+                    } else if (villain.type === 'Electro' && Math.abs(globalFrameCounter - lastMysterioAbilityFrame) < 60) {
+                        villain.abilityTimer = baseCooldown + jitter - 1;
+                    } else {
                     villain.abilityTimer = 0;
                     useVillainAbility(villain);
+                        if (villain.type === 'Doc Ock') lastDocOckAbilityFrame = globalFrameCounter;
+                        if (villain.type === 'Green Goblin') lastGoblinAbilityFrame = globalFrameCounter;
+                        if (villain.type === 'Mysterio') lastMysterioAbilityFrame = globalFrameCounter;
+                        if (villain.type === 'Electro') lastElectroAbilityFrame = globalFrameCounter;
+                    }
                 }
             });
         }
@@ -1591,36 +1574,28 @@ GAME_HTML = """
         
         function useVillainAbility(villain) {
             if (villain.ability === 'alleyBlock') {
-                // Doc Ock blocks nearest alley
+                // Doc Ock places a temporary blocker at his current position (10 seconds)
                 villainAbilities.alleyBlock.active = true;
-                villainAbilities.alleyBlock.timer = 180; // 3 seconds
-                            } else if (villain.ability === 'pumpkinBomb') {
-                    // Green Goblin drops bomb at his current position
-                    villainAbilities.pumpkinBomb.active = true;
-                    villainAbilities.pumpkinBomb.timer = 240; // 4 seconds
-                    
-                    // Place bomb at villain's current position
-                    const bomb = {
-                        x: villain.x,
-                        y: villain.y,
-                        timer: 600 // 10 seconds (600 frames at 60fps)
-                    };
-                    bombPositions.push(bomb);
-                    console.log(`Green Goblin placed bomb at (${villain.x}, ${villain.y})`);
-                } else if (villain.ability === 'alleyBlock') {
-                    // Doc Ock creates crash at his current position
-                    villainAbilities.alleyBlock.active = true;
-                    villainAbilities.alleyBlock.timer = 240; // 4 seconds
-                    
-                    // Place crash at villain's current position
-                    const crash = {
-                        x: villain.x,
-                        y: villain.y,
-                        timer: 600 // 10 seconds (600 frames at 60fps)
-                    };
-                    crashPositions.push(crash);
-                    console.log(`Doc Ock created crash at (${villain.x}, ${villain.y})`);
-                } else if (villain.ability === 'windGust') {
+                villainAbilities.alleyBlock.timer = 600; // 10 seconds at 60fps
+                const crash = {
+                    x: villain.x,
+                    y: villain.y,
+                    timer: 600
+                };
+                crashPositions.push(crash);
+                console.log(`Doc Ock placed blocker at (${villain.x}, ${villain.y})`);
+            } else if (villain.ability === 'pumpkinBomb') {
+                // Green Goblin drops bomb at his current position
+                villainAbilities.pumpkinBomb.active = true;
+                villainAbilities.pumpkinBomb.timer = 240; // 4 seconds
+                const bomb = {
+                    x: villain.x,
+                    y: villain.y,
+                    timer: 600 // 10 seconds (600 frames at 60fps)
+                };
+                bombPositions.push(bomb);
+                console.log(`Green Goblin placed bomb at (${villain.x}, ${villain.y})`);
+            } else if (villain.ability === 'windGust') {
                 // Vulture creates wind gust
                 villainAbilities.windGust.active = true;
                 villainAbilities.windGust.timer = 180; // 3 seconds
@@ -2095,6 +2070,8 @@ GAME_HTML = """
             loadTaxiSpiderManSprite();
             loadSwingSpiderManSprites();
             loadVillainSprites();
+            loadBombImage();
+            loadCrashImage();
             
             // Initialize villains for Level 1
             initVillains();
@@ -2300,6 +2277,27 @@ GAME_HTML = """
             loadSwingSpiderManSprites();
             loadVillainSprites();
             loadBombImage();
+            
+            // Load camera image once
+            if (!cameraImage) {
+                cameraImage = new Image();
+                cameraImage.onload = function() { cameraImageLoaded = true; };
+                cameraImage.onerror = function() { cameraImageLoaded = false; };
+                cameraImage.src = '/static/Camera.png';
+            }
+            
+            // Pick a random walkable square for camera (not a wall/blocker)
+            cameraPosition = null;
+            const attempts = 200;
+            for (let i = 0; i < attempts; i++) {
+                const rx = Math.floor(Math.random() * processedMap[0].length);
+                const ry = Math.floor(Math.random() * processedMap.length);
+                const tile = processedMap[ry][rx];
+                if (tile !== '#') { // any non-wall is fine
+                    cameraPosition = { x: rx, y: ry };
+                    break;
+                }
+            }
             loadCrashImage();
             
             // Initialize villains for Level 2
@@ -2360,6 +2358,9 @@ GAME_HTML = """
             const currentLevelState = currentLevel === 1 ? level1State : level2State;
             if (currentLevelState !== 'gameplay') return;
             
+            // Increment global frame counter
+            globalFrameCounter++;
+            
             // Update web shooter timer
             if (webShooterActive) {
                 webShooterTimer--;
@@ -2419,21 +2420,18 @@ GAME_HTML = """
                 console.log('🔥 Dust collected:', dustCollected);
                 console.log('🔥 Total dust:', totalDust);
                 console.log('🔥 Lives remaining:', lives);
+                console.log('🔥 Calling continueToNextLevel() directly (skip win screen)...');
                 
                 // Stop background music when level is completed
                 stopBackgroundMusic();
                 
                 if (currentLevel === 1) {
-                    console.log('🔥 Level 1 win - going to victory comic...');
                     level1State = 'win';
-                    clearInterval(gameLoop);
-                    continueToNextLevel();
                 } else {
-                    console.log('🔥 Level 2 win - showing win screen...');
                     level2State = 'win';
-                    clearInterval(gameLoop);
-                    showLevel2WinScreen();
                 }
+                clearInterval(gameLoop);
+                continueToNextLevel();
                 return;
             }
             
@@ -2708,6 +2706,20 @@ GAME_HTML = """
             // Draw bombs
             drawBombs();
             
+            // Draw camera in Level 2 if positioned
+            if (currentLevel === 2 && cameraPosition) {
+                const drawX = cameraPosition.x * tileSize + 1;
+                const drawY = cameraPosition.y * tileSize + 1 + hudHeight;
+                const size = tileSize - 2;
+                if (cameraImageLoaded && cameraImage) {
+                    ctx.drawImage(cameraImage, drawX, drawY, size, size);
+                } else {
+                    // Fallback small gray square
+                    ctx.fillStyle = '#888';
+                    ctx.fillRect(drawX, drawY, size, size);
+                }
+            }
+            
             // Draw crashes
             drawCrashes();
             
@@ -2725,6 +2737,18 @@ GAME_HTML = """
                     // Image loaded, will be drawn next frame
                 };
                 window.playerSprite.src = '/static/Spider-man_Running_Sprite.png';
+            }
+            
+            // Preload additional running frames (normal running animation)
+            if (!window.playerRun2) {
+                window.playerRun2 = new Image();
+                window.playerRun2.onload = function() {};
+                window.playerRun2.src = '/static/Spider-man%20run%202.png';
+            }
+            if (!window.playerRun3) {
+                window.playerRun3 = new Image();
+                window.playerRun3.onload = function() {};
+                window.playerRun3.src = '/static/Spider-man%20run%203.png';
             }
             
             // Choose which Spider-Man sprite to use
@@ -2745,6 +2769,39 @@ GAME_HTML = """
                 } else {
                     currentPlayerSprite = swingSpiderManSprite2;
                 }
+            } else {
+                // Normal running animation (when not swinging or riding)
+                if (typeof window.normalRunFrameIndex === 'undefined') {
+                    window.normalRunFrameIndex = 0;
+                }
+                if (typeof window.lastNormalX === 'undefined') {
+                    window.lastNormalX = playerX;
+                    window.lastNormalY = playerY;
+                }
+                // Advance frame when moving tile-to-tile
+                if (playerX !== window.lastNormalX || playerY !== window.lastNormalY) {
+                    window.normalRunFrameIndex = (window.normalRunFrameIndex + 1) % 4; // 0..3
+                    window.lastNormalX = playerX;
+                    window.lastNormalY = playerY;
+                }
+                // Frame order (loop): base -> run2 -> run3 -> run2
+                switch (window.normalRunFrameIndex) {
+                    case 0:
+                        currentPlayerSprite = window.playerSprite;
+                        break;
+                    case 1:
+                        if (window.playerRun2 && window.playerRun2.complete) currentPlayerSprite = window.playerRun2;
+                        break;
+                    case 2:
+                        if (window.playerRun3 && window.playerRun3.complete) currentPlayerSprite = window.playerRun3;
+                        break;
+                    case 3:
+                        if (window.playerRun2 && window.playerRun2.complete) currentPlayerSprite = window.playerRun2;
+                        break;
+                    default:
+                        currentPlayerSprite = window.playerSprite;
+                        break;
+                }
             }
             
             if (currentPlayerSprite && currentPlayerSprite.complete) {
@@ -2757,13 +2814,23 @@ GAME_HTML = """
                     ctx.globalAlpha = fadeValue;
                 }
                 
+                // Draw sprite preserving aspect ratio (avoid distortion across frames)
+                const imgWidth = currentPlayerSprite.naturalWidth || currentPlayerSprite.width || tileSize;
+                const imgHeight = currentPlayerSprite.naturalHeight || currentPlayerSprite.height || tileSize;
+                const available = tileSize - 2;
+                const scale = Math.min(available / imgWidth, available / imgHeight);
+                const drawW = Math.max(1, Math.round(imgWidth * scale));
+                const drawH = Math.max(1, Math.round(imgHeight * scale));
+                const baseX = playerX * tileSize + 1 + Math.floor((available - drawW) / 2);
+                const baseY = playerY * tileSize + 1 + hudHeight + Math.floor((available - drawH) / 2);
+                
                 if (playerDirection === 'left') {
                     // Flip horizontally when moving left
                     ctx.scale(-1, 1);
-                    ctx.drawImage(currentPlayerSprite, -(playerX * tileSize + 1 + tileSize - 2), playerY * tileSize + 1 + hudHeight, tileSize - 2, tileSize - 2);
+                    ctx.drawImage(currentPlayerSprite, -(baseX + drawW), baseY, drawW, drawH);
                 } else {
                     // Normal drawing for other directions
-                    ctx.drawImage(currentPlayerSprite, playerX * tileSize + 1, playerY * tileSize + 1 + hudHeight, tileSize - 2, tileSize - 2);
+                    ctx.drawImage(currentPlayerSprite, baseX, baseY, drawW, drawH);
                 }
                 ctx.restore();
                 
@@ -2907,7 +2974,7 @@ GAME_HTML = """
                 if (bombImageLoaded && bombImage) {
                     // Draw bomb with image
                     ctx.drawImage(bombImage, drawX, drawY, tileSize, tileSize);
-                    console.log('Drawing bomb image at:', drawX, drawY);
+                    console.log('🎯 Drawing bomb image at:', drawX, drawY);
                 } else {
                     // Fallback to green circle while image loads
                     ctx.fillStyle = '#00ff00';
@@ -2917,7 +2984,7 @@ GAME_HTML = """
                     ctx.strokeStyle = '#000';
                     ctx.lineWidth = 2;
                     ctx.stroke();
-                    console.log('Drawing fallback green circle - image not loaded');
+                    console.log('⚠️ Drawing fallback green circle - bombImageLoaded:', bombImageLoaded, 'bombImage:', !!bombImage);
                 }
                 
                 // Add pulsing effect as bomb gets closer to exploding
@@ -2958,17 +3025,7 @@ GAME_HTML = """
                     console.log('Drawing fallback orange circle - image not loaded');
                 }
                 
-                // Add pulsing effect as crash gets closer to clearing
-                const timeLeft = crash.timer / 600; // Normalize to 0-1
-                const pulseIntensity = 0.3 + 0.7 * (1 - timeLeft); // More intense as timer decreases
-                
-                ctx.save();
-                ctx.globalAlpha = pulseIntensity * 0.5;
-                ctx.fillStyle = '#ff4500';
-                ctx.beginPath();
-                ctx.arc(drawX + tileSize/2, drawY + tileSize/2, tileSize/2, 0, 2 * Math.PI);
-                ctx.fill();
-                ctx.restore();
+                // Removed glowing orange overlay for Doc Ock crash blocker
             });
         }
         
@@ -3040,7 +3097,7 @@ GAME_HTML = """
                         // Reset to spawn based on current level
                         if (currentLevel === 1) {
                             playerX = 13; // Level 1 spawn position
-                            playerY = 12;
+                        playerY = 12;
                         } else {
                             playerX = 15; // Level 2 spawn position (S in ASCII)
                             playerY = 9;
@@ -3139,14 +3196,14 @@ GAME_HTML = """
                     } else if (currentLevel === 1) {
                         // Level 1 wraparound logic
                         if (newX === 0 && newY === 13) {
-                            // Wrap-around tunnel: left edge to right edge at row 14
-                            playerX = processedMap[0].length - 1;
-                            playerDirection = 'left';
-                        } else if (newX === 0 && newY === 2) {
-                            // Wrap-around tunnel: left edge row 3 to right edge row 2
-                            playerX = processedMap[0].length - 1;
-                            playerY = 1;
-                            playerDirection = 'left';
+                        // Wrap-around tunnel: left edge to right edge at row 14
+                        playerX = processedMap[0].length - 1;
+                        playerDirection = 'left';
+                    } else if (newX === 0 && newY === 2) {
+                        // Wrap-around tunnel: left edge row 3 to right edge row 2
+                        playerX = processedMap[0].length - 1;
+                        playerY = 1;
+                        playerDirection = 'left';
                         }
                     } else if (currentLevel === 2) {
                         // Level 2 wraparound logic for R tiles
@@ -3166,14 +3223,14 @@ GAME_HTML = """
                     } else if (currentLevel === 1) {
                         // Level 1 wraparound logic
                         if (newX === processedMap[0].length - 1 && newY === 13) {
-                            // Wrap-around tunnel: right edge to left edge at row 14
-                            playerX = 0;
-                            playerDirection = 'right';
-                        } else if (newX === processedMap[0].length - 1 && newY === 1) {
-                            // Wrap-around tunnel: right edge row 2 to left edge row 3
-                            playerX = 0;
-                            playerY = 2;
-                            playerDirection = 'right';
+                        // Wrap-around tunnel: right edge to left edge at row 14
+                        playerX = 0;
+                        playerDirection = 'right';
+                    } else if (newX === processedMap[0].length - 1 && newY === 1) {
+                        // Wrap-around tunnel: right edge row 2 to left edge row 3
+                        playerX = 0;
+                        playerY = 2;
+                        playerDirection = 'right';
                         }
                     } else if (currentLevel === 2) {
                         // Level 2 wraparound logic for R tiles
@@ -3213,6 +3270,12 @@ GAME_HTML = """
                 //     stopWakaWakaSound();
                 // }, 500);
             }
+            // Camera collection (Level 2 only)
+            if (currentLevel === 2 && cameraPosition && playerX === cameraPosition.x && playerY === cameraPosition.y) {
+                cameraPosition = null; // collected
+                score += 50;
+                console.log('Camera collected! +50');
+            }
         }
         
         function checkWebShooterCollection() {
@@ -3239,7 +3302,7 @@ GAME_HTML = """
                     taxiDirection = 'left';
                 } else {
                     // All other taxis: Use player direction
-                    taxiDirection = playerDirection;
+                taxiDirection = playerDirection;
                 }
                 
                 taxiMoveTimer = 0;
@@ -3417,76 +3480,18 @@ GAME_HTML = """
             console.log('🔥 Game over quip set to:', currentQuip);
         }
         
-        function showLevel2WinScreen() {
-            console.log('🎉🎉🎉 === showLevel2WinScreen() called === 🎉🎉🎉');
-            console.log('🎉 Current state before:', currentState);
-            console.log('🎉 Level 2 state:', level2State);
-            
-            currentState = 'level2Win';
-            
-            console.log('🎉 State set to:', currentState);
-            
-            // Stop background music
-            stopBackgroundMusic();
-            
-            // Hide all panels and cutscenes
-            console.log('🎉 Hiding all panels...');
-            document.querySelectorAll('.comic-panel, .victory-panel').forEach(panel => {
-                panel.classList.remove('active');
-                panel.style.display = 'none';
-            });
-            
-            document.querySelectorAll('.win-loss-cutscene').forEach(cutscene => {
-                cutscene.classList.remove('active');
-                cutscene.style.display = 'none';
-            });
-            
-            // Hide canvas
-            const canvas = document.getElementById('gameCanvas');
-            if (canvas) {
-                canvas.style.display = 'none';
-                console.log('🎉 Canvas hidden');
-            }
-            
-            // Show Level 2 win screen
-            console.log('🎉 SHOWING LEVEL 2 WIN SCREEN...');
-            const level2WinElement = document.getElementById('level2WinScreen');
-            
-            if (level2WinElement) {
-                level2WinElement.classList.add('active');
-                level2WinElement.style.display = 'flex';
-                console.log('🎉 Level 2 win screen shown');
-            } else {
-                console.error('❌ Level 2 win screen element not found!');
-            }
-            
-            console.log('🎉🎉🎉 === showLevel2WinScreen() completed === 🎉🎉🎉');
-        }
-        
         // Cut scene button functions
         function returnToTitle() {
             console.log('returnToTitle called!');
             // Reset the entire game state
             resetGame();
             
-            // Hide all cutscenes (including Level 2 win screen)
-            document.querySelectorAll('.win-loss-cutscene').forEach(cutscene => {
-                cutscene.classList.remove('active');
-                cutscene.style.display = 'none';
-            });
-            
+            // Hide all cutscenes
+            document.querySelectorAll('.win-loss-cutscene').forEach(cutscene => cutscene.classList.remove('active'));
             // Hide all comic panels
-            document.querySelectorAll('.comic-panel, .victory-panel').forEach(panel => {
-                panel.classList.remove('active');
-                panel.style.display = 'none';
-            });
-            
+            document.querySelectorAll('.comic-panel, .victory-panel').forEach(panel => panel.classList.remove('active'));
             // Show title screen
-            const titleScreen = document.getElementById('titleScreen');
-            if (titleScreen) {
-                titleScreen.classList.add('active');
-                titleScreen.style.display = 'flex';
-            }
+            document.getElementById('titleScreen').classList.add('active');
             
             // Stop any running game loop
             if (gameLoop) {
@@ -3501,12 +3506,6 @@ GAME_HTML = """
             if (canvas) {
                 canvas.style.display = 'none';
             }
-            
-            // Reset state to title
-            currentState = 'title';
-            currentLevel = 1;
-            level1State = 'intro';
-            level2State = 'intro';
             
             console.log('returnToTitle completed!');
         }
@@ -4000,6 +3999,17 @@ GAME_HTML = """
         
         window.cheatToTimesSquareComic = cheatToTimesSquareComic;
         
+        // Debug function to check image loading status
+        function debugImageLoading() {
+            console.log('🔍 Image Loading Debug:');
+            console.log('- bombImageLoaded:', bombImageLoaded);
+            console.log('- bombImage exists:', !!bombImage);
+            console.log('- crashImageLoaded:', crashImageLoaded);
+            console.log('- crashImage exists:', !!crashImage);
+        }
+        
+        window.debugImageLoading = debugImageLoading;
+        
         // Add event listener for start button
         document.addEventListener('DOMContentLoaded', function() {
             console.log('DOM loaded, setting up buttons...');
@@ -4040,6 +4050,7 @@ def static_files(filename):
     """Serve static files (for future assets)"""
     return send_from_directory('static', filename)
 
+# Vercel deployment - only run if this is the main module
 if __name__ == "__main__":
     print("🕷️ Spider-Run Game Server Starting...")
     print("🎮 Your game will be available at http://localhost:8081")
