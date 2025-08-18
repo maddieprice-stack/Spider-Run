@@ -4161,6 +4161,21 @@ GAME_HTML = """
                 }
             }
 
+            // Find Level 3 spawn (S) and set player position
+            (function setLevel3Spawn() {
+                for (let y = 0; y < rows; y++) {
+                    const ix = mapData[y].indexOf('S');
+                    if (ix !== -1) {
+                        playerX = ix;
+                        playerY = y;
+                        break;
+                    }
+                }
+            })();
+
+            // Expose processed map for Level 3 controls
+            window.level3ProcessedMap = mapData;
+
             // Simple draw of the vertical maze
             function drawLevel3Grid() {
                 // Background
@@ -4264,7 +4279,63 @@ GAME_HTML = """
                 }
             }
 
-            drawLevel3Grid();
+            // Draw Spider-Man on the grid
+            const level3SpideyImg = new Image();
+            let level3SpideyReady = false;
+            level3SpideyImg.onload = function() { level3SpideyReady = true; paintAll(); };
+            level3SpideyImg.onerror = function() { level3SpideyReady = false; paintAll(); };
+            level3SpideyImg.src = '/static/Spider-man%20sprite.png';
+
+            function drawLevel3Player() {
+                const px = playerX * tileSize;
+                const py = playerY * tileSize;
+                if (level3SpideyReady) {
+                    const scale = Math.min(tileSize / level3SpideyImg.naturalWidth, tileSize / level3SpideyImg.naturalHeight) * 0.9;
+                    const dw = Math.max(1, Math.round(level3SpideyImg.naturalWidth * scale));
+                    const dh = Math.max(1, Math.round(level3SpideyImg.naturalHeight * scale));
+                    const dx = Math.floor(px + (tileSize - dw) / 2);
+                    const dy = Math.floor(py + (tileSize - dh) / 2);
+                    ctx.drawImage(level3SpideyImg, dx, dy, dw, dh);
+                } else {
+                    // Fallback: red dot
+                    ctx.fillStyle = '#ff2d2d';
+                    ctx.beginPath();
+                    ctx.arc(px + tileSize / 2, py + tileSize / 2, Math.max(3, Math.floor(tileSize * 0.25)), 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            function paintAll() {
+                drawLevel3Grid();
+                drawLevel3Player();
+            }
+
+            paintAll();
+
+            // Bind simple Level 3 movement controls (arrow keys / WASD)
+            if (!window.level3ControlsBound) {
+                window.level3ControlsBound = true;
+                document.addEventListener('keydown', function(e) {
+                    if (currentLevel !== 3 || currentState !== 'gameplay') return;
+                    const map = window.level3ProcessedMap || mapData;
+                    let dx = 0, dy = 0;
+                    if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') { dy = -1; }
+                    else if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') { dy = 1; }
+                    else if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') { dx = -1; }
+                    else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') { dx = 1; }
+                    else { return; }
+                    e.preventDefault();
+                    const nx = playerX + dx;
+                    const ny = playerY + dy;
+                    if (ny >= 0 && ny < map.length && nx >= 0 && nx < map[0].length && map[ny][nx] !== '#') {
+                        playerX = nx;
+                        playerY = ny;
+                        // Collect dust if present
+                        checkDustCollection();
+                        paintAll();
+                    }
+                });
+            }
 
             // Instruction overlay
             ctx.fillStyle = 'rgba(0,0,0,0.35)';
