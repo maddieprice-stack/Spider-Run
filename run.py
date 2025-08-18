@@ -2010,6 +2010,7 @@ GAME_HTML = """
             // Hide all panels including title screen
             document.querySelectorAll('.comic-panel, #titleScreen').forEach(panel => {
                 panel.classList.remove('active');
+                panel.style.display = 'none';
             });
 
             // Show new panel immediately without page flip effect
@@ -2070,6 +2071,9 @@ GAME_HTML = """
             // Proceed to intro comic
             document.getElementById('characterSelect').classList.remove('active');
             document.getElementById('characterSelect').style.display = 'none';
+            // Ensure canvas is hidden beneath comics
+            const canvasEl = document.getElementById('gameCanvas');
+            if (canvasEl) { canvasEl.style.display = 'none'; }
             currentState = 'comic';
             currentPanel = 0;
             showPanel(0);
@@ -2079,6 +2083,9 @@ GAME_HTML = """
             // Preserve chosen spider (default stays as last selected)
             document.getElementById('characterSelect').classList.remove('active');
             document.getElementById('characterSelect').style.display = 'none';
+            // Ensure canvas is hidden beneath comics
+            const canvasEl = document.getElementById('gameCanvas');
+            if (canvasEl) { canvasEl.style.display = 'none'; }
             currentState = 'comic';
             currentPanel = 0;
             showPanel(0);
