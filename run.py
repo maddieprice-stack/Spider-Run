@@ -4767,7 +4767,8 @@ GAME_HTML = """
             } else if (currentState === 'level3Splash') {
                 startLevel3DesignOnly();
             } else if (currentState === 'gameplay') {
-                // Skip splash screen on click
+                // Only handle Level 1/2 splash-skip logic here; ignore for Level 3
+                if (currentLevel === 1 || currentLevel === 2) {
                 const currentLevelState = currentLevel === 1 ? level1State : level2State;
                 if (currentLevelState === 'splash') {
                     if (currentLevel === 1) {
@@ -4776,6 +4777,7 @@ GAME_HTML = """
                         level2State = 'gameplay';
                     }
                     initGameplay();
+                    }
                 }
             } else if (currentState === 'win' || currentState === 'lose' || currentState === 'gameOver') {
                 // Don't handle clicks for cut scenes - let buttons handle them
@@ -4797,6 +4799,8 @@ GAME_HTML = """
                 } else if (currentState === 'level3Splash') {
                     startLevel3DesignOnly();
                 } else if (currentState === 'gameplay') {
+                    // Only apply to Level 1/2, never Level 3
+                    if (currentLevel === 1 || currentLevel === 2) {
                     const currentLevelState = currentLevel === 1 ? level1State : level2State;
                     if (currentLevelState === 'splash') {
                         // Skip splash screen
@@ -4806,6 +4810,7 @@ GAME_HTML = """
                             level2State = 'gameplay';
                         }
                         initGameplay();
+                        }
                     }
                 }
             }
