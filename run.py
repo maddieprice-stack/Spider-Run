@@ -4281,7 +4281,13 @@ GAME_HTML = """
                             }
                         }
                     }
+                    // After grid is drawn, render overlay and player to ensure visibility
+                    drawInstructionOverlay();
+                    drawLevel3Player();
                 }
+
+                // Trigger an initial paint immediately so player is visible even before textures load
+                paint();
             }
 
             // Draw Spider-Man on the grid
@@ -4341,8 +4347,6 @@ GAME_HTML = """
 
             function paintAll() {
                 drawLevel3Grid();
-                drawInstructionOverlay();
-                drawLevel3Player();
             }
 
             paintAll();
