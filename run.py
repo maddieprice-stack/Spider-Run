@@ -4318,14 +4318,6 @@ GAME_HTML = """
                 const cx = px + tileSize / 2;
                 const cy = py + tileSize / 2;
                 if (level3SpideyReady) {
-                    // Glow behind Spider-Man for visibility
-                    ctx.save();
-                    ctx.beginPath();
-                    ctx.arc(cx, cy, Math.max(6, Math.floor(tileSize * 0.42)), 0, Math.PI * 2);
-                    ctx.fillStyle = 'rgba(255, 230, 0, 0.28)';
-                    ctx.fill();
-                    ctx.restore();
-
                     // Draw the sprite using contain scaling with extra padding; rotate based on movement
                     const iw = level3SpideyImg.naturalWidth;
                     const ih = level3SpideyImg.naturalHeight;
