@@ -4317,15 +4317,18 @@ GAME_HTML = """
                 const hudY = 28;
                 ctx.save();
                 ctx.textBaseline = 'middle';
-                ctx.font = 'bold 20px Comic Sans MS';
+                let baseFontSize = 20;
+                ctx.font = `bold ${baseFontSize}px Comic Sans MS`;
                 ctx.lineWidth = 4;
                 ctx.strokeStyle = 'rgba(0,0,0,0.7)';
                 ctx.fillStyle = '#ffffff';
 
                 // Lives (left)
                 const livesText = `Lives: ${lives}`;
-                ctx.strokeText(livesText, 16, hudY);
-                ctx.fillText(livesText, 16, hudY);
+                const livesX = 16;
+                ctx.strokeText(livesText, livesX, hudY);
+                ctx.fillText(livesText, livesX, hudY);
+                const livesWidth = ctx.measureText(livesText).width;
 
                 // Score (center)
                 const scoreText = `Score: ${score}`;
@@ -4335,8 +4338,17 @@ GAME_HTML = """
 
                 // Level title (right)
                 const titleText = 'Level 3: Empire State Blitz';
-                const titleWidth = ctx.measureText(titleText).width;
-                const titleX = Math.max(16, canvas.width - titleWidth - 16);
+                const minGap = 24; // gap between lives text and title
+                let titleFontSize = baseFontSize;
+                let titleWidth = ctx.measureText(titleText).width;
+                let availableRight = canvas.width - (livesX + livesWidth + minGap) - 16;
+                while (titleWidth > availableRight && titleFontSize > 12) {
+                    titleFontSize -= 1;
+                    ctx.font = `bold ${titleFontSize}px Comic Sans MS`;
+                    titleWidth = ctx.measureText(titleText).width;
+                    availableRight = canvas.width - (livesX + livesWidth + minGap) - 16;
+                }
+                const titleX = Math.max(livesX + livesWidth + minGap, canvas.width - titleWidth - 16);
                 ctx.strokeText(titleText, titleX, hudY);
                 ctx.fillText(titleText, titleX, hudY);
 
@@ -4551,7 +4563,7 @@ GAME_HTML = """
                         window.level3LizardInterval = null;
                         lizardActive = false;
                         // Level 3 lose immediately (one life only)
-                        currentLevel = 3;
+            currentLevel = 3;
                         showLoseScreen();
                         return;
                     }
