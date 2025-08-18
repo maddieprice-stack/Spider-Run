@@ -2014,10 +2014,26 @@ GAME_HTML = """
                 const panel0 = document.getElementById('comicPanel0');
                 console.log('Showing comicPanel0:', panel0);
                 panel0.classList.add('active');
+                panel0.style.display = 'flex';
+                panel0.style.position = 'fixed';
+                panel0.style.top = '0';
+                panel0.style.left = '0';
+                panel0.style.width = '100vw';
+                panel0.style.height = '100vh';
+                panel0.style.visibility = 'visible';
+                panel0.style.opacity = '1';
             } else {
                 const panel = document.getElementById(`comicPanel${panelNumber}`);
                 console.log('Showing comicPanel' + panelNumber + ':', panel);
                 panel.classList.add('active');
+                panel.style.display = 'flex';
+                panel.style.position = 'fixed';
+                panel.style.top = '0';
+                panel.style.left = '0';
+                panel.style.width = '100vw';
+                panel.style.height = '100vh';
+                panel.style.visibility = 'visible';
+                panel.style.opacity = '1';
             }
             console.log('=== showPanel() completed ===');
         }
