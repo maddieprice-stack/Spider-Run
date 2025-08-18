@@ -4308,6 +4308,39 @@ GAME_HTML = """
                 ctx.fillStyle = fade;
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                 ctx.restore();
+
+                // Draw Level 3 HUD (points, lives, title) above the board
+                drawLevel3HUD();
+            }
+
+            function drawLevel3HUD() {
+                const hudY = 28;
+                ctx.save();
+                ctx.textBaseline = 'middle';
+                ctx.font = 'bold 20px Comic Sans MS';
+                ctx.lineWidth = 4;
+                ctx.strokeStyle = 'rgba(0,0,0,0.7)';
+                ctx.fillStyle = '#ffffff';
+
+                // Lives (left)
+                const livesText = `Lives: ${lives}`;
+                ctx.strokeText(livesText, 16, hudY);
+                ctx.fillText(livesText, 16, hudY);
+
+                // Score (center)
+                const scoreText = `Score: ${score}`;
+                const scoreX = Math.floor(canvas.width / 2 - ctx.measureText(scoreText).width / 2);
+                ctx.strokeText(scoreText, scoreX, hudY);
+                ctx.fillText(scoreText, scoreX, hudY);
+
+                // Level title (right)
+                const titleText = 'Level 3: Empire State Blitz';
+                const titleWidth = ctx.measureText(titleText).width;
+                const titleX = Math.max(16, canvas.width - titleWidth - 16);
+                ctx.strokeText(titleText, titleX, hudY);
+                ctx.fillText(titleText, titleX, hudY);
+
+                ctx.restore();
             }
 
             // Level 3: single life
