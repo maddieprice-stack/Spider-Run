@@ -4355,7 +4355,7 @@ GAME_HTML = """
                 });
             }
 
-            // Overlay now drawn inside paintAll beneath the player so he remains visible
+            
         }
         
         function resetGame() {
