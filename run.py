@@ -4281,8 +4281,7 @@ GAME_HTML = """
                             }
                         }
                     }
-                    // After grid is drawn, render overlay and player to ensure visibility
-                    drawInstructionOverlay();
+                    // After grid is drawn, render player to ensure visibility
                     drawLevel3Player();
                 }
 
@@ -4330,19 +4329,6 @@ GAME_HTML = """
                     ctx.arc(px + tileSize / 2, py + tileSize / 2, Math.max(3, Math.floor(tileSize * 0.25)), 0, Math.PI * 2);
                     ctx.fill();
                 }
-            }
-
-            function drawInstructionOverlay() {
-                const overlayHeight = 48;
-                // Draw instruction bar first so grid and player can render above it
-                ctx.save();
-                ctx.fillStyle = 'rgba(0,0,0,0.28)';
-                ctx.fillRect(0, canvas.height - overlayHeight, canvas.width, overlayHeight);
-                ctx.fillStyle = '#ffffff';
-                ctx.font = '16px Comic Sans MS';
-                ctx.textAlign = 'center';
-                ctx.fillText('Design preview: Empire State Building maze (S → G). Characters and enemies to be added.', canvas.width / 2, canvas.height - 18);
-                ctx.restore();
             }
 
             function paintAll() {
