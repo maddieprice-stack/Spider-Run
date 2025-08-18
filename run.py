@@ -3872,6 +3872,11 @@ GAME_HTML = """
         // Cut scene button functions
         function returnToTitle() {
             console.log('returnToTitle called!');
+            // Guard: only valid from cutscenes
+            if (currentState !== 'win' && currentState !== 'lose' && currentState !== 'gameOver' && currentState !== 'victoryComic') {
+                console.log('returnToTitle ignored: currentState=', currentState);
+                return;
+            }
             // Reset the entire game state
             resetGame();
             
@@ -5222,10 +5227,31 @@ GAME_HTML = """
             } else {
                 console.error('Start button not found!');
             }
-            
-
-            
-
+            // Character select buttons (add robust handlers to stop bubbling)
+            const startIntroBtn = document.getElementById('startIntroBtn');
+            const chooseSpiderManBtn = document.getElementById('chooseSpiderManBtn');
+            const chooseMilesBtn = document.getElementById('chooseMilesBtn');
+            if (startIntroBtn) {
+                startIntroBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    goToIntroComic();
+                });
+            }
+            if (chooseSpiderManBtn) {
+                chooseSpiderManBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    chooseSpider('spiderman');
+                });
+            }
+            if (chooseMilesBtn) {
+                chooseMilesBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    chooseSpider('miles');
+                });
+            }
         });
     </script>
 </body>
