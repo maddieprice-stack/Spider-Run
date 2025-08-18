@@ -4264,6 +4264,36 @@ GAME_HTML = """
                 }
             }
 
+            function renderGooOverlay(cameraX, cameraY) {
+                // Draw goo overlays for tiles the Lizard has traversed
+                if (!gooTiles || gooTiles.size === 0) return;
+                const startX = Math.floor(cameraX / tileSize);
+                const startY = Math.floor(cameraY / tileSize);
+                const endX = startX + Math.ceil(canvas.width / tileSize) + 1;
+                const endY = startY + Math.ceil(canvas.height / tileSize) + 1;
+                for (const key of gooTiles) {
+                    const [gxStr, gyStr] = key.split(',');
+                    const gx = parseInt(gxStr, 10);
+                    const gy = parseInt(gyStr, 10);
+                    if (gx < startX || gx > endX || gy < startY || gy > endY) continue;
+                    const px = gx * tileSize - cameraX;
+                    const py = gy * tileSize - cameraY;
+                    if (gooReady) {
+                        const iw = gooImg.naturalWidth;
+                        const ih = gooImg.naturalHeight;
+                        const scale = Math.max(tileSize / iw, tileSize / ih);
+                        const dw = Math.ceil(iw * scale);
+                        const dh = Math.ceil(ih * scale);
+                        const dx = Math.floor(px + (tileSize - dw) / 2);
+                        const dy = Math.floor(py + (tileSize - dh) / 2);
+                        ctx.drawImage(gooImg, dx, dy, dw, dh);
+                    } else {
+                        ctx.fillStyle = 'rgba(0, 180, 0, 0.5)';
+                        ctx.fillRect(px, py, tileSize, tileSize);
+                    }
+                }
+            }
+
             function renderDustOverlay(cameraX, cameraY) {
                 // Draw dust pellets for remaining dustPositions with camera offset
                 if (!dustPositions || dustPositions.length === 0) return;
@@ -4320,6 +4350,8 @@ GAME_HTML = """
                     canvas.width,
                     canvas.height
                 );
+                // Goo goes under dust so pellets remain visible
+                renderGooOverlay(cameraX, cameraY);
                 renderDustOverlay(cameraX, cameraY);
                 if (typeof drawLevel3Lizard === 'function') { drawLevel3Lizard(cameraX, cameraY); }
                 drawLevel3Player(cameraX, cameraY);
@@ -4410,6 +4442,18 @@ GAME_HTML = """
                         totalDust++;
                     }
                 }
+            }
+
+            // Goo trail: track all tiles the Lizard steps on (permanent)
+            const gooTiles = new Set(); // keys formatted as "x,y"
+            const gooImg = new Image();
+            let gooReady = false;
+            gooImg.onload = function() { gooReady = true; paintAll(); };
+            gooImg.onerror = function() { gooReady = false; };
+            gooImg.src = '/static/Goo.png';
+
+            function addGooAt(gx, gy) {
+                gooTiles.add(gx + ',' + gy);
             }
 
             // Track Level 3 spawn (S) and set player position
@@ -4592,13 +4636,18 @@ GAME_HTML = """
                 // Spawn Lizard exactly where Spider-Man spawned initially
                 lizardX = level3SpawnX;
                 lizardY = level3SpawnY;
+                // Leave goo at spawn
+                addGooAt(lizardX, lizardY);
                 // Immediately paint so Lizard appears as soon as he spawns
                 paintAll();
                 window.level3LizardInterval = setInterval(function() {
                     if (currentLevel !== 3 || currentState !== 'gameplay') return;
                     const [nx, ny] = computeNextStep(lizardX, lizardY, playerX, playerY);
                     const dx = nx - lizardX; const dy = ny - lizardY;
-                    if (dx !== 0 || dy !== 0) { lizardX = nx; lizardY = ny; lizardFlipX = !lizardFlipX; setLizardFacing(dx, dy); }
+                    if (dx !== 0 || dy !== 0) {
+                        lizardX = nx; lizardY = ny; lizardFlipX = !lizardFlipX; setLizardFacing(dx, dy);
+                        addGooAt(lizardX, lizardY);
+                    }
                     if (lizardX === playerX && lizardY === playerY) {
                         clearInterval(window.level3LizardInterval);
                         window.level3LizardInterval = null;
