@@ -855,7 +855,7 @@ GAME_HTML = """
                     <div class="silhouette s2"></div>
                     <div class="silhouette s3"></div>
                     <div class="silhouette s4"></div>
-                </div>
+                    </div>
                 <div class="speech-bubble">
                     But beware… you're not the only one racing to the top.
                 </div>
@@ -869,7 +869,7 @@ GAME_HTML = """
                 <div class="spider-man-victory-scene" style="background-image: url('/static/Spider-man%20Comic%203.png');"></div>
                 <div class="speech-bubble">
                     Note to self: race to the top, avoid villains, save the world before breakfast. Easy.
-                </div>
+                    </div>
                 <div class="click-prompt">Click to start Level 3</div>
             </div>
         </div>
@@ -1056,7 +1056,7 @@ GAME_HTML = """
             "#.......#.......#............#",
             "S#############################",
         ];
-
+        
         // Function to process ASCII maze with flood-fill
         function processMazeWithFloodFill(asciiMaze) {
             // Convert ASCII to 2D grid
@@ -4060,7 +4060,7 @@ GAME_HTML = """
             bg.src = '/static/Empire%20View.jpg';
 
             function drawSplashText() {
-                ctx.textAlign = 'center';
+            ctx.textAlign = 'center';
                 ctx.strokeStyle = 'rgba(0,0,0,0.75)';
                 ctx.lineWidth = 6;
                 ctx.fillStyle = '#ff2d2d';
@@ -4147,7 +4147,7 @@ GAME_HTML = """
                 // Background
                 ctx.fillStyle = '#0b0b16';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
-                // Prepare wall texture
+                // Prepare textures
                 const wallImg = new Image();
                 let wallReady = false;
                 wallImg.onload = function() {
@@ -4159,6 +4159,18 @@ GAME_HTML = """
                     paint();
                 };
                 wallImg.src = '/static/Empire%20Street.png';
+
+                const walkImg = new Image();
+                let walkReady = false;
+                walkImg.onload = function() {
+                    walkReady = true;
+                    paint();
+                };
+                walkImg.onerror = function() {
+                    walkReady = false;
+                    paint();
+                };
+                walkImg.src = '/static/Walkable%203.png';
 
                 function paint() {
                     // Grid pass
@@ -4204,9 +4216,20 @@ GAME_HTML = """
                                 ctx.textBaseline = 'middle';
                                 ctx.fillText('G', px + tileSize / 2, py + tileSize / 2);
                             } else {
-                                // Path
-                                ctx.fillStyle = '#101521';
-                                ctx.fillRect(px, py, tileSize, tileSize);
+                                // Path (walkable)
+                                if (walkReady) {
+                                    const iw = walkImg.naturalWidth;
+                                    const ih = walkImg.naturalHeight;
+                                    const scale = Math.max(tileSize / iw, tileSize / ih);
+                                    const dw = Math.ceil(iw * scale);
+                                    const dh = Math.ceil(ih * scale);
+                                    const dx = Math.floor(px + (tileSize - dw) / 2);
+                                    const dy = Math.floor(py + (tileSize - dh) / 2);
+                                    ctx.drawImage(walkImg, dx, dy, dw, dh);
+                                } else {
+                                    ctx.fillStyle = '#101521';
+                                    ctx.fillRect(px, py, tileSize, tileSize);
+                                }
                             }
                         }
                     }
@@ -4609,7 +4632,7 @@ GAME_HTML = """
             }
         }
         window.cheatToEndOfLevel2Cutscene = cheatToEndOfLevel2Cutscene;
-
+        
         // Debug function to check image loading status
         function debugImageLoading() {
             console.log('🔍 Image Loading Debug:');
