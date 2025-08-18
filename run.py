@@ -2026,6 +2026,7 @@ GAME_HTML = """
                 panel0.style.height = '100vh';
                 panel0.style.visibility = 'visible';
                 panel0.style.opacity = '1';
+                panel0.style.zIndex = '9999';
             } else {
                 const panel = document.getElementById(`comicPanel${panelNumber}`);
                 console.log('Showing comicPanel' + panelNumber + ':', panel);
@@ -2038,6 +2039,7 @@ GAME_HTML = """
                 panel.style.height = '100vh';
                 panel.style.visibility = 'visible';
                 panel.style.opacity = '1';
+                panel.style.zIndex = '9999';
             }
             console.log('=== showPanel() completed ===');
         }
@@ -2088,7 +2090,8 @@ GAME_HTML = """
             if (canvasEl) { canvasEl.style.display = 'none'; }
             currentState = 'comic';
             currentPanel = 0;
-            showPanel(0);
+            // Defer to next frame to ensure DOM changes flush first
+            setTimeout(() => showPanel(0), 0);
         }
         
         function skipToVictoryComic() {
