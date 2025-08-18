@@ -708,6 +708,10 @@ GAME_HTML = """
             animation: pulse 2s infinite;
             pointer-events: none; /* Ensure clicks pass through to parent */
         }
+        /* Strict click behavior for character select: only buttons are clickable */
+        #characterSelect { pointer-events: none; }
+        #characterSelect .panel-content { pointer-events: none; }
+        #characterSelect button.menu-button { pointer-events: auto; }
     </style>
 </head>
 <body>
@@ -4864,8 +4868,10 @@ GAME_HTML = """
             } else if (currentState === 'comic') {
                 nextPanel();
             } else if (currentState === 'characterSelect') {
-                // ignore generic clicks during character select so only buttons trigger progress
-                return;
+                // Strictly ignore all non-button clicks in character select
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
             } else if (currentState === 'victoryComic') {
                 nextVictoryPanel();
             } else if (currentState === 'level3Intro') {
