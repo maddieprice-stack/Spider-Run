@@ -743,8 +743,8 @@ GAME_HTML = """
             <div class="panel-content">
                 <div class="speech-bubble">Choose Your Spider</div>
                 <div style="display:flex; gap:24px; margin-top:16px; justify-content:center;">
-                    <button class="menu-button" onclick="chooseSpider('spiderman')">Spider-Man</button>
-                    <button class="menu-button" onclick="chooseSpider('miles')">Miles Morales</button>
+                    <button class="menu-button" id="chooseSpiderManBtn" onclick="chooseSpider('spiderman')">Spider-Man</button>
+                    <button class="menu-button" id="chooseMilesBtn" onclick="chooseSpider('miles')">Miles Morales</button>
                 </div>
                 <div style="display:flex; gap:24px; margin-top:12px; align-items:center; justify-content:center;">
                     <div style="width:140px; height:140px; background:url('/static/Spider-man%20sprite.png') center/contain no-repeat;"></div>
@@ -4827,6 +4827,7 @@ GAME_HTML = """
         document.addEventListener('click', function(e) {
             // Don't handle clicks on buttons - let button event listeners handle them
             if (e.target.tagName === 'BUTTON' || e.target.closest('button')) {
+                // Allow character select buttons to work normally
                 return;
             }
             
@@ -4835,6 +4836,9 @@ GAME_HTML = """
                 startGame();
             } else if (currentState === 'comic') {
                 nextPanel();
+            } else if (currentState === 'characterSelect') {
+                // ignore generic clicks during character select so only buttons trigger progress
+                return;
             } else if (currentState === 'victoryComic') {
                 nextVictoryPanel();
             } else if (currentState === 'level3Intro') {
