@@ -4158,7 +4158,7 @@ GAME_HTML = """
                     wallReady = false;
                     paint();
                 };
-                wallImg.src = '/static/Empire%20Street.png';
+                wallImg.src = '/static/Square.png';
 
                 const walkImg = new Image();
                 let walkReady = false;
