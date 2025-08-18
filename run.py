@@ -959,6 +959,15 @@ GAME_HTML = """
         let cameraImage = null;
         let cameraImageLoaded = false;
         let cameraPosition = null; // {x, y}
+        // Selfie flash overlay
+        let selfieImage = null;
+        let selfieLoaded = false;
+        let selfieTimer = 0; // frames remaining
+        // Level 2 subway signs
+        let subwayImage = null;
+        let subwayImageLoaded = false;
+        let subwayPositions = []; // [{x,y}, {x,y}]
+        let subwayTeleportCooldown = 0;
         
         // Villain system
         let villains = [];
@@ -2285,6 +2294,18 @@ GAME_HTML = """
                 cameraImage.onerror = function() { cameraImageLoaded = false; };
                 cameraImage.src = '/static/Camera.png';
             }
+            if (!selfieImage) {
+                selfieImage = new Image();
+                selfieImage.onload = function() { selfieLoaded = true; };
+                selfieImage.onerror = function() { selfieLoaded = false; };
+                selfieImage.src = '/static/Spider-man Selfie.png';
+            }
+            if (!subwayImage) {
+                subwayImage = new Image();
+                subwayImage.onload = function() { subwayImageLoaded = true; };
+                subwayImage.onerror = function() { subwayImageLoaded = false; };
+                subwayImage.src = '/static/Subway Sign.png';
+            }
             
             // Pick a random walkable square for camera (not a wall/blocker)
             cameraPosition = null;
@@ -2296,6 +2317,24 @@ GAME_HTML = """
                 if (tile !== '#') { // any non-wall is fine
                     cameraPosition = { x: rx, y: ry };
                     break;
+                }
+            }
+            // Pick two random walkable squares for subway signs
+            subwayPositions = [];
+            let tries = 0;
+            while (subwayPositions.length < 2 && tries < 400) {
+                tries++;
+                const rx = Math.floor(Math.random() * processedMap[0].length);
+                const ry = Math.floor(Math.random() * processedMap.length);
+                const tile = processedMap[ry][rx];
+                if (tile !== '#') {
+                    // avoid duplicating camera position
+                    if (!cameraPosition || rx !== cameraPosition.x || ry !== cameraPosition.y) {
+                        // avoid duplicates between subway spots
+                        if (!subwayPositions.some(p => p.x === rx && p.y === ry)) {
+                            subwayPositions.push({ x: rx, y: ry });
+                        }
+                    }
                 }
             }
             loadCrashImage();
@@ -2360,6 +2399,7 @@ GAME_HTML = """
             
             // Increment global frame counter
             globalFrameCounter++;
+            if (subwayTeleportCooldown > 0) subwayTeleportCooldown--;
             
             // Update web shooter timer
             if (webShooterActive) {
@@ -2718,6 +2758,37 @@ GAME_HTML = """
                     ctx.fillStyle = '#888';
                     ctx.fillRect(drawX, drawY, size, size);
                 }
+            }
+            // Draw subway signs in Level 2
+            if (currentLevel === 2 && subwayPositions && subwayPositions.length > 0) {
+                subwayPositions.forEach(pos => {
+                    const sx = pos.x * tileSize + 1;
+                    const sy = pos.y * tileSize + 1 + hudHeight;
+                    const ssize = tileSize - 2;
+                    if (subwayImageLoaded && subwayImage) {
+                        ctx.drawImage(subwayImage, sx, sy, ssize, ssize);
+                    } else {
+                        ctx.fillStyle = '#0a0';
+                        ctx.fillRect(sx, sy, ssize, ssize);
+                    }
+                });
+            }
+
+            // Draw selfie overlay if active
+            if (selfieTimer > 0 && selfieLoaded && selfieImage) {
+                const total = 120; // 2 seconds at 60fps
+                const fadeOut = 20; // last ~0.33s fade
+                const alpha = selfieTimer > fadeOut ? 1 : Math.max(0, selfieTimer / fadeOut);
+                ctx.save();
+                ctx.globalAlpha = alpha;
+                // Center overlay covering most of canvas
+                const overlayW = Math.floor(canvas.width * 0.6);
+                const overlayH = Math.floor((overlayW * selfieImage.naturalHeight) / selfieImage.naturalWidth);
+                const ox = Math.floor((canvas.width - overlayW) / 2);
+                const oy = Math.floor((canvas.height - overlayH) / 2);
+                ctx.drawImage(selfieImage, ox, oy, overlayW, overlayH);
+                ctx.restore();
+                selfieTimer--;
             }
             
             // Draw crashes
@@ -3182,6 +3253,18 @@ GAME_HTML = """
                 case 'ArrowDown':
                 case 's':
                 case 'S':
+                    // Subway teleport if on a subway sign (Level 2) and cooldown is ready
+                    if (currentLevel === 2 && subwayTeleportCooldown === 0 && subwayPositions && subwayPositions.length === 2) {
+                        const hereIdx = subwayPositions.findIndex(p => p.x === playerX && p.y === playerY);
+                        if (hereIdx !== -1) {
+                            const otherIdx = 1 - hereIdx;
+                            playerX = subwayPositions[otherIdx].x;
+                            playerY = subwayPositions[otherIdx].y;
+                            playerDirection = 'down';
+                            subwayTeleportCooldown = 20; // short lockout to prevent bounce
+                            break;
+                        }
+                    }
                     if (newY < processedMap.length - 1 && processedMap[newY + 1][newX] !== '#' && !hasCrash(newX, newY + 1)) {
                         playerY = newY + 1;
                         playerDirection = 'down';
@@ -3275,6 +3358,8 @@ GAME_HTML = """
                 cameraPosition = null; // collected
                 score += 50;
                 console.log('Camera collected! +50');
+                // Trigger selfie overlay for 3 seconds
+                selfieTimer = 120;
             }
         }
         
