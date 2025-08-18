@@ -4298,6 +4298,7 @@ GAME_HTML = """
             // Expose processed map for Level 3 controls
             window.level3ProcessedMap = mapData;
             let playerRotation = 0; // radians; 0 = facing up
+            let playerFlipX = false; // flip on vertical axis each move
 
             // Simple draw uses the offscreen map buffer with a camera centered on the player
             function drawLevel3Grid() {
@@ -4336,6 +4337,7 @@ GAME_HTML = """
                     ctx.save();
                     ctx.translate(cx, cy + tileSize * 0.06);
                     ctx.rotate(playerRotation);
+                    ctx.scale(playerFlipX ? -1 : 1, 1);
                     ctx.drawImage(level3SpideyImg, Math.floor(-dw / 2), Math.floor(-dh / 2), dw, dh);
                     ctx.restore();
                 } else {
@@ -4376,6 +4378,8 @@ GAME_HTML = """
                         else if (dy === -1) { playerRotation = 0; }
                         else if (dx === -1) { playerRotation = -Math.PI / 2; } // left: 90° CCW
                         else if (dx === 1) { playerRotation = Math.PI / 2; }  // right: 90° CW
+                        // Toggle flip each step
+                        playerFlipX = !playerFlipX;
                         // Collect dust if present
                         checkDustCollection();
                         paintAll();
