@@ -738,6 +738,21 @@ GAME_HTML = """
             </div>
         </div>
 
+        <!-- Character Select Panel -->
+        <div id="characterSelect" class="comic-panel">
+            <div class="panel-content">
+                <div class="speech-bubble">Choose Your Spider</div>
+                <div style="display:flex; gap:24px; margin-top:16px; justify-content:center;">
+                    <button class="menu-button" onclick="chooseSpider('spiderman')">Spider-Man</button>
+                    <button class="menu-button" onclick="chooseSpider('miles')">Miles Morales</button>
+                </div>
+                <div style="display:flex; gap:24px; margin-top:12px; align-items:center; justify-content:center;">
+                    <div style="width:140px; height:140px; background:url('/static/Spider-man%20sprite.png') center/contain no-repeat;"></div>
+                    <div style="width:140px; height:140px; background:url('/static/Miles%20Morales%20Sprite.png') center/contain no-repeat;"></div>
+                </div>
+            </div>
+        </div>
+
         <!-- Comic Intro Panels -->
         <div id="comicPanel0" class="comic-panel">
             <div class="panel-content">
@@ -963,6 +978,9 @@ GAME_HTML = """
         const totalPanels = 7;
         let currentVictoryPanel = 0;
         const totalVictoryPanels = 5;
+        
+        // Character selection state
+        let selectedSpider = 'spiderman'; // 'spiderman' | 'miles'
         
         // Level 1 game variables
         let level1State = 'intro'; // intro, splash, gameplay, win, lose
@@ -1920,6 +1938,21 @@ GAME_HTML = """
             });
         }
 
+        function switchToLevel1Music() {
+            // Stop current music
+            if (currentBackgroundMusic) {
+                currentBackgroundMusic.pause();
+                currentBackgroundMusic.currentTime = 0;
+            }
+            // Choose track based on selected Spider
+            const track = (typeof selectedSpider !== 'undefined' && selectedSpider === 'miles')
+                ? '/static/Miles Song 1.mp3'
+                : '/static/background_music.mp3';
+            currentBackgroundMusic = new Audio(track);
+            currentBackgroundMusic.volume = 0.3;
+            currentBackgroundMusic.loop = true;
+        }
+
         function switchToLevel3Music() {
             // Stop current music
             if (currentBackgroundMusic) {
@@ -1994,12 +2027,33 @@ GAME_HTML = """
             console.log('=== startGame() function called ===');
             console.log('Current state before:', currentState);
             playClickSound();
+            // Show character selection screen before intro comic
+            document.querySelectorAll('.comic-panel, .victory-panel, #titleScreen').forEach(p => {
+                p.classList.remove('active');
+                p.style.display = 'none';
+            });
+            const sel = document.getElementById('characterSelect');
+            sel.classList.add('active');
+            sel.style.display = 'flex';
+            sel.style.position = 'fixed';
+            sel.style.top = '0';
+            sel.style.left = '0';
+            sel.style.width = '100vw';
+            sel.style.height = '100vh';
+            sel.style.visibility = 'visible';
+            sel.style.opacity = '1';
+            currentState = 'characterSelect';
+            console.log('=== startGame() function completed ===');
+        }
+
+        function chooseSpider(which) {
+            selectedSpider = which === 'miles' ? 'miles' : 'spiderman';
+            // Proceed to intro comic
+            document.getElementById('characterSelect').classList.remove('active');
+            document.getElementById('characterSelect').style.display = 'none';
             currentState = 'comic';
             currentPanel = 0;
-            console.log('Current state after:', currentState);
-            console.log('Current panel:', currentPanel);
             showPanel(0);
-            console.log('=== startGame() function completed ===');
         }
         
         function skipToVictoryComic() {
@@ -2211,9 +2265,14 @@ GAME_HTML = """
                 panel.classList.remove('active');
             });
             
-            // Ensure Level 1 music is playing
+            // Ensure Level 1 music is playing (Spider-Man or Miles)
+            if (currentLevel === 1) {
+                switchToLevel1Music();
+                startBackgroundMusic();
+            } else {
             initBackgroundMusic();
             startBackgroundMusic();
+            }
             
             // Start Level 1
             startLevel1();
