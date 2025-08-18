@@ -4033,6 +4033,10 @@ GAME_HTML = """
             canvas.style.display = 'block';
             currentState = 'level3Splash';
             currentLevel = 3;
+            // Ensure Level 3 music starts at splash
+            if (typeof switchToLevel3Music === 'function') {
+                switchToLevel3Music();
+            }
             // Draw simple splash
             // Draw styled splash with building theme
             ctx.fillStyle = '#0b0b16';
