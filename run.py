@@ -747,6 +747,54 @@ GAME_HTML = """
             </div>
         </div>
 
+        <!-- Level 3 Intro Cutscene Panels (after winning Level 2) -->
+        <div id="l3IntroPanel0" class="victory-panel l3-intro-panel">
+            <div class="panel-content">
+                <div class="dr-strange-times-square"></div>
+                <div class="speech-bubble">
+                    <strong>Doctor Strange:</strong> Well done, Spider-Man. You cleared the space dust — but it’s not over yet.
+                </div>
+                <div class="click-prompt">Click to continue</div>
+            </div>
+        </div>
+
+        <div id="l3IntroPanel1" class="victory-panel l3-intro-panel">
+            <div class="panel-content">
+                <div class="dr-strange-times-square"></div>
+                <div class="speech-bubble">
+                    <strong>Doctor Strange:</strong> The dust has spread… to the Empire State Building. And it’s climbing fast.
+                </div>
+                <div class="click-prompt">Click to continue</div>
+            </div>
+        </div>
+
+        <div id="l3IntroPanel2" class="victory-panel l3-intro-panel">
+            <div class="panel-content">
+                <div class="dr-strange-times-square"></div>
+                <div class="speech-bubble">
+                    <strong>Doctor Strange:</strong> You have until sunrise to clean it up. If even one speck remains, the world ends.
+                </div>
+                <div class="click-prompt">Click to continue</div>
+            </div>
+        </div>
+
+        <div id="l3IntroPanel3" class="victory-panel l3-intro-panel">
+            <div class="panel-content">
+                <div class="dr-strange-times-square"></div>
+                <div class="speech-bubble">
+                    <strong>Doctor Strange:</strong> But beware… you're not the only one racing to the top.
+                </div>
+                <div class="click-prompt">Click to continue</div>
+            </div>
+        </div>
+
+        <div id="l3IntroPanel4" class="victory-panel l3-intro-panel">
+            <div class="panel-content">
+                <div class="game-over-text">LEVEL 3: BLITZ</div>
+                <div class="click-prompt">Click to start</div>
+            </div>
+        </div>
+
 
 
         <!-- Game Canvas -->
@@ -794,6 +842,9 @@ GAME_HTML = """
         const totalPanels = 7;
         let currentVictoryPanel = 0;
         const totalVictoryPanels = 5;
+        let isLevel3Intro = false;
+        let currentL3IntroPanel = 0;
+        const totalL3IntroPanels = 5;
         
         // Level 1 game variables
         let level1State = 'intro'; // intro, splash, gameplay, win, lose
@@ -1809,6 +1860,35 @@ GAME_HTML = """
             console.log('=== showPanel() completed ===');
         }
 
+        // Level 3 Intro Cutscene controls
+        function showLevel3IntroPanel(panelNumber) {
+            // Hide all other panels
+            document.querySelectorAll('.comic-panel, .victory-panel').forEach(p => p.classList.remove('active'));
+            // Show requested L3 intro panel
+            const el = document.getElementById(`l3IntroPanel${panelNumber}`);
+            if (el) {
+                el.classList.add('active');
+                // Click to advance
+                el.onclick = function() {
+                    nextLevel3IntroPanel();
+                };
+            }
+        }
+
+        function nextLevel3IntroPanel() {
+            if (!isLevel3Intro) return;
+            if (currentL3IntroPanel < totalL3IntroPanels - 1) {
+                currentL3IntroPanel++;
+                showLevel3IntroPanel(currentL3IntroPanel);
+            } else {
+                // End intro → start Level 3
+                isLevel3Intro = false;
+                // Hide panels
+                document.querySelectorAll('.l3-intro-panel').forEach(p => p.classList.remove('active'));
+                startLevel3();
+            }
+        }
+
         // Game flow functions
         function startGame() {
             console.log('=== startGame() function called ===');
@@ -2659,7 +2739,7 @@ GAME_HTML = """
                     }
                 }
             }
-
+            
             renderGame();
         }
         
@@ -3830,14 +3910,16 @@ GAME_HTML = """
             if (currentLevel === 1) {
                 // After Level 1, show the Times Square comic and then Level 2
                 console.log('🔥 Setting state to victoryComic...');
-                currentState = 'victoryComic';
-                currentVictoryPanel = 0;
+            currentState = 'victoryComic';
+            currentVictoryPanel = 0;
                 console.log('🔥 Calling showVictoryPanel(0)...');
-                showVictoryPanel(0);
+            showVictoryPanel(0);
             } else if (currentLevel === 2) {
-                // After Level 2, go to Level 3 splash directly
-                console.log('🔥 Moving straight to Level 3');
-                startLevel3();
+                // After Level 2, show Level 3 Intro Cutscene first
+                console.log('🔥 Showing Level 3 Intro cutscene panels');
+                isLevel3Intro = true;
+                currentL3IntroPanel = 0;
+                showLevel3IntroPanel(0);
             } else {
                 // After Level 3, show generic win for now
                 alert('You escaped the Empire State! Thanks for playing.');
