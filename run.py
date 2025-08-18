@@ -4310,6 +4310,9 @@ GAME_HTML = """
                 ctx.restore();
             }
 
+            // Level 3: single life
+            lives = 1;
+
             // Populate dust for every walkable path tile ('.') in Level 3 design
             dustPositions = [];
             totalDust = 0;
@@ -4507,8 +4510,13 @@ GAME_HTML = """
                     const dx = nx - lizardX; const dy = ny - lizardY;
                     if (dx !== 0 || dy !== 0) { lizardX = nx; lizardY = ny; lizardFlipX = !lizardFlipX; setLizardFacing(dx, dy); }
                     if (lizardX === playerX && lizardY === playerY) {
-                        clearInterval(window.level3LizardInterval); window.level3LizardInterval = null; lizardActive = false;
-                        alert('The Lizard caught Spider-Man!');
+                        clearInterval(window.level3LizardInterval);
+                        window.level3LizardInterval = null;
+                        lizardActive = false;
+                        // Level 3 lose immediately (one life only)
+                        currentLevel = 3;
+                        showLoseScreen();
+                        return;
                     }
                     paintAll();
                 }, 220);
