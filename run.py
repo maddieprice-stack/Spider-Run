@@ -708,10 +708,30 @@ GAME_HTML = """
             animation: pulse 2s infinite;
             pointer-events: none; /* Ensure clicks pass through to parent */
         }
-        /* Strict click behavior for character select: only buttons are clickable */
-        #characterSelect { pointer-events: none; }
-        #characterSelect .panel-content { pointer-events: none; }
-        #characterSelect button.menu-button { pointer-events: auto; }
+
+        /* Comic overlay character selector */
+        .character-select-overlay {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: none;
+            flex-direction: column;
+            gap: 8px;
+            z-index: 10000;
+            background: rgba(0,0,0,0.6);
+            border: 3px solid #000;
+            box-shadow: 5px 5px 0 rgba(0,0,0,0.35);
+            padding: 12px;
+            border-radius: 8px;
+        }
+        .character-select-overlay .title {
+            color: #fff;
+            font: bold 16px "Comic Sans MS", sans-serif;
+            text-align: center;
+        }
+        .character-select-overlay .menu-button {
+            min-width: 160px;
+        }
     </style>
 </head>
 <body>
@@ -822,6 +842,13 @@ GAME_HTML = """
                     Be careful, Spider-Man. Some of your enemies are out tonight.
                 </div>
             </div>
+        </div>
+
+        <!-- Comic character choice overlay (appears on intro comic until chosen) -->
+        <div id="comicCharacterSelect" class="character-select-overlay">
+            <div class="title">Choose Your Spider</div>
+            <button class="menu-button" id="chooseSpiderFromComicBtn" onclick="setSelectedSpider('spiderman')">Spider-Man</button>
+            <button class="menu-button" id="chooseMilesFromComicBtn" onclick="setSelectedSpider('miles')">Miles Morales</button>
         </div>
 
         <!-- Post-Level 1 Victory Comic Panels -->
@@ -988,6 +1015,7 @@ GAME_HTML = """
         
         // Character selection state
         let selectedSpider = 'spiderman'; // 'spiderman' | 'miles'
+        let characterChosen = false;
         
         // Level 1 game variables
         let level1State = 'intro'; // intro, splash, gameplay, win, lose
@@ -2053,49 +2081,27 @@ GAME_HTML = """
             console.log('=== startGame() function called ===');
             console.log('Current state before:', currentState);
             playClickSound();
-            // Show character selection screen before intro comic
+            // Go straight to intro comic; choose character on comic overlay
             document.querySelectorAll('.comic-panel, .victory-panel, #titleScreen').forEach(p => {
                 p.classList.remove('active');
                 p.style.display = 'none';
             });
-            const sel = document.getElementById('characterSelect');
-            sel.classList.add('active');
-            sel.style.display = 'flex';
-            sel.style.position = 'fixed';
-            sel.style.top = '0';
-            sel.style.left = '0';
-            sel.style.width = '100vw';
-            sel.style.height = '100vh';
-            sel.style.visibility = 'visible';
-            sel.style.opacity = '1';
-            currentState = 'characterSelect';
-            console.log('=== startGame() function completed ===');
-        }
-
-        function chooseSpider(which) {
-            selectedSpider = which === 'miles' ? 'miles' : 'spiderman';
-            // Proceed to intro comic
-            document.getElementById('characterSelect').classList.remove('active');
-            document.getElementById('characterSelect').style.display = 'none';
-            // Ensure canvas is hidden beneath comics
-            const canvasEl = document.getElementById('gameCanvas');
-            if (canvasEl) { canvasEl.style.display = 'none'; }
+            characterChosen = false;
             currentState = 'comic';
             currentPanel = 0;
             showPanel(0);
+            const overlay = document.getElementById('comicCharacterSelect');
+            if (overlay) {
+                overlay.style.display = 'flex';
+            }
+            console.log('=== startGame() function completed ===');
         }
 
-        function goToIntroComic() {
-            // Preserve chosen spider (default stays as last selected)
-            document.getElementById('characterSelect').classList.remove('active');
-            document.getElementById('characterSelect').style.display = 'none';
-            // Ensure canvas is hidden beneath comics
-            const canvasEl = document.getElementById('gameCanvas');
-            if (canvasEl) { canvasEl.style.display = 'none'; }
-            currentState = 'comic';
-            currentPanel = 0;
-            // Defer to next frame to ensure DOM changes flush first
-            setTimeout(() => showPanel(0), 0);
+        function setSelectedSpider(which) {
+            selectedSpider = which === 'miles' ? 'miles' : 'spiderman';
+            characterChosen = true;
+            const overlay = document.getElementById('comicCharacterSelect');
+            if (overlay) overlay.style.display = 'none';
         }
         
         function skipToVictoryComic() {
@@ -4871,6 +4877,20 @@ GAME_HTML = """
             if (currentState === 'title') {
                 startGame();
             } else if (currentState === 'comic') {
+                // Require character selection before advancing from first panel
+                if (currentPanel === 0 && !characterChosen) {
+                    // flash overlay to prompt selection
+                    const overlay = document.getElementById('comicCharacterSelect');
+                    if (overlay) {
+                        overlay.style.display = 'flex';
+                        overlay.animate([
+                            { transform: 'scale(1)', filter: 'brightness(1)' },
+                            { transform: 'scale(1.03)', filter: 'brightness(1.3)' },
+                            { transform: 'scale(1)', filter: 'brightness(1)' }
+                        ], { duration: 300 });
+                    }
+                    return;
+                }
                 nextPanel();
             } else if (currentState === 'victoryComic') {
                 nextVictoryPanel();
