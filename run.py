@@ -1919,6 +1919,28 @@ GAME_HTML = """
                 console.log('Level 2 background music autoplay blocked:', error);
             });
         }
+
+        function switchToLevel3Music() {
+            // Stop current music
+            if (currentBackgroundMusic) {
+                currentBackgroundMusic.pause();
+                currentBackgroundMusic.currentTime = 0;
+            }
+            // Switch to Level 3 music
+            currentBackgroundMusic = new Audio('/static/Spider song 3.mp3');
+            currentBackgroundMusic.volume = 0.3; // Set volume to 30%
+            currentBackgroundMusic.loop = true;
+            currentBackgroundMusic.addEventListener('error', function() {
+                console.log('Level 3 music failed to load; falling back to default');
+                currentBackgroundMusic = new Audio('/static/background_music.mp3');
+                currentBackgroundMusic.volume = 0.3;
+                currentBackgroundMusic.loop = true;
+                currentBackgroundMusic.play().catch(err => console.log('Fallback music autoplay blocked:', err));
+            }, { once: true });
+            currentBackgroundMusic.play().catch(error => {
+                console.log('Level 3 background music autoplay blocked:', error);
+            });
+        }
         
         // Waka waka sound functions (disabled)
         /*
@@ -4089,6 +4111,10 @@ GAME_HTML = """
             canvas.style.display = 'block';
             canvas.style.border = 'none';
             currentState = 'gameplay';
+            // Switch to Level 3 music on loop
+            if (typeof switchToLevel3Music === 'function') {
+                switchToLevel3Music();
+            }
 
             // Prepare rotated map: rotate 90° so original LEFT becomes BOTTOM,
             // then force 'S' to bottom-left as requested
