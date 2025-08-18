@@ -4133,8 +4133,7 @@ GAME_HTML = """
             }
 
             let mapData = rotateClockwise(level3Map);
-            mapData = mirrorVertical(mapData);
-            mapData = mirrorHorizontal(mapData);
+            mapData = mirrorVertical(mapData); // flip across vertical axis (left-right)
             mapData = ensureStartAtBottomLeft(mapData);
 
             // Compute tile size to fit the rotated map
