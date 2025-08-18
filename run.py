@@ -819,7 +819,7 @@ GAME_HTML = """
                 <div class="dr-strange-webp-image"></div>
                 <div class="portal-sparks"></div>
                 <div class="speech-bubble">
-                    Well done, Spider-Man. You cleared the space dust — but it’s not over yet.
+                    Well done, Spider-Man. You cleared the space dust — but it's not over yet.
                 </div>
                 <div class="click-prompt">Click to continue</div>
             </div>
@@ -830,7 +830,7 @@ GAME_HTML = """
                 <div class="dr-strange-webp-image"></div>
                 <div class="magic-orb"></div>
                 <div class="speech-bubble">
-                    The dust has spread… to the Empire State Building. And it’s climbing fast.
+                    The dust has spread… to the Empire State Building. And it's climbing fast.
                 </div>
                 <div class="click-prompt">Click to continue</div>
             </div>
@@ -4031,6 +4031,48 @@ GAME_HTML = """
             ctx.fillText('Vertical maze ascent — reach the top!', canvas.width/2, canvas.height/2 + 4);
             ctx.font = '16px Comic Sans MS';
             ctx.fillText('Press SPACE or Click to continue', canvas.width/2, canvas.height/2 + 36);
+
+            // Background image splash with Empire skyline
+            const bg = new Image();
+            bg.onload = function() {
+                const iw = bg.naturalWidth;
+                const ih = bg.naturalHeight;
+                const scale = Math.max(canvas.width / iw, canvas.height / ih);
+                const dw = Math.ceil(iw * scale);
+                const dh = Math.ceil(ih * scale);
+                const dx = Math.floor((canvas.width - dw) / 2);
+                const dy = Math.floor((canvas.height - dh) / 2);
+                ctx.drawImage(bg, dx, dy, dw, dh);
+                drawSplashText();
+            };
+            bg.onerror = function() {
+                // Fallback gradient
+                ctx.fillStyle = '#0b0b16';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+                grad.addColorStop(0, '#351a4a');
+                grad.addColorStop(0.5, '#0b0b16');
+                grad.addColorStop(1, '#000');
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                drawSplashText();
+            };
+            bg.src = '/static/Empire%20View.jpg';
+
+            function drawSplashText() {
+                ctx.textAlign = 'center';
+                ctx.strokeStyle = 'rgba(0,0,0,0.75)';
+                ctx.lineWidth = 6;
+                ctx.fillStyle = '#ff2d2d';
+                ctx.font = 'bold 52px Comic Sans MS';
+                ctx.strokeText('LEVEL 3: EMPIRE RUSH', canvas.width/2, canvas.height/2 - 40);
+                ctx.fillText('LEVEL 3: EMPIRE RUSH', canvas.width/2, canvas.height/2 - 40);
+                ctx.fillStyle = '#ffffff';
+                ctx.font = '20px Comic Sans MS';
+                ctx.fillText('Vertical maze ascent — reach the top!', canvas.width/2, canvas.height/2 + 4);
+                ctx.font = '16px Comic Sans MS';
+                ctx.fillText('Press SPACE or Click to continue', canvas.width/2, canvas.height/2 + 36);
+            }
         }
 
         function startLevel3Placeholder() {
