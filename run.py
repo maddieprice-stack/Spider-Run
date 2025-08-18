@@ -4295,12 +4295,28 @@ GAME_HTML = """
                 const px = playerX * tileSize;
                 const py = playerY * tileSize;
                 if (level3SpideyReady) {
-                    const scale = Math.min(tileSize / level3SpideyImg.naturalWidth, tileSize / level3SpideyImg.naturalHeight) * 0.9;
-                    const dw = Math.max(1, Math.round(level3SpideyImg.naturalWidth * scale));
-                    const dh = Math.max(1, Math.round(level3SpideyImg.naturalHeight * scale));
+                    // Draw a bright outline circle behind Spider-Man for visibility
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.arc(px + tileSize / 2, py + tileSize / 2, Math.max(6, Math.floor(tileSize * 0.42)), 0, Math.PI * 2);
+                    ctx.fillStyle = 'rgba(255, 230, 0, 0.28)';
+                    ctx.fill();
+                    ctx.restore();
+
+                    // Draw the sprite using cover scaling and clip to tile bounds
+                    const iw = level3SpideyImg.naturalWidth;
+                    const ih = level3SpideyImg.naturalHeight;
+                    const scale = Math.max(tileSize / iw, tileSize / ih);
+                    const dw = Math.ceil(iw * scale);
+                    const dh = Math.ceil(ih * scale);
                     const dx = Math.floor(px + (tileSize - dw) / 2);
                     const dy = Math.floor(py + (tileSize - dh) / 2);
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.rect(px, py, tileSize, tileSize);
+                    ctx.clip();
                     ctx.drawImage(level3SpideyImg, dx, dy, dw, dh);
+                    ctx.restore();
                 } else {
                     // Fallback: red dot
                     ctx.fillStyle = '#ff2d2d';
@@ -4310,21 +4326,8 @@ GAME_HTML = """
                 }
             }
 
-            function drawInstructionOverlay() {
-                ctx.save();
-                ctx.fillStyle = 'rgba(0,0,0,0.35)';
-                const overlayHeight = 48;
-                ctx.fillRect(0, canvas.height - overlayHeight, canvas.width, overlayHeight);
-                ctx.fillStyle = '#ffffff';
-                ctx.font = '16px Comic Sans MS';
-                ctx.textAlign = 'center';
-                ctx.fillText('Design preview: Empire State Building maze (S → G). Characters and enemies to be added.', canvas.width / 2, canvas.height - 18);
-                ctx.restore();
-            }
-
             function paintAll() {
                 drawLevel3Grid();
-                drawInstructionOverlay();
                 drawLevel3Player();
             }
 
@@ -4355,7 +4358,13 @@ GAME_HTML = """
                 });
             }
 
-            
+            // Instruction overlay
+            ctx.fillStyle = 'rgba(0,0,0,0.35)';
+            ctx.fillRect(0, canvas.height - 48, canvas.width, 48);
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '16px Comic Sans MS';
+            ctx.textAlign = 'center';
+            ctx.fillText('Design preview: Empire State Building maze (S → G). Characters and enemies to be added.', canvas.width / 2, canvas.height - 18);
         }
         
         function resetGame() {
