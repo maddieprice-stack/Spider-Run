@@ -2527,6 +2527,17 @@ GAME_HTML = """
             currentLevel = 3;
             initLevel3();
 
+            // Hide any overlays/title/comics that might be visible
+            const titleScreenEl = document.getElementById('titleScreen');
+            if (titleScreenEl) {
+                titleScreenEl.classList.remove('active');
+                titleScreenEl.style.display = 'none';
+            }
+            document.querySelectorAll('.comic-panel, .victory-panel, .win-loss-cutscene').forEach(p => {
+                p.classList.remove('active');
+                p.style.display = 'none';
+            });
+
             // Splash screen
             const canvas = document.getElementById('gameCanvas');
             const ctx = canvas.getContext('2d');
