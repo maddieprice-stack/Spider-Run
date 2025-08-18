@@ -4326,8 +4326,22 @@ GAME_HTML = """
                 }
             }
 
+            function drawInstructionOverlay() {
+                const overlayHeight = 48;
+                // Draw instruction bar first so grid and player can render above it
+                ctx.save();
+                ctx.fillStyle = 'rgba(0,0,0,0.28)';
+                ctx.fillRect(0, canvas.height - overlayHeight, canvas.width, overlayHeight);
+                ctx.fillStyle = '#ffffff';
+                ctx.font = '16px Comic Sans MS';
+                ctx.textAlign = 'center';
+                ctx.fillText('Design preview: Empire State Building maze (S → G). Characters and enemies to be added.', canvas.width / 2, canvas.height - 18);
+                ctx.restore();
+            }
+
             function paintAll() {
                 drawLevel3Grid();
+                drawInstructionOverlay();
                 drawLevel3Player();
             }
 
@@ -4358,13 +4372,7 @@ GAME_HTML = """
                 });
             }
 
-            // Instruction overlay
-            ctx.fillStyle = 'rgba(0,0,0,0.35)';
-            ctx.fillRect(0, canvas.height - 48, canvas.width, 48);
-            ctx.fillStyle = '#ffffff';
-            ctx.font = '16px Comic Sans MS';
-            ctx.textAlign = 'center';
-            ctx.fillText('Design preview: Empire State Building maze (S → G). Characters and enemies to be added.', canvas.width / 2, canvas.height - 18);
+            // Overlay now drawn inside paintAll beneath the player
         }
         
         function resetGame() {
