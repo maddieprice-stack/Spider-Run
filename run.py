@@ -4289,7 +4289,7 @@ GAME_HTML = """
             let level3SpideyReady = false;
             level3SpideyImg.onload = function() { level3SpideyReady = true; paintAll(); };
             level3SpideyImg.onerror = function() { level3SpideyReady = false; paintAll(); };
-            level3SpideyImg.src = '/static/Spider-man%20sprite.png';
+            level3SpideyImg.src = '/static/Spider-man%20climb.png';
 
             function drawLevel3Player() {
                 const px = playerX * tileSize;
