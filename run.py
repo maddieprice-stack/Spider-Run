@@ -4856,22 +4856,22 @@ GAME_HTML = """
 
         // Event listeners
         document.addEventListener('click', function(e) {
-            // Don't handle clicks on buttons - let button event listeners handle them
-            if (e.target.tagName === 'BUTTON' || e.target.closest('button')) {
-                // Allow character select buttons to work normally
-                return;
+            const isButton = (e.target.tagName === 'BUTTON' || e.target.closest('button'));
+            // During character select, ignore ALL non-button clicks silently
+            if (!isButton && currentState === 'characterSelect') {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
             }
             
+            // Log only when not in characterSelect background
+            if (!(currentState === 'characterSelect' && !isButton)) {
             console.log('Click detected, currentState:', currentState);
+            }
             if (currentState === 'title') {
                 startGame();
             } else if (currentState === 'comic') {
                 nextPanel();
-            } else if (currentState === 'characterSelect') {
-                // Strictly ignore all non-button clicks in character select
-                e.preventDefault();
-                e.stopPropagation();
-                return false;
             } else if (currentState === 'victoryComic') {
                 nextVictoryPanel();
             } else if (currentState === 'level3Intro') {
