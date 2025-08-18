@@ -4215,7 +4215,7 @@ GAME_HTML = """
                             const py = y * tileSize;
                             if (ch === '#') {
                                 if (wallReady) {
-                                    // Draw textured wall tile (cover mode)
+                                    // Draw textured wall tile (cover mode) and crop to tile bounds
                                     const iw = wallImg.naturalWidth;
                                     const ih = wallImg.naturalHeight;
                                     const scale = Math.max(tileSize / iw, tileSize / ih);
@@ -4223,7 +4223,12 @@ GAME_HTML = """
                                     const dh = Math.ceil(ih * scale);
                                     const dx = Math.floor(px + (tileSize - dw) / 2);
                                     const dy = Math.floor(py + (tileSize - dh) / 2);
+                                    ctx.save();
+                                    ctx.beginPath();
+                                    ctx.rect(px, py, tileSize, tileSize);
+                                    ctx.clip();
                                     ctx.drawImage(wallImg, dx, dy, dw, dh);
+                                    ctx.restore();
                                 } else {
                                     // Fallback solid wall
                                     ctx.fillStyle = '#2a2f3a';
