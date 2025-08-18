@@ -811,6 +811,8 @@ GAME_HTML = """
         
         // Level 2 game variables
         let level2State = 'intro'; // intro, splash, gameplay, win, lose
+        // Level 3 game variables
+        let level3State = 'intro'; // intro, splash, gameplay, win, lose
         let currentLevel = 1; // Track current level
         
         // Taxi riding system
@@ -867,6 +869,25 @@ GAME_HTML = """
             "R.####.###...####...###.####.R",
             "#W...........####...........W#",
             "##############################"
+        ];
+        
+        // Level 3 map data - Blitz Mode (Empire State Building) from PRD
+        const level3Map = [
+            "##############################",
+            "#.......###.......#.....#...G#",
+            "#.#####.###.#####.#.###.###.##",
+            "#.#...#.###.....#...#.....#.##",
+            "#.#.#.#.#######.#####.#####.##",
+            "#...#.#.........#...#.....#..#",
+            "#####.###########.#.#####.#.##",
+            "#.....#.........#.#.#...#.#..#",
+            "#.#####.#######.#.#.#.#.#.#.##",
+            "#.#.....###.....#.#.#.#...#..#",
+            "#.###.#####.#####.#.#.#####.##",
+            "#.....#...#.....#.#.......#..#",
+            "#######.#.#####.#.#########.##",
+            "#.......#.......#............#",
+            "S#############################"
         ];
         
         // Function to process ASCII maze with flood-fill
@@ -934,7 +955,7 @@ GAME_HTML = """
         
         function isWalkable(char) {
             return char === '.' || char === ' ' || char === 'W' || char === 'T' || 
-                   char === 'V' || char === '-' || char === 'S' || char === 'E' || char === 'R';
+                   char === 'V' || char === '-' || char === 'S' || char === 'E' || char === 'R' || char === 'G';
         }
         
         function isPassable(char) {
@@ -975,6 +996,12 @@ GAME_HTML = """
         // Villain spawn positions - these will be set dynamically based on V positions in the map
         let villainSpawns = [];
         
+        // Level 3 specific state (Lizard chase)
+        let level3Goal = { x: null, y: null };
+        let level3Spawn = { x: null, y: null };
+        let lizardSpawned = false;
+        let lizardSpawnDelayFrames = 60; // ~1s delay before Lizard appears
+        
         // Global frame counter and last-ability timestamps to avoid simultaneous triggers
         let globalFrameCounter = 0;
         let lastDocOckAbilityFrame = -99999;
@@ -989,7 +1016,8 @@ GAME_HTML = """
             { name: 'Vulture', color: '#006400', speed: 1.1, ability: 'windGust' },
             { name: 'Venom', color: '#000000', speed: 1.1, ability: 'windGust' },
             { name: 'Mysterio', color: '#4B0082', speed: 0.8, ability: 'illusion' },
-            { name: 'Electro', color: '#FFD700', speed: 1.2, ability: 'lightning' }
+            { name: 'Electro', color: '#FFD700', speed: 1.2, ability: 'lightning' },
+            { name: 'Lizard', color: '#2e8b57', speed: 1.0, ability: null }
         ];
         
         // Villain state
@@ -1042,7 +1070,8 @@ GAME_HTML = """
             'Vulture': null,
             'Venom': null,
             'Mysterio': null,
-            'Electro': null
+            'Electro': null,
+            'Lizard': null
         };
         let villainSpritesLoaded = 0;
         
@@ -1198,7 +1227,8 @@ GAME_HTML = """
                 'Vulture': '/static/Vulture.png',
                 'Venom': '/static/Venom.png',
                 'Mysterio': '/static/Mysterio.png',
-                'Electro': '/static/Electro.png'
+                'Electro': '/static/Electro.png',
+                'Lizard': '/static/Lizard.png'
             };
             
             Object.keys(villainPaths).forEach(villainName => {
@@ -1260,7 +1290,7 @@ GAME_HTML = """
             villains = [];
             
             // Get current map to find V positions
-            const currentMap = currentLevel === 1 ? level1Map : level2Map;
+            const currentMap = currentLevel === 1 ? level1Map : (currentLevel === 2 ? level2Map : level3Map);
             
             // Find all V positions in the map
             villainSpawns = [];
@@ -1370,7 +1400,7 @@ GAME_HTML = """
         }
         
         function setNewTarget(villain) {
-            const currentMap = currentLevel === 1 ? level1Map : level2Map;
+            const currentMap = currentLevel === 1 ? level1Map : (currentLevel === 2 ? level2Map : level3Map);
             const processedMap = currentLevel === 1 ? processMazeWithFloodFill(currentMap) : currentMap;
             
             // All villains can move freely - just pick random valid positions
@@ -1461,7 +1491,7 @@ GAME_HTML = """
         }
         
         function moveTowardsTarget(villain) {
-            const currentMap = currentLevel === 1 ? level1Map : level2Map;
+            const currentMap = currentLevel === 1 ? level1Map : (currentLevel === 2 ? level2Map : level3Map);
             const processedMap = currentLevel === 1 ? processMazeWithFloodFill(currentMap) : currentMap;
             
             // Find the best path to target using A* pathfinding
@@ -2348,6 +2378,98 @@ GAME_HTML = """
             // Initialize waka waka sound (disabled)
             // initWakaWakaSound();
         }
+
+        // Level 3: Empire State Blitz
+        function initLevel3() {
+            console.log('=== initLevel3() called ===');
+            // Reset game state for Level 3
+            dustCollected = 0;
+            totalDust = 0;
+            lives = 5; // per-level lives
+            score = 0;
+            webShooterActive = false;
+            webShooterTimer = 0;
+            isRidingTaxi = false;
+            winLock = false;
+
+            // Clear arrays
+            dustPositions = [];
+            webShooterPositions = [];
+            villainPositions = [];
+            taxiStopPositions = [];
+            bombPositions = [];
+            crashPositions = [];
+            villains = [];
+
+            // Parse Level 3 map for S and G
+            const processedMap = level3Map; // No flood fill for L3
+            level3Goal = { x: null, y: null };
+            level3Spawn = { x: null, y: null };
+            for (let y = 0; y < processedMap.length; y++) {
+                for (let x = 0; x < processedMap[y].length; x++) {
+                    const tile = processedMap[y][x];
+                    if (tile === '.') {
+                        dustPositions.push({ x, y });
+                        totalDust++;
+                    } else if (tile === 'S') {
+                        level3Spawn = { x, y };
+                    } else if (tile === 'G') {
+                        level3Goal = { x, y };
+                    }
+                }
+            }
+            // Default to bottom-left if not found
+            if (level3Spawn.x === null) level3Spawn = { x: 0, y: level3Map.length - 1 };
+            if (level3Goal.x === null) level3Goal = { x: level3Map[0].length - 2, y: 1 };
+
+            // Set player to S
+            playerX = level3Spawn.x;
+            playerY = level3Spawn.y;
+
+            // Spawn only Lizard after delay
+            lizardSpawned = false;
+            lizardSpawnDelayFrames = 60;
+
+            // Load art
+            loadWebImage();
+            loadTaxiImage();
+            loadTaxiSpiderManSprite();
+            loadSwingSpiderManSprites();
+            loadVillainSprites();
+
+            // Init background music (reuse existing track)
+            initBackgroundMusic();
+        }
+
+        function startLevel3() {
+            console.log('=== startLevel3() called ===');
+            level3State = 'splash';
+            currentLevel = 3;
+            initLevel3();
+
+            // Splash screen
+            const canvas = document.getElementById('gameCanvas');
+            const ctx = canvas.getContext('2d');
+            canvas.style.display = 'block';
+            canvas.style.border = '5px solid #000';
+            canvas.style.boxShadow = '5px 5px 0px rgba(0,0,0,0.3)';
+
+            ctx.fillStyle = '#1a1a2e';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#ffff00';
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 3;
+            ctx.font = 'bold 48px Comic Sans MS';
+            ctx.textAlign = 'center';
+            const title = 'LEVEL 3: EMPIRE STATE (BLITZ)';
+            ctx.strokeText(title, canvas.width/2, 100);
+            ctx.fillText(title, canvas.width/2, 100);
+
+            setTimeout(() => {
+                level3State = 'gameplay';
+                initGameplay();
+            }, 1500);
+        }
         
         function initGameplay() {
             console.log('=== initGameplay() called ===');
@@ -2360,7 +2482,7 @@ GAME_HTML = """
             canvas.style.display = 'block';
             
             // Get current level map
-            const currentMap = currentLevel === 1 ? level1Map : level2Map;
+            const currentMap = currentLevel === 1 ? level1Map : (currentLevel === 2 ? level2Map : level3Map);
             
             // Calculate optimal tile size to fit screen horizontally
             const maxWidth = window.innerWidth * 0.98; // 98% of screen width for maximum horizontal coverage
@@ -2382,6 +2504,8 @@ GAME_HTML = """
             
             // Add keyboard controls
             document.addEventListener('keydown', handleKeyPress);
+            // Expose cheats for testing
+            window.startLevel3 = startLevel3;
             
             // Ensure canvas doesn't interfere with UI overlays
             if (canvas) {
@@ -2394,7 +2518,7 @@ GAME_HTML = """
         
         function updateGame() {
             if (currentState !== 'gameplay') return;
-            const currentLevelState = currentLevel === 1 ? level1State : level2State;
+            const currentLevelState = currentLevel === 1 ? level1State : (currentLevel === 2 ? level2State : level3State);
             if (currentLevelState !== 'gameplay') return;
             
             // Increment global frame counter
@@ -2454,8 +2578,16 @@ GAME_HTML = """
             // Check villain collision
             checkVillainCollision();
             
-            // Check win condition (but not if we just came from victory comic)
-            if (dustCollected >= totalDust && dustCollected > 0) {
+            // Level-specific win condition
+            if (currentLevel === 3) {
+                // Reach goal tile G
+                if (level3Goal && playerX === level3Goal.x && playerY === level3Goal.y) {
+                    console.log('🔥🔥🔥 LEVEL 3 GOAL REACHED!');
+                    clearInterval(gameLoop);
+                    showWinScreen();
+                    return;
+                }
+            } else if (dustCollected >= totalDust && dustCollected > 0) {
                 console.log('🔥🔥🔥 WIN CONDITION TRIGGERED! 🔥🔥🔥');
                 console.log('🔥 Dust collected:', dustCollected);
                 console.log('🔥 Total dust:', totalDust);
@@ -2492,6 +2624,42 @@ GAME_HTML = """
                 return;
             }
             
+            // Level 3: spawn and update Lizard chase
+            if (currentLevel === 3) {
+                if (!lizardSpawned) {
+                    if (lizardSpawnDelayFrames > 0) {
+                        lizardSpawnDelayFrames--;
+                    } else {
+                        // Spawn Lizard at spawn tile (just below player start or bottom area)
+                        const spawnX = Math.max(0, level3Spawn.x);
+                        const spawnY = Math.min(level3Map.length - 1, level3Spawn.y);
+                        villains.push({
+                            x: spawnX,
+                            y: spawnY,
+                            type: 'Lizard',
+                            color: '#2e8b57',
+                            speed: 1.0,
+                            ability: null,
+                            direction: 'up',
+                            moveTimer: 0,
+                            targetX: playerX,
+                            targetY: playerY,
+                            stunned: false,
+                            stunnedTimer: 0,
+                            abilityTimer: 0
+                        });
+                        lizardSpawned = true;
+                    }
+                } else {
+                    // Lizard always targets the player
+                    const liz = villains.find(v => v.type === 'Lizard');
+                    if (liz) {
+                        liz.targetX = playerX;
+                        liz.targetY = playerY;
+                    }
+                }
+            }
+
             renderGame();
         }
         
@@ -2520,7 +2688,10 @@ GAME_HTML = """
                 };
                 if (currentLevel === 1) {
                     window.backgroundImage.src = '/static/East_Village_Pixel_Scape.png';
+                } else if (currentLevel === 2) {
+                    window.backgroundImage.src = '/static/Times Square Pixel.png';
                 } else {
+                    // Placeholder background for Level 3
                     window.backgroundImage.src = '/static/Times Square Pixel.png';
                 }
             }
@@ -2625,7 +2796,7 @@ GAME_HTML = """
             }
             
             // Get processed map based on current level
-            const currentMap = currentLevel === 1 ? level1Map : level2Map;
+            const currentMap = currentLevel === 1 ? level1Map : (currentLevel === 2 ? level2Map : level3Map);
             const processedMap = currentLevel === 1 ? processMazeWithFloodFill(currentMap) : currentMap;
             
             // Draw map elements
@@ -3169,9 +3340,13 @@ GAME_HTML = """
                         if (currentLevel === 1) {
                             playerX = 13; // Level 1 spawn position
                         playerY = 12;
-                        } else {
+                        } else if (currentLevel === 2) {
                             playerX = 15; // Level 2 spawn position (S in ASCII)
                             playerY = 9;
+                        } else {
+                            // Level 3 respawn at S
+                            playerX = level3Spawn.x;
+                            playerY = level3Spawn.y;
                         }
                     }
                 }
@@ -3192,7 +3367,7 @@ GAME_HTML = """
             ctx.fillText(`Score: ${score}`, canvas.width/2 - tileSize * 2.5, hudY);
             
             // Level
-            const levelText = currentLevel === 1 ? 'Level 1: East Village' : 'Level 2: Times Square';
+            const levelText = currentLevel === 1 ? 'Level 1: East Village' : (currentLevel === 2 ? 'Level 2: Times Square' : 'Level 3: Empire State');
             ctx.fillText(levelText, canvas.width - tileSize * 10, hudY);
             
             // Villain ability status
@@ -3236,7 +3411,7 @@ GAME_HTML = """
             // Don't allow movement while riding taxi
             if (isRidingTaxi) return;
             
-            const currentMap = currentLevel === 1 ? level1Map : level2Map;
+            const currentMap = currentLevel === 1 ? level1Map : (currentLevel === 2 ? level2Map : level3Map);
             const processedMap = currentLevel === 1 ? processMazeWithFloodFill(currentMap) : currentMap;
             const newX = playerX;
             const newY = playerY;
@@ -3652,15 +3827,22 @@ GAME_HTML = """
                 console.log('🔥 Canvas hidden');
             }
             
-            // Show victory comic panels
-            console.log('🔥 Setting state to victoryComic...');
-            currentState = 'victoryComic';
-            currentVictoryPanel = 0;
-            console.log('🔥 State changed to:', currentState);
-            console.log('🔥 Victory panel set to:', currentVictoryPanel);
-            
-            console.log('🔥 Calling showVictoryPanel(0)...');
-            showVictoryPanel(0);
+            if (currentLevel === 1) {
+                // After Level 1, show the Times Square comic and then Level 2
+                console.log('🔥 Setting state to victoryComic...');
+                currentState = 'victoryComic';
+                currentVictoryPanel = 0;
+                console.log('🔥 Calling showVictoryPanel(0)...');
+                showVictoryPanel(0);
+            } else if (currentLevel === 2) {
+                // After Level 2, go to Level 3 splash directly
+                console.log('🔥 Moving straight to Level 3');
+                startLevel3();
+            } else {
+                // After Level 3, show generic win for now
+                alert('You escaped the Empire State! Thanks for playing.');
+                returnToTitle();
+            }
             console.log('🔥🔥🔥 === continueToNextLevel() completed === 🔥🔥🔥');
         }
         
