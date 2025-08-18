@@ -4265,8 +4265,11 @@ GAME_HTML = """
                 cameraX = Math.max(0, Math.min(cameraX, mapCanvas.width - canvas.width));
                 cameraY = Math.max(0, Math.min(cameraY, mapCanvas.height - canvas.height));
 
-                const cx = Math.floor(canvas.width / 2);
-                const cy = Math.floor(canvas.height / 2);
+                // Center circular viewport on player's screen position so Spidey is always visible
+                const playerScreenX = Math.floor(playerX * tileSize - cameraX + tileSize / 2);
+                const playerScreenY = Math.floor(playerY * tileSize - cameraY + tileSize / 2);
+                const cx = playerScreenX;
+                const cy = playerScreenY;
                 const radius = Math.floor(Math.min(canvas.width, canvas.height) * 0.48);
 
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
