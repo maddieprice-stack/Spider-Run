@@ -4348,7 +4348,7 @@ GAME_HTML = """
             let lizardFlipX = false;
             const lizardImg = new Image();
             let lizardReady = false;
-            lizardImg.onload = function() { lizardReady = true; };
+            lizardImg.onload = function() { lizardReady = true; paintAll(); };
             lizardImg.onerror = function() { lizardReady = false; };
             lizardImg.src = '/static/Lizard.png';
             if (window.level3LizardInterval) { clearInterval(window.level3LizardInterval); window.level3LizardInterval = null; }
@@ -4409,8 +4409,8 @@ GAME_HTML = """
                 if (lizardReady) {
                     const iw = lizardImg.naturalWidth;
                     const ih = lizardImg.naturalHeight;
-                    const maxDrawW = Math.floor(tileSize * 0.9);
-                    const maxDrawH = Math.floor(tileSize * 0.9);
+                    const maxDrawW = Math.floor(tileSize * 0.98);
+                    const maxDrawH = Math.floor(tileSize * 0.98);
                     const scale = Math.min(maxDrawW / iw, maxDrawH / ih);
                     const dw = Math.max(1, Math.round(iw * scale));
                     const dh = Math.max(1, Math.round(ih * scale));
@@ -4418,6 +4418,11 @@ GAME_HTML = """
                     ctx.translate(cx, cy);
                     ctx.rotate(lizardRotation);
                     ctx.scale(lizardFlipX ? -1 : 1, 1);
+                    // subtle shadow for visibility
+                    ctx.shadowColor = 'rgba(0,0,0,0.35)';
+                    ctx.shadowBlur = Math.max(2, Math.floor(tileSize * 0.1));
+                    ctx.shadowOffsetX = 0;
+                    ctx.shadowOffsetY = 0;
                     ctx.drawImage(lizardImg, Math.floor(-dw / 2), Math.floor(-dh / 2), dw, dh);
                     ctx.restore();
                 } else {
@@ -4494,6 +4499,8 @@ GAME_HTML = """
                 const startNeighbors = neighborsOf(playerX, playerY);
                 if (startNeighbors.length) { [lizardX, lizardY] = startNeighbors[0]; }
                 else { lizardX = playerX; lizardY = playerY; }
+                // Immediately paint so Lizard appears as soon as he spawns
+                paintAll();
                 window.level3LizardInterval = setInterval(function() {
                     if (currentLevel !== 3 || currentState !== 'gameplay') return;
                     const [nx, ny] = computeNextStep(lizardX, lizardY, playerX, playerY);
