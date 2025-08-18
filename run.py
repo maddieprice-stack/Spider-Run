@@ -4148,6 +4148,111 @@ GAME_HTML = """
             canvas.width = cols * tileSize;
             canvas.height = rows * tileSize;
 
+            // Offscreen buffer for static map to prevent flicker
+            const mapCanvas = document.createElement('canvas');
+            mapCanvas.width = cols * tileSize;
+            mapCanvas.height = rows * tileSize;
+            const mapCtx = mapCanvas.getContext('2d');
+
+            // Cache textures once
+            const wallImg = new Image();
+            let wallReady = false;
+            wallImg.onload = function() { wallReady = true; renderStaticMap(); renderFrame(); };
+            wallImg.onerror = function() { wallReady = false; renderStaticMap(); renderFrame(); };
+            wallImg.src = '/static/Square.png';
+
+            const walkImg = new Image();
+            let walkReady = false;
+            walkImg.onload = function() { walkReady = true; renderStaticMap(); renderFrame(); };
+            walkImg.onerror = function() { walkReady = false; renderStaticMap(); renderFrame(); };
+            walkImg.src = '/static/Walkable%203.png';
+
+            function renderStaticMap() {
+                // Draw the static grid to offscreen canvas
+                mapCtx.fillStyle = '#0b0b16';
+                mapCtx.fillRect(0, 0, mapCanvas.width, mapCanvas.height);
+                for (let y = 0; y < rows; y++) {
+                    for (let x = 0; x < cols; x++) {
+                        const ch = mapData[y][x];
+                        const px = x * tileSize;
+                        const py = y * tileSize;
+                        if (ch === '#') {
+                            if (wallReady) {
+                                const iw = wallImg.naturalWidth;
+                                const ih = wallImg.naturalHeight;
+                                const scale = Math.max(tileSize / iw, tileSize / ih);
+                                const dw = Math.ceil(iw * scale);
+                                const dh = Math.ceil(ih * scale);
+                                const dx = Math.floor(px + (tileSize - dw) / 2);
+                                const dy = Math.floor(py + (tileSize - dh) / 2);
+                                mapCtx.save();
+                                mapCtx.beginPath();
+                                mapCtx.rect(px, py, tileSize, tileSize);
+                                mapCtx.clip();
+                                mapCtx.drawImage(wallImg, dx, dy, dw, dh);
+                                mapCtx.restore();
+                            } else {
+                                mapCtx.fillStyle = '#2a2f3a';
+                                mapCtx.fillRect(px, py, tileSize, tileSize);
+                                mapCtx.strokeStyle = '#4c5566';
+                                mapCtx.strokeRect(px + 0.5, py + 0.5, tileSize - 1, tileSize - 1);
+                            }
+                        } else if (ch === 'S') {
+                            mapCtx.fillStyle = '#14203a';
+                            mapCtx.fillRect(px, py, tileSize, tileSize);
+                            mapCtx.fillStyle = '#00bfff';
+                            mapCtx.font = `${Math.floor(tileSize * 0.6)}px Comic Sans MS`;
+                            mapCtx.textAlign = 'center';
+                            mapCtx.textBaseline = 'middle';
+                            mapCtx.fillText('S', px + tileSize / 2, py + tileSize / 2);
+                        } else if (ch === 'G') {
+                            mapCtx.fillStyle = '#1d2a4d';
+                            mapCtx.fillRect(px, py, tileSize, tileSize);
+                            mapCtx.fillStyle = '#ff2d2d';
+                            mapCtx.font = `${Math.floor(tileSize * 0.6)}px Comic Sans MS`;
+                            mapCtx.textAlign = 'center';
+                            mapCtx.textBaseline = 'middle';
+                            mapCtx.fillText('G', px + tileSize / 2, py + tileSize / 2);
+                        } else {
+                            if (walkReady) {
+                                const iw = walkImg.naturalWidth;
+                                const ih = walkImg.naturalHeight;
+                                const scale = Math.max(tileSize / iw, tileSize / ih);
+                                const dw = Math.ceil(iw * scale);
+                                const dh = Math.ceil(ih * scale);
+                                const dx = Math.floor(px + (tileSize - dw) / 2);
+                                const dy = Math.floor(py + (tileSize - dh) / 2);
+                                mapCtx.drawImage(walkImg, dx, dy, dw, dh);
+                            } else {
+                                mapCtx.fillStyle = '#101521';
+                                mapCtx.fillRect(px, py, tileSize, tileSize);
+                            }
+                        }
+                    }
+                }
+            }
+
+            function renderDustOverlay() {
+                // Draw dust pellets for remaining dustPositions
+                if (!dustPositions || dustPositions.length === 0) return;
+                ctx.fillStyle = '#ffffff';
+                for (const d of dustPositions) {
+                    const px = d.x * tileSize;
+                    const py = d.y * tileSize;
+                    ctx.beginPath();
+                    const r = Math.max(2, Math.floor(tileSize * 0.12));
+                    ctx.arc(px + tileSize / 2, py + tileSize / 2, r, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            function renderFrame() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(mapCanvas, 0, 0);
+                renderDustOverlay();
+                drawLevel3Player();
+            }
+
             // Populate dust for every walkable path tile ('.') in Level 3 design
             dustPositions = [];
             totalDust = 0;
@@ -4176,117 +4281,13 @@ GAME_HTML = """
             // Expose processed map for Level 3 controls
             window.level3ProcessedMap = mapData;
 
-            // Simple draw of the vertical maze
+            // Simple draw uses the offscreen map buffer
             function drawLevel3Grid() {
-                // Background
-                ctx.fillStyle = '#0b0b16';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                // Prepare textures
-                const wallImg = new Image();
-                let wallReady = false;
-                wallImg.onload = function() {
-                    wallReady = true;
-                    paint();
-                };
-                wallImg.onerror = function() {
-                    wallReady = false;
-                    paint();
-                };
-                wallImg.src = '/static/Square.png';
-
-                const walkImg = new Image();
-                let walkReady = false;
-                walkImg.onload = function() {
-                    walkReady = true;
-                    paint();
-                };
-                walkImg.onerror = function() {
-                    walkReady = false;
-                    paint();
-                };
-                walkImg.src = '/static/Walkable%203.png';
-
-                function paint() {
-                    // Grid pass
-                    for (let y = 0; y < rows; y++) {
-                        for (let x = 0; x < cols; x++) {
-                            const ch = mapData[y][x];
-                            const px = x * tileSize;
-                            const py = y * tileSize;
-                            if (ch === '#') {
-                                if (wallReady) {
-                                    // Draw textured wall tile (cover mode) and crop to tile bounds
-                                    const iw = wallImg.naturalWidth;
-                                    const ih = wallImg.naturalHeight;
-                                    const scale = Math.max(tileSize / iw, tileSize / ih);
-                                    const dw = Math.ceil(iw * scale);
-                                    const dh = Math.ceil(ih * scale);
-                                    const dx = Math.floor(px + (tileSize - dw) / 2);
-                                    const dy = Math.floor(py + (tileSize - dh) / 2);
-                                    ctx.save();
-                                    ctx.beginPath();
-                                    ctx.rect(px, py, tileSize, tileSize);
-                                    ctx.clip();
-                                    ctx.drawImage(wallImg, dx, dy, dw, dh);
-                                    ctx.restore();
-                                } else {
-                                    // Fallback solid wall
-                                    ctx.fillStyle = '#2a2f3a';
-                                    ctx.fillRect(px, py, tileSize, tileSize);
-                                    ctx.strokeStyle = '#4c5566';
-                                    ctx.strokeRect(px + 0.5, py + 0.5, tileSize - 1, tileSize - 1);
-                                }
-                            } else if (ch === 'S') {
-                                // Start marker
-                                ctx.fillStyle = '#14203a';
-                                ctx.fillRect(px, py, tileSize, tileSize);
-                                ctx.fillStyle = '#00bfff';
-                                ctx.font = `${Math.floor(tileSize * 0.6)}px Comic Sans MS`;
-                                ctx.textAlign = 'center';
-                                ctx.textBaseline = 'middle';
-                                ctx.fillText('S', px + tileSize / 2, py + tileSize / 2);
-                            } else if (ch === 'G') {
-                                // Goal marker
-                                ctx.fillStyle = '#1d2a4d';
-                                ctx.fillRect(px, py, tileSize, tileSize);
-                                ctx.fillStyle = '#ff2d2d';
-                                ctx.font = `${Math.floor(tileSize * 0.6)}px Comic Sans MS`;
-                                ctx.textAlign = 'center';
-                                ctx.textBaseline = 'middle';
-                                ctx.fillText('G', px + tileSize / 2, py + tileSize / 2);
-                            } else {
-                                // Path (walkable)
-                                if (walkReady) {
-                                    const iw = walkImg.naturalWidth;
-                                    const ih = walkImg.naturalHeight;
-                                    const scale = Math.max(tileSize / iw, tileSize / ih);
-                                    const dw = Math.ceil(iw * scale);
-                                    const dh = Math.ceil(ih * scale);
-                                    const dx = Math.floor(px + (tileSize - dw) / 2);
-                                    const dy = Math.floor(py + (tileSize - dh) / 2);
-                                    ctx.drawImage(walkImg, dx, dy, dw, dh);
-                                } else {
-                                    ctx.fillStyle = '#101521';
-                                    ctx.fillRect(px, py, tileSize, tileSize);
-                                }
-
-                                // Draw space dust on walkable tiles
-                                if (mapData[y][x] === '.') {
-                                    ctx.fillStyle = '#ffffff';
-                                    ctx.beginPath();
-                                    const r = Math.max(2, Math.floor(tileSize * 0.12));
-                                    ctx.arc(px + tileSize / 2, py + tileSize / 2, r, 0, Math.PI * 2);
-                                    ctx.fill();
-                                }
-                            }
-                        }
-                    }
-                    // After grid is drawn, render player to ensure visibility
-                    drawLevel3Player();
-                }
-
-                // Trigger an initial paint immediately so player is visible even before textures load
-                paint();
+                renderStaticMap();
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(mapCanvas, 0, 0);
+                renderDustOverlay();
+                drawLevel3Player();
             }
 
             // Draw Spider-Man on the grid
