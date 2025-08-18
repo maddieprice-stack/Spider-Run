@@ -4309,20 +4309,15 @@ GAME_HTML = """
                     ctx.fill();
                     ctx.restore();
 
-                    // Draw the sprite using cover scaling and clip to tile bounds
+                    // Draw the sprite using contain scaling so nothing (like the head) is cropped
                     const iw = level3SpideyImg.naturalWidth;
                     const ih = level3SpideyImg.naturalHeight;
-                    const scale = Math.max(tileSize / iw, tileSize / ih);
-                    const dw = Math.ceil(iw * scale);
-                    const dh = Math.ceil(ih * scale);
+                    const scale = Math.min(tileSize / iw, tileSize / ih) * 0.95; // slight padding
+                    const dw = Math.max(1, Math.round(iw * scale));
+                    const dh = Math.max(1, Math.round(ih * scale));
                     const dx = Math.floor(px + (tileSize - dw) / 2);
-                    const dy = Math.floor(py + (tileSize - dh) / 2);
-                    ctx.save();
-                    ctx.beginPath();
-                    ctx.rect(px, py, tileSize, tileSize);
-                    ctx.clip();
+                    const dy = Math.floor(py + (tileSize - dh) / 2 + tileSize * 0.02); // nudge down a bit
                     ctx.drawImage(level3SpideyImg, dx, dy, dw, dh);
-                    ctx.restore();
                 } else {
                     // Fallback: red dot
                     ctx.fillStyle = '#ff2d2d';
