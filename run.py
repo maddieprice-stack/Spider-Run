@@ -4326,13 +4326,17 @@ GAME_HTML = """
                 }
             }
 
-            // Find Level 3 spawn (S) and set player position
+            // Track Level 3 spawn (S) and set player position
+            let level3SpawnX = 0;
+            let level3SpawnY = 0;
             (function setLevel3Spawn() {
                 for (let y = 0; y < rows; y++) {
                     const ix = mapData[y].indexOf('S');
                     if (ix !== -1) {
                         playerX = ix;
                         playerY = y;
+                        level3SpawnX = ix;
+                        level3SpawnY = y;
                         break;
                     }
                 }
@@ -4499,9 +4503,9 @@ GAME_HTML = """
 
             function startLizardChase() {
                 lizardActive = true;
-                const startNeighbors = neighborsOf(playerX, playerY);
-                if (startNeighbors.length) { [lizardX, lizardY] = startNeighbors[0]; }
-                else { lizardX = playerX; lizardY = playerY; }
+                // Spawn Lizard exactly where Spider-Man spawned initially
+                lizardX = level3SpawnX;
+                lizardY = level3SpawnY;
                 // Immediately paint so Lizard appears as soon as he spawns
                 paintAll();
                 window.level3LizardInterval = setInterval(function() {
