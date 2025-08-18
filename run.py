@@ -4148,6 +4148,19 @@ GAME_HTML = """
             canvas.width = cols * tileSize;
             canvas.height = rows * tileSize;
 
+            // Populate dust for every walkable path tile ('.') in Level 3 design
+            dustPositions = [];
+            totalDust = 0;
+            for (let y = 0; y < rows; y++) {
+                for (let x = 0; x < cols; x++) {
+                    const ch = mapData[y][x];
+                    if (ch === '.') {
+                        dustPositions.push({ x, y });
+                        totalDust++;
+                    }
+                }
+            }
+
             // Simple draw of the vertical maze
             function drawLevel3Grid() {
                 // Background
@@ -4235,6 +4248,15 @@ GAME_HTML = """
                                 } else {
                                     ctx.fillStyle = '#101521';
                                     ctx.fillRect(px, py, tileSize, tileSize);
+                                }
+
+                                // Draw space dust on walkable tiles
+                                if (mapData[y][x] === '.') {
+                                    ctx.fillStyle = '#ffffff';
+                                    ctx.beginPath();
+                                    const r = Math.max(2, Math.floor(tileSize * 0.12));
+                                    ctx.arc(px + tileSize / 2, py + tileSize / 2, r, 0, Math.PI * 2);
+                                    ctx.fill();
                                 }
                             }
                         }
