@@ -4087,6 +4087,7 @@ GAME_HTML = """
             const canvas = document.getElementById('gameCanvas');
             const ctx = canvas.getContext('2d');
             canvas.style.display = 'block';
+            canvas.style.border = 'none';
             currentState = 'gameplay';
 
             // Prepare rotated map: rotate 90° so original LEFT becomes BOTTOM,
@@ -4264,10 +4265,45 @@ GAME_HTML = """
                 cameraX = Math.max(0, Math.min(cameraX, mapCanvas.width - canvas.width));
                 cameraY = Math.max(0, Math.min(cameraY, mapCanvas.height - canvas.height));
 
+                const cx = canvas.width / 2;
+                const cy = canvas.height / 2;
+                const radius = Math.floor(Math.min(canvas.width, canvas.height) * 0.48);
+
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
-                ctx.drawImage(mapCanvas, cameraX, cameraY, canvas.width, canvas.height, 0, 0, canvas.width, canvas.height);
+
+                // Clip to circle for round viewport
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+                ctx.clip();
+
+                // Draw world within circular clip
+                ctx.drawImage(
+                    mapCanvas,
+                    cameraX,
+                    cameraY,
+                    canvas.width,
+                    canvas.height,
+                    0,
+                    0,
+                    canvas.width,
+                    canvas.height
+                );
                 renderDustOverlay(cameraX, cameraY);
                 drawLevel3Player(cameraX, cameraY);
+                ctx.restore();
+
+                // Circular fade border (vignette)
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+                ctx.clip();
+                const fade = ctx.createRadialGradient(cx, cy, Math.max(1, radius * 0.82), cx, cy, radius);
+                fade.addColorStop(0, 'rgba(0,0,0,0)');
+                fade.addColorStop(1, 'rgba(0,0,0,0.35)');
+                ctx.fillStyle = fade;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.restore();
             }
 
             // Populate dust for every walkable path tile ('.') in Level 3 design
