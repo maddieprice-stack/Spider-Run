@@ -4297,6 +4297,7 @@ GAME_HTML = """
 
             // Expose processed map for Level 3 controls
             window.level3ProcessedMap = mapData;
+            let playerRotation = 0; // radians; 0 = facing up
 
             // Simple draw uses the offscreen map buffer with a camera centered on the player
             function drawLevel3Grid() {
@@ -4313,16 +4314,18 @@ GAME_HTML = """
             function drawLevel3Player(cameraX = 0, cameraY = 0) {
                 const px = playerX * tileSize - cameraX;
                 const py = playerY * tileSize - cameraY;
+                const cx = px + tileSize / 2;
+                const cy = py + tileSize / 2;
                 if (level3SpideyReady) {
-                    // Draw a bright outline circle behind Spider-Man for visibility
+                    // Glow behind Spider-Man for visibility
                     ctx.save();
                     ctx.beginPath();
-                    ctx.arc(px + tileSize / 2, py + tileSize / 2, Math.max(6, Math.floor(tileSize * 0.42)), 0, Math.PI * 2);
+                    ctx.arc(cx, cy, Math.max(6, Math.floor(tileSize * 0.42)), 0, Math.PI * 2);
                     ctx.fillStyle = 'rgba(255, 230, 0, 0.28)';
                     ctx.fill();
                     ctx.restore();
 
-                    // Draw the sprite using contain scaling with extra padding and a larger downward nudge
+                    // Draw the sprite using contain scaling with extra padding; rotate based on movement
                     const iw = level3SpideyImg.naturalWidth;
                     const ih = level3SpideyImg.naturalHeight;
                     const maxDrawW = Math.floor(tileSize * 0.88);
@@ -4330,14 +4333,16 @@ GAME_HTML = """
                     const scale = Math.min(maxDrawW / iw, maxDrawH / ih);
                     const dw = Math.max(1, Math.round(iw * scale));
                     const dh = Math.max(1, Math.round(ih * scale));
-                    const dx = Math.floor(px + (tileSize - dw) / 2);
-                    const dy = Math.floor(py + (tileSize - dh) / 2 + tileSize * 0.06);
-                    ctx.drawImage(level3SpideyImg, dx, dy, dw, dh);
+                    ctx.save();
+                    ctx.translate(cx, cy + tileSize * 0.06);
+                    ctx.rotate(playerRotation);
+                    ctx.drawImage(level3SpideyImg, Math.floor(-dw / 2), Math.floor(-dh / 2), dw, dh);
+                    ctx.restore();
                 } else {
                     // Fallback: red dot
                     ctx.fillStyle = '#ff2d2d';
                     ctx.beginPath();
-                    ctx.arc(px + tileSize / 2, py + tileSize / 2, Math.max(3, Math.floor(tileSize * 0.25)), 0, Math.PI * 2);
+                    ctx.arc(cx, cy, Math.max(3, Math.floor(tileSize * 0.25)), 0, Math.PI * 2);
                     ctx.fill();
                 }
             }
@@ -4366,6 +4371,11 @@ GAME_HTML = """
                     if (ny >= 0 && ny < map.length && nx >= 0 && nx < map[0].length && map[ny][nx] !== '#') {
                         playerX = nx;
                         playerY = ny;
+                        // Update facing based on movement
+                        if (dy === 1) { playerRotation = Math.PI; }
+                        else if (dy === -1) { playerRotation = 0; }
+                        else if (dx === -1) { playerRotation = Math.PI / 2; }
+                        else if (dx === 1) { playerRotation = -Math.PI / 2; }
                         // Collect dust if present
                         checkDustCollection();
                         paintAll();
