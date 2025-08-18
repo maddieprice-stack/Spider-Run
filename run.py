@@ -4127,8 +4127,14 @@ GAME_HTML = """
                 return mapArr.map(row => row.split('').reverse().join(''));
             }
 
+            function mirrorHorizontal(mapArr) {
+                // Reverse the order of rows
+                return mapArr.slice().reverse();
+            }
+
             let mapData = rotateClockwise(level3Map);
             mapData = mirrorVertical(mapData);
+            mapData = mirrorHorizontal(mapData);
             mapData = ensureStartAtBottomLeft(mapData);
 
             // Compute tile size to fit the rotated map
