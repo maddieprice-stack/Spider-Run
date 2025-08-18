@@ -4137,16 +4137,20 @@ GAME_HTML = """
             mapData = mirrorHorizontal(mapData);
             mapData = ensureStartAtBottomLeft(mapData);
 
-            // Compute tile size to fit the rotated map
+            // Compute tile size for a zoomed-in viewport centered on Spider-Man
             const rows = mapData.length;
             const cols = mapData[0].length;
+            const viewTilesX = 11; // visible tiles horizontally
+            const viewTilesY = 11; // visible tiles vertically
             const maxWidth = window.innerWidth * 0.98;
             const maxHeight = window.innerHeight * 0.85;
-            const tileSizeX = Math.floor(maxWidth / cols);
-            const tileSizeY = Math.floor(maxHeight / rows);
-            const tileSize = Math.min(tileSizeX, tileSizeY, 45);
-            canvas.width = cols * tileSize;
-            canvas.height = rows * tileSize;
+            const tileSize = Math.min(
+                Math.floor(maxWidth / viewTilesX),
+                Math.floor(maxHeight / viewTilesY),
+                64
+            );
+            canvas.width = viewTilesX * tileSize;
+            canvas.height = viewTilesY * tileSize;
 
             // Offscreen buffer for static map to prevent flicker
             const mapCanvas = document.createElement('canvas');
@@ -4169,8 +4173,7 @@ GAME_HTML = """
 
             function renderStaticMap() {
                 // Draw the static grid to offscreen canvas
-                mapCtx.fillStyle = '#0b0b16';
-                mapCtx.fillRect(0, 0, mapCanvas.width, mapCanvas.height);
+                mapCtx.clearRect(0, 0, mapCanvas.width, mapCanvas.height);
                 for (let y = 0; y < rows; y++) {
                     for (let x = 0; x < cols; x++) {
                         const ch = mapData[y][x];
@@ -4232,13 +4235,18 @@ GAME_HTML = """
                 }
             }
 
-            function renderDustOverlay() {
-                // Draw dust pellets for remaining dustPositions
+            function renderDustOverlay(cameraX, cameraY) {
+                // Draw dust pellets for remaining dustPositions with camera offset
                 if (!dustPositions || dustPositions.length === 0) return;
                 ctx.fillStyle = '#ffffff';
+                const startX = Math.floor(cameraX / tileSize);
+                const startY = Math.floor(cameraY / tileSize);
+                const endX = startX + Math.ceil(canvas.width / tileSize) + 1;
+                const endY = startY + Math.ceil(canvas.height / tileSize) + 1;
                 for (const d of dustPositions) {
-                    const px = d.x * tileSize;
-                    const py = d.y * tileSize;
+                    if (d.x < startX || d.x > endX || d.y < startY || d.y > endY) continue;
+                    const px = d.x * tileSize - cameraX;
+                    const py = d.y * tileSize - cameraY;
                     ctx.beginPath();
                     const r = Math.max(2, Math.floor(tileSize * 0.12));
                     ctx.arc(px + tileSize / 2, py + tileSize / 2, r, 0, Math.PI * 2);
@@ -4247,10 +4255,19 @@ GAME_HTML = """
             }
 
             function renderFrame() {
+                // Camera centered on player
+                const camCenterX = playerX * tileSize + tileSize / 2;
+                const camCenterY = playerY * tileSize + tileSize / 2;
+                let cameraX = Math.floor(camCenterX - canvas.width / 2);
+                let cameraY = Math.floor(camCenterY - canvas.height / 2);
+                // Clamp to map bounds
+                cameraX = Math.max(0, Math.min(cameraX, mapCanvas.width - canvas.width));
+                cameraY = Math.max(0, Math.min(cameraY, mapCanvas.height - canvas.height));
+
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
-                ctx.drawImage(mapCanvas, 0, 0);
-                renderDustOverlay();
-                drawLevel3Player();
+                ctx.drawImage(mapCanvas, cameraX, cameraY, canvas.width, canvas.height, 0, 0, canvas.width, canvas.height);
+                renderDustOverlay(cameraX, cameraY);
+                drawLevel3Player(cameraX, cameraY);
             }
 
             // Populate dust for every walkable path tile ('.') in Level 3 design
@@ -4281,13 +4298,9 @@ GAME_HTML = """
             // Expose processed map for Level 3 controls
             window.level3ProcessedMap = mapData;
 
-            // Simple draw uses the offscreen map buffer
+            // Simple draw uses the offscreen map buffer with a camera centered on the player
             function drawLevel3Grid() {
-                renderStaticMap();
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                ctx.drawImage(mapCanvas, 0, 0);
-                renderDustOverlay();
-                drawLevel3Player();
+                renderFrame();
             }
 
             // Draw Spider-Man on the grid
@@ -4297,9 +4310,9 @@ GAME_HTML = """
             level3SpideyImg.onerror = function() { level3SpideyReady = false; paintAll(); };
             level3SpideyImg.src = '/static/Spider-man%20climb.png';
 
-            function drawLevel3Player() {
-                const px = playerX * tileSize;
-                const py = playerY * tileSize;
+            function drawLevel3Player(cameraX = 0, cameraY = 0) {
+                const px = playerX * tileSize - cameraX;
+                const py = playerY * tileSize - cameraY;
                 if (level3SpideyReady) {
                     // Draw a bright outline circle behind Spider-Man for visibility
                     ctx.save();
