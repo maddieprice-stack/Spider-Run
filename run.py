@@ -4147,40 +4147,67 @@ GAME_HTML = """
                 // Background
                 ctx.fillStyle = '#0b0b16';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
-                // Grid pass
-                for (let y = 0; y < rows; y++) {
-                    for (let x = 0; x < cols; x++) {
-                        const ch = mapData[y][x];
-                        const px = x * tileSize;
-                        const py = y * tileSize;
-                        if (ch === '#') {
-                            // Wall block with subtle bevel
-                            ctx.fillStyle = '#2a2f3a';
-                            ctx.fillRect(px, py, tileSize, tileSize);
-                            ctx.strokeStyle = '#4c5566';
-                            ctx.strokeRect(px + 0.5, py + 0.5, tileSize - 1, tileSize - 1);
-                        } else if (ch === 'S') {
-                            // Start marker
-                            ctx.fillStyle = '#14203a';
-                            ctx.fillRect(px, py, tileSize, tileSize);
-                            ctx.fillStyle = '#00bfff';
-                            ctx.font = `${Math.floor(tileSize * 0.6)}px Comic Sans MS`;
-                            ctx.textAlign = 'center';
-                            ctx.textBaseline = 'middle';
-                            ctx.fillText('S', px + tileSize / 2, py + tileSize / 2);
-                        } else if (ch === 'G') {
-                            // Goal marker
-                            ctx.fillStyle = '#1d2a4d';
-                            ctx.fillRect(px, py, tileSize, tileSize);
-                            ctx.fillStyle = '#ff2d2d';
-                            ctx.font = `${Math.floor(tileSize * 0.6)}px Comic Sans MS`;
-                            ctx.textAlign = 'center';
-                            ctx.textBaseline = 'middle';
-                            ctx.fillText('G', px + tileSize / 2, py + tileSize / 2);
-                        } else {
-                            // Path
-                            ctx.fillStyle = '#101521';
-                            ctx.fillRect(px, py, tileSize, tileSize);
+                // Prepare wall texture
+                const wallImg = new Image();
+                let wallReady = false;
+                wallImg.onload = function() {
+                    wallReady = true;
+                    paint();
+                };
+                wallImg.onerror = function() {
+                    wallReady = false;
+                    paint();
+                };
+                wallImg.src = '/static/Empire%20Street.png';
+
+                function paint() {
+                    // Grid pass
+                    for (let y = 0; y < rows; y++) {
+                        for (let x = 0; x < cols; x++) {
+                            const ch = mapData[y][x];
+                            const px = x * tileSize;
+                            const py = y * tileSize;
+                            if (ch === '#') {
+                                if (wallReady) {
+                                    // Draw textured wall tile (cover mode)
+                                    const iw = wallImg.naturalWidth;
+                                    const ih = wallImg.naturalHeight;
+                                    const scale = Math.max(tileSize / iw, tileSize / ih);
+                                    const dw = Math.ceil(iw * scale);
+                                    const dh = Math.ceil(ih * scale);
+                                    const dx = Math.floor(px + (tileSize - dw) / 2);
+                                    const dy = Math.floor(py + (tileSize - dh) / 2);
+                                    ctx.drawImage(wallImg, dx, dy, dw, dh);
+                                } else {
+                                    // Fallback solid wall
+                                    ctx.fillStyle = '#2a2f3a';
+                                    ctx.fillRect(px, py, tileSize, tileSize);
+                                    ctx.strokeStyle = '#4c5566';
+                                    ctx.strokeRect(px + 0.5, py + 0.5, tileSize - 1, tileSize - 1);
+                                }
+                            } else if (ch === 'S') {
+                                // Start marker
+                                ctx.fillStyle = '#14203a';
+                                ctx.fillRect(px, py, tileSize, tileSize);
+                                ctx.fillStyle = '#00bfff';
+                                ctx.font = `${Math.floor(tileSize * 0.6)}px Comic Sans MS`;
+                                ctx.textAlign = 'center';
+                                ctx.textBaseline = 'middle';
+                                ctx.fillText('S', px + tileSize / 2, py + tileSize / 2);
+                            } else if (ch === 'G') {
+                                // Goal marker
+                                ctx.fillStyle = '#1d2a4d';
+                                ctx.fillRect(px, py, tileSize, tileSize);
+                                ctx.fillStyle = '#ff2d2d';
+                                ctx.font = `${Math.floor(tileSize * 0.6)}px Comic Sans MS`;
+                                ctx.textAlign = 'center';
+                                ctx.textBaseline = 'middle';
+                                ctx.fillText('G', px + tileSize / 2, py + tileSize / 2);
+                            } else {
+                                // Path
+                                ctx.fillStyle = '#101521';
+                                ctx.fillRect(px, py, tileSize, tileSize);
+                            }
                         }
                     }
                 }
