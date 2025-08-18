@@ -750,6 +750,9 @@ GAME_HTML = """
                     <div style="width:140px; height:140px; background:url('/static/Spider-man%20sprite.png') center/contain no-repeat;"></div>
                     <div style="width:140px; height:140px; background:url('/static/Miles%20Morales%20Sprite.png') center/contain no-repeat;"></div>
                 </div>
+                <div style="display:flex; gap:24px; margin-top:24px; justify-content:center;">
+                    <button class="menu-button" id="startIntroBtn" onclick="goToIntroComic()">Start Intro</button>
+                </div>
             </div>
         </div>
 
@@ -2065,6 +2068,15 @@ GAME_HTML = """
         function chooseSpider(which) {
             selectedSpider = which === 'miles' ? 'miles' : 'spiderman';
             // Proceed to intro comic
+            document.getElementById('characterSelect').classList.remove('active');
+            document.getElementById('characterSelect').style.display = 'none';
+            currentState = 'comic';
+            currentPanel = 0;
+            showPanel(0);
+        }
+
+        function goToIntroComic() {
+            // Preserve chosen spider (default stays as last selected)
             document.getElementById('characterSelect').classList.remove('active');
             document.getElementById('characterSelect').style.display = 'none';
             currentState = 'comic';
