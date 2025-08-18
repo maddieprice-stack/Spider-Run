@@ -4265,8 +4265,8 @@ GAME_HTML = """
                 cameraX = Math.max(0, Math.min(cameraX, mapCanvas.width - canvas.width));
                 cameraY = Math.max(0, Math.min(cameraY, mapCanvas.height - canvas.height));
 
-                const cx = canvas.width / 2;
-                const cy = canvas.height / 2;
+                const cx = Math.floor(canvas.width / 2);
+                const cy = Math.floor(canvas.height / 2);
                 const radius = Math.floor(Math.min(canvas.width, canvas.height) * 0.48);
 
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -4363,7 +4363,7 @@ GAME_HTML = """
                     const dw = Math.max(1, Math.round(iw * scale));
                     const dh = Math.max(1, Math.round(ih * scale));
                     ctx.save();
-                    ctx.translate(cx, cy + tileSize * 0.06);
+                    ctx.translate(cx, cy);
                     ctx.rotate(playerRotation);
                     ctx.scale(playerFlipX ? -1 : 1, 1);
                     ctx.drawImage(level3SpideyImg, Math.floor(-dw / 2), Math.floor(-dh / 2), dw, dh);
