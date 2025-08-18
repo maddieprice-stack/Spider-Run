@@ -4319,6 +4319,7 @@ GAME_HTML = """
                     canvas.height
                 );
                 renderDustOverlay(cameraX, cameraY);
+                renderGooOverlay(cameraX, cameraY);
                 if (typeof drawLevel3Lizard === 'function') { drawLevel3Lizard(cameraX, cameraY); }
                 drawLevel3Player(cameraX, cameraY);
                 ctx.restore();
@@ -4596,7 +4597,11 @@ GAME_HTML = """
                     if (currentLevel !== 3 || currentState !== 'gameplay') return;
                     const [nx, ny] = computeNextStep(lizardX, lizardY, playerX, playerY);
                     const dx = nx - lizardX; const dy = ny - lizardY;
-                    if (dx !== 0 || dy !== 0) { lizardX = nx; lizardY = ny; lizardFlipX = !lizardFlipX; setLizardFacing(dx, dy); }
+                    if (dx !== 0 || dy !== 0) {
+                        lizardX = nx; lizardY = ny; lizardFlipX = !lizardFlipX; setLizardFacing(dx, dy);
+                        // Leave persistent goo
+                        if (typeof gooTiles !== 'undefined') { gooTiles.add(`${lizardX},${lizardY}`); }
+                    }
                     if (lizardX === playerX && lizardY === playerY) {
                         clearInterval(window.level3LizardInterval);
                         window.level3LizardInterval = null;
