@@ -4374,8 +4374,8 @@ GAME_HTML = """
                         // Update facing based on movement
                         if (dy === 1) { playerRotation = Math.PI; }
                         else if (dy === -1) { playerRotation = 0; }
-                        else if (dx === -1) { playerRotation = Math.PI / 2; }
-                        else if (dx === 1) { playerRotation = -Math.PI / 2; }
+                        else if (dx === -1) { playerRotation = -Math.PI / 2; } // left: 90° CCW
+                        else if (dx === 1) { playerRotation = Math.PI / 2; }  // right: 90° CW
                         // Collect dust if present
                         checkDustCollection();
                         paintAll();
