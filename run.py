@@ -4293,6 +4293,7 @@ GAME_HTML = """
                     canvas.height
                 );
                 renderDustOverlay(cameraX, cameraY);
+                if (typeof drawLevel3Lizard === 'function') { drawLevel3Lizard(cameraX, cameraY); }
                 drawLevel3Player(cameraX, cameraY);
                 ctx.restore();
 
@@ -4338,6 +4339,19 @@ GAME_HTML = """
             window.level3ProcessedMap = mapData;
             let playerRotation = 0; // radians; 0 = facing up
             let playerFlipX = false; // flip on vertical axis each move
+
+            // --- Lizard (enemy) setup ---
+            let lizardX = playerX;
+            let lizardY = playerY;
+            let lizardActive = false;
+            let lizardRotation = 0;
+            let lizardFlipX = false;
+            const lizardImg = new Image();
+            let lizardReady = false;
+            lizardImg.onload = function() { lizardReady = true; };
+            lizardImg.onerror = function() { lizardReady = false; };
+            lizardImg.src = '/static/Lizard.png';
+            if (window.level3LizardInterval) { clearInterval(window.level3LizardInterval); window.level3LizardInterval = null; }
 
             // Simple draw uses the offscreen map buffer with a camera centered on the player
             function drawLevel3Grid() {
@@ -4385,6 +4399,115 @@ GAME_HTML = """
             }
 
             paintAll();
+
+            function drawLevel3Lizard(cameraX = 0, cameraY = 0) {
+                if (!lizardActive) return;
+                const px = lizardX * tileSize - cameraX;
+                const py = lizardY * tileSize - cameraY;
+                const cx = px + tileSize / 2;
+                const cy = py + tileSize / 2;
+                if (lizardReady) {
+                    const iw = lizardImg.naturalWidth;
+                    const ih = lizardImg.naturalHeight;
+                    const maxDrawW = Math.floor(tileSize * 0.9);
+                    const maxDrawH = Math.floor(tileSize * 0.9);
+                    const scale = Math.min(maxDrawW / iw, maxDrawH / ih);
+                    const dw = Math.max(1, Math.round(iw * scale));
+                    const dh = Math.max(1, Math.round(ih * scale));
+                    ctx.save();
+                    ctx.translate(cx, cy);
+                    ctx.rotate(lizardRotation);
+                    ctx.scale(lizardFlipX ? -1 : 1, 1);
+                    ctx.drawImage(lizardImg, Math.floor(-dw / 2), Math.floor(-dh / 2), dw, dh);
+                    ctx.restore();
+                } else {
+                    ctx.fillStyle = '#3cb043';
+                    ctx.beginPath();
+                    ctx.arc(cx, cy, Math.max(3, Math.floor(tileSize * 0.25)), 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            function neighborsOf(x, y) {
+                const result = [];
+                const dirs = [ [1,0], [-1,0], [0,1], [0,-1] ];
+                for (const [dx, dy] of dirs) {
+                    const nx = x + dx;
+                    const ny = y + dy;
+                    if (ny >= 0 && ny < rows && nx >= 0 && nx < cols && mapData[ny][nx] !== '#') {
+                        result.push([nx, ny]);
+                    }
+                }
+                return result;
+            }
+
+            function computeNextStep(ax, ay, bx, by) {
+                if (ax === bx && ay === by) return [ax, ay];
+                const q = [];
+                const visited = new Set();
+                const prev = new Map();
+                const startKey = ax + ',' + ay;
+                q.push([ax, ay]);
+                visited.add(startKey);
+                let found = false;
+                while (q.length) {
+                    const [cx, cy] = q.shift();
+                    if (cx === bx && cy === by) { found = true; break; }
+                    for (const [nx, ny] of neighborsOf(cx, cy)) {
+                        const key = nx + ',' + ny;
+                        if (!visited.has(key)) {
+                            visited.add(key);
+                            prev.set(key, cx + ',' + cy);
+                            q.push([nx, ny]);
+                        }
+                    }
+                }
+                if (!found) {
+                    let best = [ax, ay];
+                    let bestDist = Number.POSITIVE_INFINITY;
+                    for (const [nx, ny] of neighborsOf(ax, ay)) {
+                        const d = Math.abs(nx - bx) + Math.abs(ny - by);
+                        if (d < bestDist) { bestDist = d; best = [nx, ny]; }
+                    }
+                    return best;
+                }
+                let curKey = bx + ',' + by;
+                const path = [];
+                while (curKey && curKey !== startKey) {
+                    const [sx, sy] = curKey.split(',').map(Number);
+                    path.push([sx, sy]);
+                    curKey = prev.get(curKey);
+                }
+                path.reverse();
+                return path.length ? path[0] : [ax, ay];
+            }
+
+            function setLizardFacing(dx, dy) {
+                if (dy === 1) { lizardRotation = Math.PI; }
+                else if (dy === -1) { lizardRotation = 0; }
+                else if (dx === -1) { lizardRotation = -Math.PI / 2; }
+                else if (dx === 1) { lizardRotation = Math.PI / 2; }
+            }
+
+            function startLizardChase() {
+                lizardActive = true;
+                const startNeighbors = neighborsOf(playerX, playerY);
+                if (startNeighbors.length) { [lizardX, lizardY] = startNeighbors[0]; }
+                else { lizardX = playerX; lizardY = playerY; }
+                window.level3LizardInterval = setInterval(function() {
+                    if (currentLevel !== 3 || currentState !== 'gameplay') return;
+                    const [nx, ny] = computeNextStep(lizardX, lizardY, playerX, playerY);
+                    const dx = nx - lizardX; const dy = ny - lizardY;
+                    if (dx !== 0 || dy !== 0) { lizardX = nx; lizardY = ny; lizardFlipX = !lizardFlipX; setLizardFacing(dx, dy); }
+                    if (lizardX === playerX && lizardY === playerY) {
+                        clearInterval(window.level3LizardInterval); window.level3LizardInterval = null; lizardActive = false;
+                        alert('The Lizard caught Spider-Man!');
+                    }
+                    paintAll();
+                }, 220);
+            }
+
+            setTimeout(function() { if (currentLevel === 3 && currentState === 'gameplay') startLizardChase(); }, 3000);
 
             // Bind simple Level 3 movement controls (arrow keys / WASD)
             if (!window.level3ControlsBound) {
