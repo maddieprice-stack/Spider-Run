@@ -474,6 +474,112 @@ GAME_HTML = """
             50% { transform: scale(1.1) translateY(-15px); }
         }
         
+        /* --- Level 3 Intro: light animated effects --- */
+        .portal-sparks {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 140px;
+            height: 140px;
+            margin-left: -70px;
+            margin-top: -70px;
+            border-radius: 50%;
+            box-shadow:
+                0 0 8px 2px rgba(255, 215, 0, 0.8),
+                inset 0 0 20px 2px rgba(255, 140, 0, 0.5);
+            border: 2px dashed rgba(255, 215, 0, 0.6);
+            animation: spin 4s linear infinite;
+            pointer-events: none;
+        }
+        
+        .magic-orb {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 120px;
+            height: 120px;
+            margin-left: -60px;
+            margin-top: -60px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 40% 40%, rgba(0,191,255,0.9), rgba(0,0,0,0.1));
+            box-shadow: 0 0 25px rgba(0,191,255,0.8), inset 0 0 20px rgba(255,255,255,0.2);
+            animation: pulseGlow 2.2s ease-in-out infinite;
+            pointer-events: none;
+        }
+        
+        .sunrise-clock {
+            position: absolute;
+            top: 24px;
+            right: 24px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 3px solid #FFD700;
+            box-shadow: 0 0 10px rgba(255,215,0,0.7);
+            animation: clockPulse 1.4s ease-in-out infinite;
+            pointer-events: none;
+        }
+        .sunrise-clock::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 2px;
+            height: 22px;
+            background: #FFD700;
+            transform-origin: bottom center;
+            transform: translate(-50%, -100%) rotate(20deg);
+        }
+        .sunrise-clock::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 2px;
+            height: 16px;
+            background: #FFD700;
+            transform-origin: bottom center;
+            transform: translate(-50%, -100%) rotate(120deg);
+            opacity: 0.8;
+        }
+        
+        .villain-silhouettes {
+            position: absolute;
+            bottom: 18%;
+            left: 10%;
+            right: 10%;
+            height: 120px;
+            pointer-events: none;
+        }
+        .villain-silhouettes .silhouette {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            filter: brightness(0) contrast(200%);
+            opacity: 0.7;
+            animation: floatUp 3.5s ease-in-out infinite alternate;
+        }
+        .villain-silhouettes .s1 { left: 5%; background-image: url('/static/Doc_Oc.png'); animation-delay: 0s; }
+        .villain-silhouettes .s2 { left: 28%; background-image: url('/static/Green_Goblin.png'); animation-delay: .3s; }
+        .villain-silhouettes .s3 { left: 51%; background-image: url('/static/Vulture.png'); animation-delay: .6s; }
+        .villain-silhouettes .s4 { left: 74%; background-image: url('/static/Venom.png'); animation-delay: .9s; }
+        
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes pulseGlow {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 18px rgba(0,191,255,0.6), inset 0 0 12px rgba(255,255,255,0.15); }
+            50% { transform: scale(1.06); box-shadow: 0 0 30px rgba(0,191,255,0.95), inset 0 0 24px rgba(255,255,255,0.25); }
+        }
+        @keyframes clockPulse {
+            0%, 100% { box-shadow: 0 0 8px rgba(255,215,0,0.6); transform: scale(1); }
+            50% { box-shadow: 0 0 18px rgba(255,215,0,0.9); transform: scale(1.06); }
+        }
+        @keyframes floatUp {
+            0% { transform: translateY(0); opacity: 0.65; }
+            100% { transform: translateY(-18px); opacity: 0.85; }
+        }
+        
         .quip-bubble {
             background: #fff;
             border: 3px solid #000;
@@ -644,7 +750,7 @@ GAME_HTML = """
 
         <div id="comicPanel1" class="comic-panel">
             <div class="panel-content">
-                <div class="dr-strange-webp-image"></div>
+                <div class="dr-strange-webp-image" style="background-image: url('/static/Dr%20Strange%203.png');"></div>
                 <div class="speech-bubble">
                     Spider-Man! I need your help — I've spilled space dust all over New York City!
                 </div>
@@ -662,7 +768,7 @@ GAME_HTML = """
 
         <div id="comicPanel3" class="comic-panel">
             <div class="panel-content">
-                <div class="dr-strange-webp-image"></div>
+                <div class="dr-strange-webp-image" style="background-image: url('/static/Dr%20Strange%203.png');"></div>
                 <div class="speech-bubble">
                     This dust isn't ordinary, Spider-Man. If left unchecked... it could END THE WORLD!
                 </div>
@@ -680,7 +786,7 @@ GAME_HTML = """
 
         <div id="comicPanel5" class="comic-panel">
             <div class="panel-content">
-                <div class="dr-strange-webp-image"></div>
+                <div class="dr-strange-webp-image" style="background-image: url('/static/Dr%20Strange%203.png');"></div>
                 <div class="speech-bubble">
                     The dust is scattered across the East Village — start there before it spreads any further!
                 </div>
@@ -689,7 +795,7 @@ GAME_HTML = """
 
         <div id="comicPanel6" class="comic-panel">
             <div class="panel-content">
-                <div class="dr-strange-webp-image"></div>
+                <div class="dr-strange-webp-image" style="background-image: url('/static/Dr%20Strange%203.png');"></div>
                 <div class="speech-bubble">
                     Be careful, Spider-Man. Some of your enemies are out tonight.
                 </div>
@@ -706,6 +812,69 @@ GAME_HTML = """
                 <div class="click-prompt">Click to continue</div>
             </div>
         </div>
+
+        <!-- Level 3 Intro Cutscene Panels (post-Level 2 win) -->
+        <div id="level3IntroPanel0" class="victory-panel" style="background: url('/static/New%20York%203%20Updated.png') no-repeat center center; background-size: cover;">
+            <div class="panel-content">
+                <div class="dr-strange-webp-image"></div>
+                <div class="portal-sparks"></div>
+                <div class="speech-bubble">
+                    Well done, Spider-Man. You cleared the space dust — but it’s not over yet.
+                </div>
+                <div class="click-prompt">Click to continue</div>
+            </div>
+        </div>
+
+        <div id="level3IntroPanel1" class="victory-panel" style="background: url('/static/New%20York%203%20Updated.png') no-repeat center center; background-size: cover;">
+            <div class="panel-content">
+                <div class="dr-strange-webp-image"></div>
+                <div class="magic-orb"></div>
+                <div class="speech-bubble">
+                    The dust has spread… to the Empire State Building. And it’s climbing fast.
+                </div>
+                <div class="click-prompt">Click to continue</div>
+            </div>
+        </div>
+
+        <div id="level3IntroPanel2" class="victory-panel" style="background: url('/static/New%20York%203%20Updated.png') no-repeat center center; background-size: cover;">
+            <div class="panel-content">
+                <div class="dr-strange-webp-image"></div>
+                <div class="sunrise-clock"></div>
+                <div class="speech-bubble">
+                    You have until sunrise to clean it up. If even one speck remains, the world ends.
+                </div>
+                <div class="click-prompt">Click to continue</div>
+            </div>
+        </div>
+
+        <div id="level3IntroPanel3" class="victory-panel" style="background: url('/static/New%20York%203%20Updated.png') no-repeat center center; background-size: cover;">
+            <div class="panel-content">
+                <div class="dr-strange-webp-image"></div>
+                <div class="villain-silhouettes">
+                    <div class="silhouette s1"></div>
+                    <div class="silhouette s2"></div>
+                    <div class="silhouette s3"></div>
+                    <div class="silhouette s4"></div>
+                </div>
+                <div class="speech-bubble">
+                    But beware… you're not the only one racing to the top.
+                </div>
+                <div class="click-prompt">Click to continue</div>
+            </div>
+        </div>
+
+        <!-- Spider-Man quip panel -->
+        <div id="level3IntroPanel4" class="victory-panel" style="background: url('/static/New%20York%203%20Updated.png') no-repeat center center; background-size: cover;">
+            <div class="panel-content">
+                <div class="spider-man-victory-scene" style="background-image: url('/static/Spider-man%20Comic%203.png');"></div>
+                <div class="speech-bubble">
+                    Note to self: race to the top, avoid villains, save the world before breakfast. Easy.
+                </div>
+                <div class="click-prompt">Click to start Level 3</div>
+            </div>
+        </div>
+
+        
 
         <div id="victoryPanel1" class="victory-panel">
             <div class="panel-content">
@@ -744,54 +913,6 @@ GAME_HTML = """
                     Beware, Spider-Man! Mysterio and Electro are also there, and they know how to use Times Square to their advantage.
                 </div>
                 <div class="click-prompt">Click to continue</div>
-            </div>
-        </div>
-
-        <!-- Level 3 Intro Cutscene Panels (after winning Level 2) -->
-        <div id="l3IntroPanel0" class="victory-panel l3-intro-panel">
-            <div class="panel-content">
-                <div class="dr-strange-times-square"></div>
-                <div class="speech-bubble">
-                    <strong>Doctor Strange:</strong> Well done, Spider-Man. You cleared the space dust — but it’s not over yet.
-                </div>
-                <div class="click-prompt">Click to continue</div>
-            </div>
-        </div>
-
-        <div id="l3IntroPanel1" class="victory-panel l3-intro-panel">
-            <div class="panel-content">
-                <div class="dr-strange-times-square"></div>
-                <div class="speech-bubble">
-                    <strong>Doctor Strange:</strong> The dust has spread… to the Empire State Building. And it’s climbing fast.
-                </div>
-                <div class="click-prompt">Click to continue</div>
-            </div>
-        </div>
-
-        <div id="l3IntroPanel2" class="victory-panel l3-intro-panel">
-            <div class="panel-content">
-                <div class="dr-strange-times-square"></div>
-                <div class="speech-bubble">
-                    <strong>Doctor Strange:</strong> You have until sunrise to clean it up. If even one speck remains, the world ends.
-                </div>
-                <div class="click-prompt">Click to continue</div>
-            </div>
-        </div>
-
-        <div id="l3IntroPanel3" class="victory-panel l3-intro-panel">
-            <div class="panel-content">
-                <div class="dr-strange-times-square"></div>
-                <div class="speech-bubble">
-                    <strong>Doctor Strange:</strong> But beware… you're not the only one racing to the top.
-                </div>
-                <div class="click-prompt">Click to continue</div>
-            </div>
-        </div>
-
-        <div id="l3IntroPanel4" class="victory-panel l3-intro-panel">
-            <div class="panel-content">
-                <div class="game-over-text">LEVEL 3: BLITZ</div>
-                <div class="click-prompt">Click to start</div>
             </div>
         </div>
 
@@ -842,9 +963,6 @@ GAME_HTML = """
         const totalPanels = 7;
         let currentVictoryPanel = 0;
         const totalVictoryPanels = 5;
-        let isLevel3Intro = false;
-        let currentL3IntroPanel = 0;
-        const totalL3IntroPanels = 5;
         
         // Level 1 game variables
         let level1State = 'intro'; // intro, splash, gameplay, win, lose
@@ -862,8 +980,6 @@ GAME_HTML = """
         
         // Level 2 game variables
         let level2State = 'intro'; // intro, splash, gameplay, win, lose
-        // Level 3 game variables
-        let level3State = 'intro'; // intro, splash, gameplay, win, lose
         let currentLevel = 1; // Track current level
         
         // Taxi riding system
@@ -922,7 +1038,7 @@ GAME_HTML = """
             "##############################"
         ];
         
-        // Level 3 map data - Blitz Mode (Empire State Building) from PRD
+        // Level 3 map data - Empire State Building vertical maze (design-only)
         const level3Map = [
             "##############################",
             "#.......###.......#.....#...G#",
@@ -938,9 +1054,9 @@ GAME_HTML = """
             "#.....#...#.....#.#.......#..#",
             "#######.#.#####.#.#########.##",
             "#.......#.......#............#",
-            "S#############################"
+            "S#############################",
         ];
-        
+
         // Function to process ASCII maze with flood-fill
         function processMazeWithFloodFill(asciiMaze) {
             // Convert ASCII to 2D grid
@@ -1006,7 +1122,7 @@ GAME_HTML = """
         
         function isWalkable(char) {
             return char === '.' || char === ' ' || char === 'W' || char === 'T' || 
-                   char === 'V' || char === '-' || char === 'S' || char === 'E' || char === 'R' || char === 'G';
+                   char === 'V' || char === '-' || char === 'S' || char === 'E' || char === 'R';
         }
         
         function isPassable(char) {
@@ -1047,12 +1163,6 @@ GAME_HTML = """
         // Villain spawn positions - these will be set dynamically based on V positions in the map
         let villainSpawns = [];
         
-        // Level 3 specific state (Lizard chase)
-        let level3Goal = { x: null, y: null };
-        let level3Spawn = { x: null, y: null };
-        let lizardSpawned = false;
-        let lizardSpawnDelayFrames = 60; // ~1s delay before Lizard appears
-        
         // Global frame counter and last-ability timestamps to avoid simultaneous triggers
         let globalFrameCounter = 0;
         let lastDocOckAbilityFrame = -99999;
@@ -1067,8 +1177,7 @@ GAME_HTML = """
             { name: 'Vulture', color: '#006400', speed: 1.1, ability: 'windGust' },
             { name: 'Venom', color: '#000000', speed: 1.1, ability: 'windGust' },
             { name: 'Mysterio', color: '#4B0082', speed: 0.8, ability: 'illusion' },
-            { name: 'Electro', color: '#FFD700', speed: 1.2, ability: 'lightning' },
-            { name: 'Lizard', color: '#2e8b57', speed: 1.0, ability: null }
+            { name: 'Electro', color: '#FFD700', speed: 1.2, ability: 'lightning' }
         ];
         
         // Villain state
@@ -1121,8 +1230,7 @@ GAME_HTML = """
             'Vulture': null,
             'Venom': null,
             'Mysterio': null,
-            'Electro': null,
-            'Lizard': null
+            'Electro': null
         };
         let villainSpritesLoaded = 0;
         
@@ -1278,8 +1386,7 @@ GAME_HTML = """
                 'Vulture': '/static/Vulture.png',
                 'Venom': '/static/Venom.png',
                 'Mysterio': '/static/Mysterio.png',
-                'Electro': '/static/Electro.png',
-                'Lizard': '/static/Lizard.png'
+                'Electro': '/static/Electro.png'
             };
             
             Object.keys(villainPaths).forEach(villainName => {
@@ -1341,7 +1448,7 @@ GAME_HTML = """
             villains = [];
             
             // Get current map to find V positions
-            const currentMap = currentLevel === 1 ? level1Map : (currentLevel === 2 ? level2Map : level3Map);
+            const currentMap = currentLevel === 1 ? level1Map : level2Map;
             
             // Find all V positions in the map
             villainSpawns = [];
@@ -1451,7 +1558,7 @@ GAME_HTML = """
         }
         
         function setNewTarget(villain) {
-            const currentMap = currentLevel === 1 ? level1Map : (currentLevel === 2 ? level2Map : level3Map);
+            const currentMap = currentLevel === 1 ? level1Map : level2Map;
             const processedMap = currentLevel === 1 ? processMazeWithFloodFill(currentMap) : currentMap;
             
             // All villains can move freely - just pick random valid positions
@@ -1542,7 +1649,7 @@ GAME_HTML = """
         }
         
         function moveTowardsTarget(villain) {
-            const currentMap = currentLevel === 1 ? level1Map : (currentLevel === 2 ? level2Map : level3Map);
+            const currentMap = currentLevel === 1 ? level1Map : level2Map;
             const processedMap = currentLevel === 1 ? processMazeWithFloodFill(currentMap) : currentMap;
             
             // Find the best path to target using A* pathfinding
@@ -1858,35 +1965,6 @@ GAME_HTML = """
                 panel.classList.add('active');
             }
             console.log('=== showPanel() completed ===');
-        }
-
-        // Level 3 Intro Cutscene controls
-        function showLevel3IntroPanel(panelNumber) {
-            // Hide all other panels
-            document.querySelectorAll('.comic-panel, .victory-panel').forEach(p => p.classList.remove('active'));
-            // Show requested L3 intro panel
-            const el = document.getElementById(`l3IntroPanel${panelNumber}`);
-            if (el) {
-                el.classList.add('active');
-                // Click to advance
-                el.onclick = function() {
-                    nextLevel3IntroPanel();
-                };
-            }
-        }
-
-        function nextLevel3IntroPanel() {
-            if (!isLevel3Intro) return;
-            if (currentL3IntroPanel < totalL3IntroPanels - 1) {
-                currentL3IntroPanel++;
-                showLevel3IntroPanel(currentL3IntroPanel);
-            } else {
-                // End intro → start Level 3
-                isLevel3Intro = false;
-                // Hide panels
-                document.querySelectorAll('.l3-intro-panel').forEach(p => p.classList.remove('active'));
-                startLevel3();
-            }
         }
 
         // Game flow functions
@@ -2458,109 +2536,6 @@ GAME_HTML = """
             // Initialize waka waka sound (disabled)
             // initWakaWakaSound();
         }
-
-        // Level 3: Empire State Blitz
-        function initLevel3() {
-            console.log('=== initLevel3() called ===');
-            // Reset game state for Level 3
-            dustCollected = 0;
-            totalDust = 0;
-            lives = 5; // per-level lives
-            score = 0;
-            webShooterActive = false;
-            webShooterTimer = 0;
-            isRidingTaxi = false;
-            winLock = false;
-
-            // Clear arrays
-            dustPositions = [];
-            webShooterPositions = [];
-            villainPositions = [];
-            taxiStopPositions = [];
-            bombPositions = [];
-            crashPositions = [];
-            villains = [];
-
-            // Parse Level 3 map for S and G
-            const processedMap = level3Map; // No flood fill for L3
-            level3Goal = { x: null, y: null };
-            level3Spawn = { x: null, y: null };
-            for (let y = 0; y < processedMap.length; y++) {
-                for (let x = 0; x < processedMap[y].length; x++) {
-                    const tile = processedMap[y][x];
-                    if (tile === '.') {
-                        dustPositions.push({ x, y });
-                        totalDust++;
-                    } else if (tile === 'S') {
-                        level3Spawn = { x, y };
-                    } else if (tile === 'G') {
-                        level3Goal = { x, y };
-                    }
-                }
-            }
-            // Default to bottom-left if not found
-            if (level3Spawn.x === null) level3Spawn = { x: 0, y: level3Map.length - 1 };
-            if (level3Goal.x === null) level3Goal = { x: level3Map[0].length - 2, y: 1 };
-
-            // Set player to S
-            playerX = level3Spawn.x;
-            playerY = level3Spawn.y;
-
-            // Spawn only Lizard after delay
-            lizardSpawned = false;
-            lizardSpawnDelayFrames = 60;
-
-            // Load art
-            loadWebImage();
-            loadTaxiImage();
-            loadTaxiSpiderManSprite();
-            loadSwingSpiderManSprites();
-            loadVillainSprites();
-
-            // Init background music (reuse existing track)
-            initBackgroundMusic();
-        }
-
-        function startLevel3() {
-            console.log('=== startLevel3() called ===');
-            level3State = 'splash';
-            currentLevel = 3;
-            initLevel3();
-
-            // Hide any overlays/title/comics that might be visible
-            const titleScreenEl = document.getElementById('titleScreen');
-            if (titleScreenEl) {
-                titleScreenEl.classList.remove('active');
-                titleScreenEl.style.display = 'none';
-            }
-            document.querySelectorAll('.comic-panel, .victory-panel, .win-loss-cutscene').forEach(p => {
-                p.classList.remove('active');
-                p.style.display = 'none';
-            });
-
-            // Splash screen
-            const canvas = document.getElementById('gameCanvas');
-            const ctx = canvas.getContext('2d');
-            canvas.style.display = 'block';
-            canvas.style.border = '5px solid #000';
-            canvas.style.boxShadow = '5px 5px 0px rgba(0,0,0,0.3)';
-
-            ctx.fillStyle = '#1a1a2e';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = '#ffff00';
-            ctx.strokeStyle = '#000';
-            ctx.lineWidth = 3;
-            ctx.font = 'bold 48px Comic Sans MS';
-            ctx.textAlign = 'center';
-            const title = 'LEVEL 3: EMPIRE STATE (BLITZ)';
-            ctx.strokeText(title, canvas.width/2, 100);
-            ctx.fillText(title, canvas.width/2, 100);
-
-            setTimeout(() => {
-                level3State = 'gameplay';
-                initGameplay();
-            }, 1500);
-        }
         
         function initGameplay() {
             console.log('=== initGameplay() called ===');
@@ -2573,7 +2548,7 @@ GAME_HTML = """
             canvas.style.display = 'block';
             
             // Get current level map
-            const currentMap = currentLevel === 1 ? level1Map : (currentLevel === 2 ? level2Map : level3Map);
+            const currentMap = currentLevel === 1 ? level1Map : level2Map;
             
             // Calculate optimal tile size to fit screen horizontally
             const maxWidth = window.innerWidth * 0.98; // 98% of screen width for maximum horizontal coverage
@@ -2595,8 +2570,6 @@ GAME_HTML = """
             
             // Add keyboard controls
             document.addEventListener('keydown', handleKeyPress);
-            // Expose cheats for testing
-            window.startLevel3 = startLevel3;
             
             // Ensure canvas doesn't interfere with UI overlays
             if (canvas) {
@@ -2609,7 +2582,7 @@ GAME_HTML = """
         
         function updateGame() {
             if (currentState !== 'gameplay') return;
-            const currentLevelState = currentLevel === 1 ? level1State : (currentLevel === 2 ? level2State : level3State);
+            const currentLevelState = currentLevel === 1 ? level1State : level2State;
             if (currentLevelState !== 'gameplay') return;
             
             // Increment global frame counter
@@ -2669,16 +2642,8 @@ GAME_HTML = """
             // Check villain collision
             checkVillainCollision();
             
-            // Level-specific win condition
-            if (currentLevel === 3) {
-                // Reach goal tile G
-                if (level3Goal && playerX === level3Goal.x && playerY === level3Goal.y) {
-                    console.log('🔥🔥🔥 LEVEL 3 GOAL REACHED!');
-                    clearInterval(gameLoop);
-                    showWinScreen();
-                    return;
-                }
-            } else if (dustCollected >= totalDust && dustCollected > 0) {
+            // Check win condition (but not if we just came from victory comic)
+            if (dustCollected >= totalDust && dustCollected > 0) {
                 console.log('🔥🔥🔥 WIN CONDITION TRIGGERED! 🔥🔥🔥');
                 console.log('🔥 Dust collected:', dustCollected);
                 console.log('🔥 Total dust:', totalDust);
@@ -2715,42 +2680,6 @@ GAME_HTML = """
                 return;
             }
             
-            // Level 3: spawn and update Lizard chase
-            if (currentLevel === 3) {
-                if (!lizardSpawned) {
-                    if (lizardSpawnDelayFrames > 0) {
-                        lizardSpawnDelayFrames--;
-                    } else {
-                        // Spawn Lizard at spawn tile (just below player start or bottom area)
-                        const spawnX = Math.max(0, level3Spawn.x);
-                        const spawnY = Math.min(level3Map.length - 1, level3Spawn.y);
-                        villains.push({
-                            x: spawnX,
-                            y: spawnY,
-                            type: 'Lizard',
-                            color: '#2e8b57',
-                            speed: 1.0,
-                            ability: null,
-                            direction: 'up',
-                            moveTimer: 0,
-                            targetX: playerX,
-                            targetY: playerY,
-                            stunned: false,
-                            stunnedTimer: 0,
-                            abilityTimer: 0
-                        });
-                        lizardSpawned = true;
-                    }
-                } else {
-                    // Lizard always targets the player
-                    const liz = villains.find(v => v.type === 'Lizard');
-                    if (liz) {
-                        liz.targetX = playerX;
-                        liz.targetY = playerY;
-                    }
-                }
-            }
-            
             renderGame();
         }
         
@@ -2779,10 +2708,7 @@ GAME_HTML = """
                 };
                 if (currentLevel === 1) {
                     window.backgroundImage.src = '/static/East_Village_Pixel_Scape.png';
-                } else if (currentLevel === 2) {
-                    window.backgroundImage.src = '/static/Times Square Pixel.png';
                 } else {
-                    // Placeholder background for Level 3
                     window.backgroundImage.src = '/static/Times Square Pixel.png';
                 }
             }
@@ -2887,7 +2813,7 @@ GAME_HTML = """
             }
             
             // Get processed map based on current level
-            const currentMap = currentLevel === 1 ? level1Map : (currentLevel === 2 ? level2Map : level3Map);
+            const currentMap = currentLevel === 1 ? level1Map : level2Map;
             const processedMap = currentLevel === 1 ? processMazeWithFloodFill(currentMap) : currentMap;
             
             // Draw map elements
@@ -3431,13 +3357,9 @@ GAME_HTML = """
                         if (currentLevel === 1) {
                             playerX = 13; // Level 1 spawn position
                         playerY = 12;
-                        } else if (currentLevel === 2) {
+                        } else {
                             playerX = 15; // Level 2 spawn position (S in ASCII)
                             playerY = 9;
-                        } else {
-                            // Level 3 respawn at S
-                            playerX = level3Spawn.x;
-                            playerY = level3Spawn.y;
                         }
                     }
                 }
@@ -3458,7 +3380,7 @@ GAME_HTML = """
             ctx.fillText(`Score: ${score}`, canvas.width/2 - tileSize * 2.5, hudY);
             
             // Level
-            const levelText = currentLevel === 1 ? 'Level 1: East Village' : (currentLevel === 2 ? 'Level 2: Times Square' : 'Level 3: Empire State');
+            const levelText = currentLevel === 1 ? 'Level 1: East Village' : 'Level 2: Times Square';
             ctx.fillText(levelText, canvas.width - tileSize * 10, hudY);
             
             // Villain ability status
@@ -3502,7 +3424,7 @@ GAME_HTML = """
             // Don't allow movement while riding taxi
             if (isRidingTaxi) return;
             
-            const currentMap = currentLevel === 1 ? level1Map : (currentLevel === 2 ? level2Map : level3Map);
+            const currentMap = currentLevel === 1 ? level1Map : level2Map;
             const processedMap = currentLevel === 1 ? processMazeWithFloodFill(currentMap) : currentMap;
             const newX = playerX;
             const newY = playerY;
@@ -3918,24 +3840,28 @@ GAME_HTML = """
                 console.log('🔥 Canvas hidden');
             }
             
+            // Branch by currentLevel: after Level 1 → Times Square victory; after Level 2 → Level 3 Intro cutscene
             if (currentLevel === 1) {
-                // After Level 1, show the Times Square comic and then Level 2
+                console.log('🔥 Transition: Level 1 → Level 2 victory comic');
                 console.log('🔥 Setting state to victoryComic...');
-            currentState = 'victoryComic';
-            currentVictoryPanel = 0;
+                currentState = 'victoryComic';
+                currentVictoryPanel = 0;
                 console.log('🔥 Calling showVictoryPanel(0)...');
-            showVictoryPanel(0);
+                showVictoryPanel(0);
             } else if (currentLevel === 2) {
-                // After Level 2, show Level 3 Intro Cutscene first
-                console.log('🔥 Showing Level 3 Intro cutscene panels');
-                isLevel3Intro = true;
-                currentL3IntroPanel = 0;
-                showLevel3IntroPanel(0);
+                console.log('🔥 Transition: Level 2 → Level 3 Intro cutscene');
+                startLevel3IntroCutscene();
             } else {
-                // After Level 3, show generic win for now
-                alert('You escaped the Empire State! Thanks for playing.');
-                returnToTitle();
+                // Fallback: default to title
+                console.log('⚠️ Unknown level transition. Returning to title.');
+                const title = document.getElementById('titleScreen');
+                if (title) {
+                    title.style.display = 'block';
+                    title.classList.add('active');
+                }
+                currentState = 'title';
             }
+            
             console.log('🔥🔥🔥 === continueToNextLevel() completed === 🔥🔥🔥');
         }
         
@@ -4011,6 +3937,223 @@ GAME_HTML = """
             // Don't reset currentLevel - it should persist for level progression
             console.log('Current level after reset:', currentLevel);
         }
+
+        // === Level 3 Intro Cutscene Logic ===
+        let level3IntroPanelIndex = 0;
+        const totalLevel3IntroPanels = 5; // 0..4 (adds Spider-Man quip panel)
+
+        function showLevel3IntroPanel(index) {
+            // Hide all level 3 intro panels
+            document.querySelectorAll('[id^="level3IntroPanel"]').forEach(p => {
+                p.classList.remove('active');
+                p.style.display = 'none';
+                p.style.visibility = 'hidden';
+            });
+            const panel = document.getElementById(`level3IntroPanel${index}`);
+            if (panel) {
+                // Forcefully ensure the panel is visible above everything
+                panel.classList.add('active');
+                panel.style.display = 'flex';
+                panel.style.position = 'fixed';
+                panel.style.top = '0';
+                panel.style.left = '0';
+                panel.style.width = '100vw';
+                panel.style.height = '100vh';
+                panel.style.visibility = 'visible';
+                panel.style.opacity = '1';
+                panel.style.zIndex = '9999';
+
+                // Hide the canvas to avoid any overlapping artifacts
+                const canvas = document.getElementById('gameCanvas');
+                if (canvas) {
+                    canvas.style.display = 'none';
+                }
+            }
+        }
+
+        function nextLevel3IntroPanel() {
+            if (level3IntroPanelIndex < totalLevel3IntroPanels - 1) {
+                level3IntroPanelIndex++;
+                showLevel3IntroPanel(level3IntroPanelIndex);
+            } else {
+                // End of intro → proceed to Level 3 splash
+                // Hide intro panels before transitioning
+                document.querySelectorAll('[id^="level3IntroPanel"]').forEach(p => {
+                    p.classList.remove('active');
+                    p.style.display = 'none';
+                    p.style.visibility = 'hidden';
+                });
+                startLevel3Splash();
+            }
+        }
+
+        function startLevel3IntroCutscene() {
+            console.log('=== startLevel3IntroCutscene() ===');
+            currentState = 'level3Intro';
+            level3IntroPanelIndex = 0;
+            // Click anywhere to advance panels (handled in global click/keydown)
+            showLevel3IntroPanel(0);
+        }
+
+        function startLevel3Splash() {
+            console.log('=== startLevel3Splash() ===');
+            // Hide any intro panels
+            document.querySelectorAll('[id^="level3IntroPanel"]').forEach(p => {
+                p.classList.remove('active');
+                p.style.display = 'none';
+                p.style.visibility = 'hidden';
+            });
+            // Prepare canvas splash
+            const canvas = document.getElementById('gameCanvas');
+            const ctx = canvas.getContext('2d');
+            canvas.style.display = 'block';
+            currentState = 'level3Splash';
+            currentLevel = 3;
+            // Draw simple splash
+            // Draw styled splash with building theme
+            ctx.fillStyle = '#0b0b16';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            grad.addColorStop(0, '#351a4a');
+            grad.addColorStop(0.5, '#0b0b16');
+            grad.addColorStop(1, '#000');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.textAlign = 'center';
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 6;
+            ctx.fillStyle = '#ff2d2d';
+            ctx.font = 'bold 52px Comic Sans MS';
+            ctx.strokeText('LEVEL 3: EMPIRE RUSH', canvas.width/2, canvas.height/2 - 40);
+            ctx.fillText('LEVEL 3: EMPIRE RUSH', canvas.width/2, canvas.height/2 - 40);
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '20px Comic Sans MS';
+            ctx.fillText('Vertical maze ascent — reach the top!', canvas.width/2, canvas.height/2 + 4);
+            ctx.font = '16px Comic Sans MS';
+            ctx.fillText('Press SPACE or Click to continue', canvas.width/2, canvas.height/2 + 36);
+        }
+
+        function startLevel3Placeholder() {
+            console.log('=== startLevel3Placeholder() ===');
+            // Deprecated: replaced by startLevel3DesignOnly
+            startLevel3DesignOnly();
+        }
+
+        // Level 3 design-only renderer (no characters/villains yet)
+        function startLevel3DesignOnly() {
+            console.log('=== startLevel3DesignOnly() ===');
+            const canvas = document.getElementById('gameCanvas');
+            const ctx = canvas.getContext('2d');
+            canvas.style.display = 'block';
+            currentState = 'gameplay';
+
+            // Prepare rotated map: rotate 90° so original LEFT becomes BOTTOM,
+            // then force 'S' to bottom-left as requested
+            function rotateClockwise(mapArr) {
+                const r = mapArr.length;
+                const c = mapArr[0].length;
+                const out = Array.from({ length: c }, () => Array(r).fill(' '));
+                for (let y = 0; y < r; y++) {
+                    for (let x = 0; x < c; x++) {
+                        out[x][r - 1 - y] = mapArr[y][x];
+                    }
+                }
+                return out.map(row => row.join(''));
+            }
+
+            function ensureStartAtBottomLeft(mapArr) {
+                const r = mapArr.length;
+                const c = mapArr[0].length;
+                let sx = -1, sy = -1;
+                for (let y = 0; y < r; y++) {
+                    const ix = mapArr[y].indexOf('S');
+                    if (ix !== -1) { sy = y; sx = ix; break; }
+                }
+                if (sx !== -1) {
+                    // Replace old S with path
+                    mapArr[sy] = mapArr[sy].substring(0, sx) + '.' + mapArr[sy].substring(sx + 1);
+                }
+                // Set bottom-left to 'S' if it's a wall, carve a path
+                const by = r - 1, bx = 0;
+                const ch = mapArr[by][bx];
+                const replacement = 'S';
+                mapArr[by] = replacement + mapArr[by].substring(1);
+                return mapArr;
+            }
+
+            function mirrorVertical(mapArr) {
+                return mapArr.map(row => row.split('').reverse().join(''));
+            }
+
+            let mapData = rotateClockwise(level3Map);
+            mapData = mirrorVertical(mapData);
+            mapData = ensureStartAtBottomLeft(mapData);
+
+            // Compute tile size to fit the rotated map
+            const rows = mapData.length;
+            const cols = mapData[0].length;
+            const maxWidth = window.innerWidth * 0.98;
+            const maxHeight = window.innerHeight * 0.85;
+            const tileSizeX = Math.floor(maxWidth / cols);
+            const tileSizeY = Math.floor(maxHeight / rows);
+            const tileSize = Math.min(tileSizeX, tileSizeY, 45);
+            canvas.width = cols * tileSize;
+            canvas.height = rows * tileSize;
+
+            // Simple draw of the vertical maze
+            function drawLevel3Grid() {
+                // Background
+                ctx.fillStyle = '#0b0b16';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                // Grid pass
+                for (let y = 0; y < rows; y++) {
+                    for (let x = 0; x < cols; x++) {
+                        const ch = mapData[y][x];
+                        const px = x * tileSize;
+                        const py = y * tileSize;
+                        if (ch === '#') {
+                            // Wall block with subtle bevel
+                            ctx.fillStyle = '#2a2f3a';
+                            ctx.fillRect(px, py, tileSize, tileSize);
+                            ctx.strokeStyle = '#4c5566';
+                            ctx.strokeRect(px + 0.5, py + 0.5, tileSize - 1, tileSize - 1);
+                        } else if (ch === 'S') {
+                            // Start marker
+                            ctx.fillStyle = '#14203a';
+                            ctx.fillRect(px, py, tileSize, tileSize);
+                            ctx.fillStyle = '#00bfff';
+                            ctx.font = `${Math.floor(tileSize * 0.6)}px Comic Sans MS`;
+                            ctx.textAlign = 'center';
+                            ctx.textBaseline = 'middle';
+                            ctx.fillText('S', px + tileSize / 2, py + tileSize / 2);
+                        } else if (ch === 'G') {
+                            // Goal marker
+                            ctx.fillStyle = '#1d2a4d';
+                            ctx.fillRect(px, py, tileSize, tileSize);
+                            ctx.fillStyle = '#ff2d2d';
+                            ctx.font = `${Math.floor(tileSize * 0.6)}px Comic Sans MS`;
+                            ctx.textAlign = 'center';
+                            ctx.textBaseline = 'middle';
+                            ctx.fillText('G', px + tileSize / 2, py + tileSize / 2);
+                        } else {
+                            // Path
+                            ctx.fillStyle = '#101521';
+                            ctx.fillRect(px, py, tileSize, tileSize);
+                        }
+                    }
+                }
+            }
+
+            drawLevel3Grid();
+
+            // Instruction overlay
+            ctx.fillStyle = 'rgba(0,0,0,0.35)';
+            ctx.fillRect(0, canvas.height - 48, canvas.width, 48);
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '16px Comic Sans MS';
+            ctx.textAlign = 'center';
+            ctx.fillText('Design preview: Empire State Building maze (S → G). Characters and enemies to be added.', canvas.width / 2, canvas.height - 18);
+        }
         
         function resetGame() {
             console.log('=== resetGame() called ===');
@@ -4072,6 +4215,10 @@ GAME_HTML = """
                 nextPanel();
             } else if (currentState === 'victoryComic') {
                 nextVictoryPanel();
+            } else if (currentState === 'level3Intro') {
+                nextLevel3IntroPanel();
+            } else if (currentState === 'level3Splash') {
+                startLevel3DesignOnly();
             } else if (currentState === 'gameplay') {
                 // Skip splash screen on click
                 const currentLevelState = currentLevel === 1 ? level1State : level2State;
@@ -4098,6 +4245,10 @@ GAME_HTML = """
                     nextPanel();
                 } else if (currentState === 'victoryComic') {
                     nextVictoryPanel();
+                } else if (currentState === 'level3Intro') {
+                    nextLevel3IntroPanel();
+                } else if (currentState === 'level3Splash') {
+                    startLevel3DesignOnly();
                 } else if (currentState === 'gameplay') {
                     const currentLevelState = currentLevel === 1 ? level1State : level2State;
                     if (currentLevelState === 'splash') {
@@ -4359,6 +4510,37 @@ GAME_HTML = """
         
         window.cheatToTimesSquareComic = cheatToTimesSquareComic;
         
+        // CHEAT CODE: Jump to END of Level 2 cutscene (Level 3 intro final panel)
+        function cheatToEndOfLevel2Cutscene() {
+            console.log('🔥🔥🔥 CHEAT CODE ACTIVATED: Jumping to END of Level 2 cutscene (Level 3 Intro final panel)! 🔥🔥🔥');
+            try {
+                // Hide all other UI first
+                document.querySelectorAll('.comic-panel, .victory-panel, #titleScreen').forEach(panel => {
+                    panel.classList.remove('active');
+                    panel.style.display = 'none';
+                });
+                const canvas = document.getElementById('gameCanvas');
+                if (canvas) canvas.style.display = 'none';
+
+                // Ensure state reflects post-Level-2 flow
+                currentLevel = 2; // Still considered Level 2 until splash sets Level 3
+                currentState = 'level3Intro';
+
+                // Initialize the Level 3 intro handlers (skip/continue)
+                startLevel3IntroCutscene();
+
+                // Start from the first Dr. Strange panel
+                level3IntroPanelIndex = 0;
+                showLevel3IntroPanel(0);
+
+                console.log('✅ Now showing final Level 3 intro panel with Continue button.');
+                console.log('👉 Click anywhere to advance through the Level 3 intro panels.');
+            } catch (e) {
+                console.error('❌ Cheat to end of Level 2 cutscene failed:', e);
+            }
+        }
+        window.cheatToEndOfLevel2Cutscene = cheatToEndOfLevel2Cutscene;
+
         // Debug function to check image loading status
         function debugImageLoading() {
             console.log('🔍 Image Loading Debug:');
