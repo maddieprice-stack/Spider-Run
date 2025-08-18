@@ -4309,14 +4309,16 @@ GAME_HTML = """
                     ctx.fill();
                     ctx.restore();
 
-                    // Draw the sprite using contain scaling so nothing (like the head) is cropped
+                    // Draw the sprite using contain scaling with extra padding and a larger downward nudge
                     const iw = level3SpideyImg.naturalWidth;
                     const ih = level3SpideyImg.naturalHeight;
-                    const scale = Math.min(tileSize / iw, tileSize / ih) * 0.95; // slight padding
+                    const maxDrawW = Math.floor(tileSize * 0.88);
+                    const maxDrawH = Math.floor(tileSize * 0.88);
+                    const scale = Math.min(maxDrawW / iw, maxDrawH / ih);
                     const dw = Math.max(1, Math.round(iw * scale));
                     const dh = Math.max(1, Math.round(ih * scale));
                     const dx = Math.floor(px + (tileSize - dw) / 2);
-                    const dy = Math.floor(py + (tileSize - dh) / 2 + tileSize * 0.02); // nudge down a bit
+                    const dy = Math.floor(py + (tileSize - dh) / 2 + tileSize * 0.06);
                     ctx.drawImage(level3SpideyImg, dx, dy, dw, dh);
                 } else {
                     // Fallback: red dot
