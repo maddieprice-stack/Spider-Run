@@ -4330,13 +4330,7 @@ GAME_HTML = """
                 ctx.fillText(livesText, livesX, hudY);
                 const livesWidth = ctx.measureText(livesText).width;
 
-                // Score (center)
-                const scoreText = `Score: ${score}`;
-                const scoreX = Math.floor(canvas.width / 2 - ctx.measureText(scoreText).width / 2);
-                ctx.strokeText(scoreText, scoreX, hudY);
-                ctx.fillText(scoreText, scoreX, hudY);
-
-                // Level title (right)
+                // Precompute Level title (right) metrics and position
                 const titleText = 'Level 3: Empire State Blitz';
                 const minGap = 24; // gap between lives text and title
                 let titleFontSize = baseFontSize;
@@ -4349,6 +4343,25 @@ GAME_HTML = """
                     availableRight = canvas.width - (livesX + livesWidth + minGap) - 16;
                 }
                 const titleX = Math.max(livesX + livesWidth + minGap, canvas.width - titleWidth - 16);
+
+                // Score (center between lives and title)
+                let scoreFontSize = baseFontSize;
+                ctx.font = `bold ${scoreFontSize}px Comic Sans MS`;
+                const scoreText = `Score: ${score}`;
+                let scoreWidth = ctx.measureText(scoreText).width;
+                const leftEdge = livesX + livesWidth + minGap;
+                const midAvailable = titleX - leftEdge;
+                while (scoreWidth > (midAvailable - minGap) && scoreFontSize > 12) {
+                    scoreFontSize -= 1;
+                    ctx.font = `bold ${scoreFontSize}px Comic Sans MS`;
+                    scoreWidth = ctx.measureText(scoreText).width;
+                }
+                const scoreX = Math.floor(leftEdge + (midAvailable - scoreWidth) / 2);
+                ctx.strokeText(scoreText, scoreX, hudY);
+                ctx.fillText(scoreText, scoreX, hudY);
+
+                // Draw Level title (right)
+                ctx.font = `bold ${titleFontSize}px Comic Sans MS`;
                 ctx.strokeText(titleText, titleX, hudY);
                 ctx.fillText(titleText, titleX, hudY);
 
