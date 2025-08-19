@@ -809,7 +809,7 @@ GAME_HTML = """
 
         <div id="comicPanel2" class="comic-panel">
             <div class="panel-content">
-                <div class="dr-strange-image"></div>
+                <div class="spider-man-victory-scene" id="introSpiderP2" style="background-image: url('/static/Spider-man%20Comic%203.png');"></div>
                 <div class="speech-bubble">
                     What's a little more dust on the streets? We've seen worse.
                 </div>
@@ -818,7 +818,7 @@ GAME_HTML = """
 
         <div id="comicPanel3" class="comic-panel">
             <div class="panel-content">
-                <div class="spider-man-victory-scene" id="introSpiderP3" style="background-image: url('/static/Spider-man%20Comic%203.png');"></div>
+                <div class="dr-strange-webp-image" style="background-image: url('/static/Dr%20Strange%203.png');"></div>
                 <div class="speech-bubble">
                     This dust isn't ordinary, Spider-Man. If left unchecked... it could END THE WORLD!
                 </div>
@@ -827,7 +827,7 @@ GAME_HTML = """
 
         <div id="comicPanel4" class="comic-panel">
             <div class="panel-content">
-                <div class="dr-strange-image"></div>
+                <div class="spider-man-victory-scene" id="introSpiderP4" style="background-image: url('/static/Spider-man%20Comic%203.png');"></div>
                 <div class="speech-bubble">
                     ...Okay, okay. Guess I'll grab a broom.
                 </div>
@@ -836,7 +836,7 @@ GAME_HTML = """
 
         <div id="comicPanel5" class="comic-panel">
             <div class="panel-content">
-                <div class="spider-man-victory-scene" id="introSpiderP5" style="background-image: url('/static/Spider-man%20Comic%203.png');"></div>
+                <div class="dr-strange-webp-image" style="background-image: url('/static/Dr%20Strange%203.png');"></div>
                 <div class="speech-bubble">
                     The dust is scattered across the East Village — start there before it spreads any further!
                 </div>
@@ -2114,7 +2114,7 @@ GAME_HTML = """
                 if (currentState === 'comic' && typeof selectedSpider !== 'undefined' && selectedSpider === 'miles') {
                     const activePanel = document.querySelector('.comic-panel.active');
                     if (activePanel) {
-                        const targets = activePanel.querySelectorAll('.spider-man-victory-scene, #introSpiderStart, #introSpiderP3, #introSpiderP5');
+                        const targets = activePanel.querySelectorAll('.spider-man-victory-scene, #introSpiderStart, #introSpiderP2, #introSpiderP4');
                         targets.forEach(el => { el.style.backgroundImage = "url('/static/Miles Morales Comic.png')"; });
                     }
                 }
@@ -2156,9 +2156,15 @@ GAME_HTML = """
                 const el1 = document.getElementById('introSpiderImage');
                 const el2 = document.getElementById('introSpiderImage2');
                 const el3 = document.getElementById('level3IntroSpideyImage');
+                const ep0 = document.getElementById('introSpiderStart');
+                const ep2 = document.getElementById('introSpiderP2');
+                const ep4 = document.getElementById('introSpiderP4');
                 if (el1) el1.style.backgroundImage = "url('/static/Miles Morales Comic.png')";
                 if (el2) el2.style.backgroundImage = "url('/static/Miles Morales Comic.png')";
                 if (el3) el3.style.backgroundImage = "url('/static/Miles Morales Comic.png')";
+                if (ep0) ep0.style.backgroundImage = "url('/static/Miles Morales Comic.png')";
+                if (ep2) ep2.style.backgroundImage = "url('/static/Miles Morales Comic.png')";
+                if (ep4) ep4.style.backgroundImage = "url('/static/Miles Morales Comic.png')";
                 // Swap selfie to Miles for Level 2 camera feature immediately
                 if (typeof selfieImage !== 'undefined' && selfieImage) {
                     selfieImage.src = '/static/Miles Selfie.png';
