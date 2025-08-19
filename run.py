@@ -2146,6 +2146,10 @@ GAME_HTML = """
                 if (el1) el1.style.backgroundImage = "url('/static/Miles Morales Comic.png')";
                 if (el2) el2.style.backgroundImage = "url('/static/Miles Morales Comic.png')";
                 if (el3) el3.style.backgroundImage = "url('/static/Miles Morales Comic.png')";
+                // Swap selfie to Miles for Level 2 camera feature immediately
+                if (typeof selfieImage !== 'undefined' && selfieImage) {
+                    selfieImage.src = '/static/Miles Selfie.png';
+                }
             }
         }
         
@@ -2688,7 +2692,16 @@ GAME_HTML = """
                 selfieImage = new Image();
                 selfieImage.onload = function() { selfieLoaded = true; };
                 selfieImage.onerror = function() { selfieLoaded = false; };
-                selfieImage.src = '/static/Spider-man Selfie.png';
+                selfieImage.src = (typeof selectedSpider !== 'undefined' && selectedSpider === 'miles')
+                    ? '/static/Miles Selfie.png'
+                    : '/static/Spider-man Selfie.png';
+            } else {
+                const desiredSelfie = (typeof selectedSpider !== 'undefined' && selectedSpider === 'miles')
+                    ? '/static/Miles Selfie.png'
+                    : '/static/Spider-man Selfie.png';
+                if (!selfieImage.src.endsWith(desiredSelfie)) {
+                    selfieImage.src = desiredSelfie;
+                }
             }
             if (!subwayImage) {
                 subwayImage = new Image();
