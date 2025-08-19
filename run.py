@@ -2092,7 +2092,7 @@ GAME_HTML = """
                 // If Miles selected, swap immediately
                 if (typeof selectedSpider !== 'undefined' && selectedSpider === 'miles') {
                     const s = document.getElementById('introSpiderStart');
-                    if (s) s.style.backgroundImage = "url('/static/Miles Morales Comic.png')";
+                    if (s) s.style.backgroundImage = "url('/static/Miles Comic.png')";
                 }
             } else {
                 const panel = document.getElementById(`comicPanel${panelNumber}`);
@@ -2143,9 +2143,9 @@ GAME_HTML = """
                 const el1 = document.getElementById('introSpiderImage');
                 const el2 = document.getElementById('introSpiderImage2');
                 const el3 = document.getElementById('level3IntroSpideyImage');
-                if (el1) el1.style.backgroundImage = "url('/static/Miles Morales Comic.png')";
-                if (el2) el2.style.backgroundImage = "url('/static/Miles Morales Comic.png')";
-                if (el3) el3.style.backgroundImage = "url('/static/Miles Morales Comic.png')";
+                if (el1) el1.style.backgroundImage = "url('/static/Miles Comic.png')";
+                if (el2) el2.style.backgroundImage = "url('/static/Miles Comic.png')";
+                if (el3) el3.style.backgroundImage = "url('/static/Miles Comic.png')";
                 // Swap selfie to Miles for Level 2 camera feature immediately
                 if (typeof selfieImage !== 'undefined' && selfieImage) {
                     selfieImage.src = '/static/Miles Selfie.png';
@@ -4254,7 +4254,7 @@ GAME_HTML = """
             // If Miles is selected, swap any Spider image used in the intro to Miles comic art
             if (typeof selectedSpider !== 'undefined' && selectedSpider === 'miles') {
                 const el3 = document.getElementById('level3IntroSpideyImage');
-                if (el3) el3.style.backgroundImage = "url('/static/Miles Morales Comic.png')";
+                if (el3) el3.style.backgroundImage = "url('/static/Miles Comic.png')";
             }
         }
 
