@@ -1979,7 +1979,10 @@ GAME_HTML = """
             }
             
             // Switch to Level 2 music
-            currentBackgroundMusic = new Audio('/static/Spider song 2.mp3');
+            const level2Track = (typeof selectedSpider !== 'undefined' && selectedSpider === 'miles')
+                ? '/static/Miles Song 2.mp3'
+                : '/static/Spider song 2.mp3';
+            currentBackgroundMusic = new Audio(level2Track);
             currentBackgroundMusic.volume = 0.3; // Set volume to 30%
             currentBackgroundMusic.loop = true;
             
