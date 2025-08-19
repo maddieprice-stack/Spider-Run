@@ -923,7 +923,7 @@ GAME_HTML = """
         <!-- Spider-Man quip panel -->
         <div id="level3IntroPanel4" class="victory-panel" style="background: url('/static/New%20York%203%20Updated.png') no-repeat center center; background-size: cover;">
             <div class="panel-content">
-                <div class="spider-man-victory-scene" style="background-image: url('/static/Spider-man%20Comic%203.png');"></div>
+                <div id="level3IntroSpideyImage" class="spider-man-victory-scene" style="background-image: url('/static/Spider-man%20Comic%203.png');"></div>
                 <div class="speech-bubble">
                     Note to self: race to the top, avoid villains, save the world before breakfast. Easy.
                     </div>
@@ -2137,8 +2137,10 @@ GAME_HTML = """
             if (selectedSpider === 'miles') {
                 const el1 = document.getElementById('introSpiderImage');
                 const el2 = document.getElementById('introSpiderImage2');
+                const el3 = document.getElementById('level3IntroSpideyImage');
                 if (el1) el1.style.backgroundImage = "url('/static/Miles Morales Comic.png')";
                 if (el2) el2.style.backgroundImage = "url('/static/Miles Morales Comic.png')";
+                if (el3) el3.style.backgroundImage = "url('/static/Miles Morales Comic.png')";
             }
         }
         
@@ -4223,6 +4225,11 @@ GAME_HTML = """
             level3IntroPanelIndex = 0;
             // Click anywhere to advance panels (handled in global click/keydown)
             showLevel3IntroPanel(0);
+            // If Miles is selected, swap any Spider image used in the intro to Miles comic art
+            if (typeof selectedSpider !== 'undefined' && selectedSpider === 'miles') {
+                const el3 = document.getElementById('level3IntroSpideyImage');
+                if (el3) el3.style.backgroundImage = "url('/static/Miles Morales Comic.png')";
+            }
         }
 
         function startLevel3Splash() {
