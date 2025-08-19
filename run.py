@@ -1217,12 +1217,6 @@ GAME_HTML = """
         let subwayImageLoaded = false;
         let subwayPositions = []; // [{x,y}, {x,y}]
         let subwayTeleportCooldown = 0;
-        // Subway teleport animation (Spider-Man only): exit hop timer in frames
-        let subwayExitHopTimer = 0; // when > 0, show hopping sprite
-        // Subway-specific Spider-Man sprites
-        let subwayJumpSprite = null; // Spider-man jumping.png
-        let subwayHopSprite = null;  // Spider hopping.png
-        let subwaySpritesLoaded = false;
         
         // Villain system
         let villains = [];
@@ -1374,24 +1368,6 @@ GAME_HTML = """
                 console.error('Failed to load taxi image from:', taxiPath);
             };
             img.src = taxiPath;
-        }
-        
-        // Load Spider-Man subway sprites (jump before teleport, hop after exit)
-        function loadSubwaySprites() {
-            // Only relevant for Spider-Man; Miles keeps existing behavior
-            const jumpImg = new Image();
-            const hopImg = new Image();
-            let loadedCount = 0;
-            const markLoaded = () => { loadedCount++; if (loadedCount >= 1) { /* tolerate missing one */ subwaySpritesLoaded = true; } };
-            jumpImg.onload = markLoaded;
-            hopImg.onload = markLoaded;
-            // Use exact filenames per requirement; if missing, onerror leaves them null
-            jumpImg.onerror = function() { /* leave as not loaded */ };
-            hopImg.onerror = function() { /* leave as not loaded */ };
-            jumpImg.src = '/static/Spider-man jumping.png';
-            hopImg.src = '/static/Spider hopping.png';
-            subwayJumpSprite = jumpImg;
-            subwayHopSprite = hopImg;
         }
         
         // Load web image
@@ -2727,7 +2703,6 @@ GAME_HTML = """
             loadTaxiImage();
             loadTaxiSpiderManSprite();
             loadSwingSpiderManSprites();
-            loadSubwaySprites();
             loadVillainSprites();
             loadBombImage();
             
@@ -2853,7 +2828,6 @@ GAME_HTML = """
             // Increment global frame counter
             globalFrameCounter++;
             if (subwayTeleportCooldown > 0) subwayTeleportCooldown--;
-            if (subwayExitHopTimer > 0) subwayExitHopTimer--;
             
             // Update web shooter timer
             if (webShooterActive) {
@@ -3213,12 +3187,25 @@ GAME_HTML = """
                     ctx.fillRect(drawX, drawY, size, size);
                 }
             }
-            // Draw subway signs in Level 2
+            // Draw subway signs in Level 2 with glow (always, regardless of character)
             if (currentLevel === 2 && subwayPositions && subwayPositions.length > 0) {
                 subwayPositions.forEach(pos => {
                     const sx = pos.x * tileSize + 1;
                     const sy = pos.y * tileSize + 1 + hudHeight;
                     const ssize = tileSize - 2;
+                    // Pulsing glow
+                    const pulse = 0.6 + 0.4 * Math.sin(globalFrameCounter * 0.12);
+                    ctx.save();
+                    ctx.globalAlpha = 0.9;
+                    ctx.shadowColor = 'rgba(0, 255, 255, 0.9)';
+                    ctx.shadowBlur = Math.max(10, (tileSize * 0.7) * pulse);
+                    ctx.shadowOffsetX = 0;
+                    ctx.shadowOffsetY = 0;
+                    ctx.fillStyle = 'rgba(0, 255, 255, 0.28)';
+                    ctx.fillRect(sx + ssize * 0.12, sy + ssize * 0.12, ssize * 0.76, ssize * 0.76);
+                    ctx.restore();
+
+                    // Draw the subway sign image or fallback square on top
                     if (subwayImageLoaded && subwayImage) {
                         ctx.drawImage(subwayImage, sx, sy, ssize, ssize);
                     } else {
@@ -3306,15 +3293,6 @@ GAME_HTML = """
             
             // Choose which Spider-Man sprite to use
             let currentPlayerSprite = window.playerSprite;
-            // Subway visuals (Spider-Man only): if standing on a subway tile, show jumping; after exit, show hop for 1s
-            const onSubwayTile = (currentLevel === 2 && subwayPositions && subwayPositions.some(p => p.x === playerX && p.y === playerY));
-            if (selectedSpider !== 'miles') {
-                if (subwayExitHopTimer > 0 && subwayHopSprite && subwayHopSprite.complete) {
-                    currentPlayerSprite = subwayHopSprite;
-                } else if (onSubwayTile && subwayJumpSprite && subwayJumpSprite.complete) {
-                    currentPlayerSprite = subwayJumpSprite;
-                }
-            }
             if (isRidingTaxi) {
                 if (selectedSpider === 'miles' && taxiMilesLoaded && taxiMilesSprite) {
                     currentPlayerSprite = taxiMilesSprite;
@@ -3761,8 +3739,6 @@ GAME_HTML = """
                             playerY = subwayPositions[otherIdx].y;
                             playerDirection = 'down';
                             subwayTeleportCooldown = 20; // short lockout to prevent bounce
-                            // After exit, show hop sprite for ~1 second
-                            subwayExitHopTimer = 60;
                             break;
                         }
                     }
