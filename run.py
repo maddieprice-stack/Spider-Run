@@ -2138,9 +2138,29 @@ GAME_HTML = """
                 currentPanel++;
                 showPanel(currentPanel);
             } else if (currentState === 'comic' && currentPanel === totalPanels - 1) {
-                // End of comic, start gameplay
-                startGameplay();
+                // End of comic, start Level 1 explicitly
+                beginLevel1FromIntro();
             }
+        }
+
+        function beginLevel1FromIntro() {
+            // Hide any overlays
+            const overlay = document.getElementById('comicCharacterSelect');
+            if (overlay) overlay.style.display = 'none';
+            // Hide all comic panels
+            document.querySelectorAll('.comic-panel').forEach(panel => {
+                panel.classList.remove('active');
+                panel.style.display = 'none';
+            });
+            // Ensure proper state and music for Level 1
+            currentState = 'gameplay';
+            currentLevel = 1;
+            if (typeof switchToLevel1Music === 'function') {
+                switchToLevel1Music();
+                startBackgroundMusic();
+            }
+            // Start Level 1 flow
+            startLevel1();
         }
         
         function showVictoryPanel(panelNumber) {
