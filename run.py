@@ -935,7 +935,7 @@ GAME_HTML = """
 
         <div id="victoryPanel1" class="victory-panel">
             <div class="panel-content">
-                <div class="spider-man-victory-scene"></div>
+                <div class="spider-man-victory-scene" id="introSpiderImage"></div>
                 <div class="speech-bubble">
                     Glad I could help. Got any other cosmic chores for me to run while I'm at it?
                 </div>
@@ -955,7 +955,7 @@ GAME_HTML = """
 
         <div id="victoryPanel3" class="victory-panel">
             <div class="panel-content">
-                <div class="spider-man-victory-scene"></div>
+                <div class="spider-man-victory-scene" id="introSpiderImage2"></div>
                 <div class="speech-bubble">
                     I'll try... but I'm not making any promises about the chaos part.
                 </div>
@@ -2133,6 +2133,13 @@ GAME_HTML = """
             characterChosen = true;
             const overlay = document.getElementById('comicCharacterSelect');
             if (overlay) overlay.style.display = 'none';
+            // Update intro comic Spider image backgrounds for Miles
+            if (selectedSpider === 'miles') {
+                const el1 = document.getElementById('introSpiderImage');
+                const el2 = document.getElementById('introSpiderImage2');
+                if (el1) el1.style.backgroundImage = "url('/static/Miles Morales Comic.png')";
+                if (el2) el2.style.backgroundImage = "url('/static/Miles Morales Comic.png')";
+            }
         }
         
         function skipToVictoryComic() {
