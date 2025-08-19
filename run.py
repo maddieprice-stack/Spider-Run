@@ -793,7 +793,7 @@ GAME_HTML = """
 
         <div id="comicPanel0" class="comic-panel">
             <div class="panel-content">
-                <div class="spider-man-victory-scene" id="introSpiderStart" style="background-image: url('/static/Spider-man%20Comic%203.png');"></div>
+                <div class="spider-man-victory-scene" id="introSpiderStart" style="background-image: url('/static/Spider-man%20Comic.png');"></div>
                 <div class="speech-bubble">
                     Hi Dr. Strange!
                 </div>
