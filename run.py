@@ -3187,22 +3187,27 @@ GAME_HTML = """
                     ctx.fillRect(drawX, drawY, size, size);
                 }
             }
-            // Draw subway signs in Level 2 with glow (always, regardless of character)
+            // Draw subway signs in Level 2 with yellow circular glow (always, regardless of character)
             if (currentLevel === 2 && subwayPositions && subwayPositions.length > 0) {
                 subwayPositions.forEach(pos => {
                     const sx = pos.x * tileSize + 1;
                     const sy = pos.y * tileSize + 1 + hudHeight;
                     const ssize = tileSize - 2;
-                    // Pulsing glow
+                    // Pulsing yellow circular glow
                     const pulse = 0.6 + 0.4 * Math.sin(globalFrameCounter * 0.12);
+                    const cx = sx + ssize / 2;
+                    const cy = sy + ssize / 2;
+                    const rad = ssize * 0.55;
                     ctx.save();
                     ctx.globalAlpha = 0.9;
-                    ctx.shadowColor = 'rgba(0, 255, 255, 0.9)';
-                    ctx.shadowBlur = Math.max(10, (tileSize * 0.7) * pulse);
+                    ctx.shadowColor = 'rgba(255, 215, 0, 0.95)';
+                    ctx.shadowBlur = Math.max(12, (tileSize * 0.8) * pulse);
                     ctx.shadowOffsetX = 0;
                     ctx.shadowOffsetY = 0;
-                    ctx.fillStyle = 'rgba(0, 255, 255, 0.28)';
-                    ctx.fillRect(sx + ssize * 0.12, sy + ssize * 0.12, ssize * 0.76, ssize * 0.76);
+                    ctx.fillStyle = 'rgba(255, 215, 0, 0.3)';
+                    ctx.beginPath();
+                    ctx.arc(cx, cy, rad, 0, Math.PI * 2);
+                    ctx.fill();
                     ctx.restore();
 
                     // Draw the subway sign image or fallback square on top
