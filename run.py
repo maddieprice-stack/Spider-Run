@@ -1394,17 +1394,24 @@ GAME_HTML = """
         }
         
         // Load taxi Spider-Man sprite
-        let taxiSpiderManSprite = null;
+        let taxiSpiderManSprite = null; // will hold Spider-Man taxi by default
+        let taxiMilesSprite = null;     // Miles taxi sprite
         let taxiSpiderManLoaded = false;
+        let taxiMilesLoaded = false;
         
         function loadTaxiSpiderManSprite() {
-            const taxiSpiderManPath = '/static/spider_man_taxi.png';
-            const img = new Image();
-            img.onload = function() {
-                taxiSpiderManLoaded = true;
-            };
-            img.src = taxiSpiderManPath;
-            taxiSpiderManSprite = img;
+            // Load Spider-Man taxi
+            const smPath = '/static/spider_man_taxi.png';
+            const smImg = new Image();
+            smImg.onload = function() { taxiSpiderManLoaded = true; };
+            smImg.src = smPath;
+            taxiSpiderManSprite = smImg;
+            // Load Miles taxi
+            const milesPath = '/static/Miles Taxi.png';
+            const milesImg = new Image();
+            milesImg.onload = function() { taxiMilesLoaded = true; };
+            milesImg.src = milesPath;
+            taxiMilesSprite = milesImg;
         }
         
         // Load swing Spider-Man sprites
@@ -3189,8 +3196,12 @@ GAME_HTML = """
             
             // Choose which Spider-Man sprite to use
             let currentPlayerSprite = window.playerSprite;
-            if (isRidingTaxi && taxiSpiderManLoaded && taxiSpiderManSprite) {
-                currentPlayerSprite = taxiSpiderManSprite;
+            if (isRidingTaxi) {
+                if (selectedSpider === 'miles' && taxiMilesLoaded && taxiMilesSprite) {
+                    currentPlayerSprite = taxiMilesSprite;
+                } else if (taxiSpiderManLoaded && taxiSpiderManSprite) {
+                    currentPlayerSprite = taxiSpiderManSprite;
+                }
             } else if (webShooterActive && swingSpiderManLoaded && swingSpiderManSprite1 && swingSpiderManSprite2) {
                 // Check if player moved to a new square
                 if (playerX !== lastPlayerX || playerY !== lastPlayerY) {
