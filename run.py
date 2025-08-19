@@ -791,7 +791,7 @@ GAME_HTML = """
 
         <div id="comicPanel0" class="comic-panel">
             <div class="panel-content">
-                <div class="dr-strange-image"></div>
+                <div class="spider-man-victory-scene" id="introSpiderStart" style="background-image: url('/static/Spider-man%20Comic%203.png');"></div>
                 <div class="speech-bubble">
                     Hi Dr. Strange!
                 </div>
@@ -2089,6 +2089,11 @@ GAME_HTML = """
                 panel0.style.visibility = 'visible';
                 panel0.style.opacity = '1';
                 panel0.style.zIndex = '9999';
+                // If Miles selected, swap immediately
+                if (typeof selectedSpider !== 'undefined' && selectedSpider === 'miles') {
+                    const s = document.getElementById('introSpiderStart');
+                    if (s) s.style.backgroundImage = "url('/static/Miles Morales Comic.png')";
+                }
             } else {
                 const panel = document.getElementById(`comicPanel${panelNumber}`);
                 console.log('Showing comicPanel' + panelNumber + ':', panel);
