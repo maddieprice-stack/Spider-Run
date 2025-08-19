@@ -783,7 +783,7 @@ GAME_HTML = """
         <!-- Comic Intro Panels -->
         <div id="comicPanelStart" class="comic-panel">
             <div class="panel-content">
-                <div class="speech-bubble">
+                <div class="panel-box" style="background:#fff; border:3px solid #000; padding:16px 20px; font-size:22px; font-weight:bold; box-shadow:0 4px 8px rgba(0,0,0,0.3);">
                     Spider-man: Space Dust Chaos
                 </div>
             </div>
