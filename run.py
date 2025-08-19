@@ -4960,7 +4960,7 @@ GAME_HTML = """
                 }, 220);
             }
 
-            setTimeout(function() { if (currentLevel === 3 && currentState === 'gameplay') startLizardChase(); }, 3000);
+            setTimeout(function() { if (currentLevel === 3 && currentState === 'gameplay') startLizardChase(); }, 4000);
 
             // Bind simple Level 3 movement controls (arrow keys / WASD)
             if (!window.level3ControlsBound) {
