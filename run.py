@@ -5137,7 +5137,11 @@ GAME_HTML = """
                     initGameplay();
                     }
                 }
-            } else if (currentState === 'win' || currentState === 'lose' || currentState === 'gameOver') {
+            } else if (currentState === 'win') {
+                // Click anywhere on the win screen to return to title
+                returnToTitle();
+                return;
+            } else if (currentState === 'lose' || currentState === 'gameOver') {
                 // Don't handle clicks for cut scenes - let buttons handle them
                 return;
             }
