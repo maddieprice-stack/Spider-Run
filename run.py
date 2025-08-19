@@ -4680,7 +4680,10 @@ GAME_HTML = """
             let level3SpideyReady = false;
             level3SpideyImg.onload = function() { level3SpideyReady = true; paintAll(); };
             level3SpideyImg.onerror = function() { level3SpideyReady = false; paintAll(); };
-            level3SpideyImg.src = '/static/Spider-man%20climb.png';
+            // Choose Miles vs Spider-Man climbing sprite for Level 3
+            level3SpideyImg.src = (typeof selectedSpider !== 'undefined' && selectedSpider === 'miles')
+                ? '/static/Miles Morales Climbing.png'
+                : '/static/Spider-man%20climb.png';
 
             function drawLevel3Player(cameraX = 0, cameraY = 0) {
                 const px = playerX * tileSize - cameraX;
