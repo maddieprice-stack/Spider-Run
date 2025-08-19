@@ -1414,28 +1414,29 @@ GAME_HTML = """
             taxiMilesSprite = milesImg;
         }
         
-        // Load swing Spider-Man sprites
+        // Load swing sprites (Spider-Man and Miles variants)
         let swingSpiderManSprite1 = null;
         let swingSpiderManSprite2 = null;
+        let swingMilesSprite1 = null;
+        let swingMilesSprite2 = null;
         let swingSpiderManLoaded = false;
         
         function loadSwingSpiderManSprites() {
-            const swingPath1 = '/static/spider_man_swing.png';
-            const swingPath2 = '/static/spider_man_swing_2.png';
-            
-            const img1 = new Image();
-            img1.onload = function() {
-                swingSpiderManLoaded = true;
-            };
-            img1.src = swingPath1;
-            swingSpiderManSprite1 = img1;
-            
-            const img2 = new Image();
-            img2.onload = function() {
-                swingSpiderManLoaded = true;
-            };
-            img2.src = swingPath2;
-            swingSpiderManSprite2 = img2;
+            const sm1 = new Image();
+            sm1.onload = function() { swingSpiderManLoaded = true; };
+            sm1.src = '/static/spider_man_swing.png';
+            swingSpiderManSprite1 = sm1;
+
+            const sm2 = new Image();
+            sm2.onload = function() { swingSpiderManLoaded = true; };
+            sm2.src = '/static/spider_man_swing_2.png';
+            swingSpiderManSprite2 = sm2;
+
+            // Miles swing frames
+            swingMilesSprite1 = new Image();
+            swingMilesSprite1.src = '/static/Miles Morales Swinging.png';
+            swingMilesSprite2 = new Image();
+            swingMilesSprite2.src = '/static/Miles Morales Swinging 2.png';
         }
         
         // Load villain sprites
@@ -3200,21 +3201,25 @@ GAME_HTML = """
                 if (selectedSpider === 'miles' && taxiMilesLoaded && taxiMilesSprite) {
                     currentPlayerSprite = taxiMilesSprite;
                 } else if (taxiSpiderManLoaded && taxiSpiderManSprite) {
-                    currentPlayerSprite = taxiSpiderManSprite;
+                currentPlayerSprite = taxiSpiderManSprite;
                 }
-            } else if (webShooterActive && swingSpiderManLoaded && swingSpiderManSprite1 && swingSpiderManSprite2) {
-                // Check if player moved to a new square
-                if (playerX !== lastPlayerX || playerY !== lastPlayerY) {
-                    swingAnimationCounter++;
-                    lastPlayerX = playerX;
-                    lastPlayerY = playerY;
+            } else if (webShooterActive) {
+                // Select Miles vs Spider-Man swing frames
+                let swing1 = swingSpiderManSprite1;
+                let swing2 = swingSpiderManSprite2;
+                let swingReady = swingSpiderManLoaded;
+                if (selectedSpider === 'miles' && swingMilesSprite1 && swingMilesSprite2) {
+                    swing1 = swingMilesSprite1;
+                    swing2 = swingMilesSprite2;
+                    swingReady = true;
                 }
-                
-                // Alternate between swing sprites based on movement
-                if (swingAnimationCounter % 2 === 0) {
-                    currentPlayerSprite = swingSpiderManSprite1;
-                } else {
-                    currentPlayerSprite = swingSpiderManSprite2;
+                if (swingReady && swing1 && swing2) {
+                    if (playerX !== lastPlayerX || playerY !== lastPlayerY) {
+                        swingAnimationCounter++;
+                        lastPlayerX = playerX;
+                        lastPlayerY = playerY;
+                    }
+                    currentPlayerSprite = (swingAnimationCounter % 2 === 0) ? swing1 : swing2;
                 }
             } else {
                 // Normal running animation (when not swinging or riding)
