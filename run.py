@@ -818,7 +818,7 @@ GAME_HTML = """
 
         <div id="comicPanel3" class="comic-panel">
             <div class="panel-content">
-                <div class="dr-strange-webp-image" style="background-image: url('/static/Dr%20Strange%203.png');"></div>
+                <div class="spider-man-victory-scene" id="introSpiderP3" style="background-image: url('/static/Spider-man%20Comic%203.png');"></div>
                 <div class="speech-bubble">
                     This dust isn't ordinary, Spider-Man. If left unchecked... it could END THE WORLD!
                 </div>
@@ -836,7 +836,7 @@ GAME_HTML = """
 
         <div id="comicPanel5" class="comic-panel">
             <div class="panel-content">
-                <div class="dr-strange-webp-image" style="background-image: url('/static/Dr%20Strange%203.png');"></div>
+                <div class="spider-man-victory-scene" id="introSpiderP5" style="background-image: url('/static/Spider-man%20Comic%203.png');"></div>
                 <div class="speech-bubble">
                     The dust is scattered across the East Village — start there before it spreads any further!
                 </div>
@@ -2114,7 +2114,7 @@ GAME_HTML = """
                 if (currentState === 'comic' && typeof selectedSpider !== 'undefined' && selectedSpider === 'miles') {
                     const activePanel = document.querySelector('.comic-panel.active');
                     if (activePanel) {
-                        const targets = activePanel.querySelectorAll('.spider-man-victory-scene, [style*="Spider-man"], [style*="Spider%20man"], [style*="Spider-man%20Comic"]');
+                        const targets = activePanel.querySelectorAll('.spider-man-victory-scene, #introSpiderStart, #introSpiderP3, #introSpiderP5');
                         targets.forEach(el => { el.style.backgroundImage = "url('/static/Miles Morales Comic.png')"; });
                     }
                 }
