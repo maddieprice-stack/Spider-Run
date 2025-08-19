@@ -753,6 +753,8 @@ GAME_HTML = """
                         <li>You have 5 LIVES per level</li>
                         <li>TAXIS will move you double time</li>
                         <li>WEB SHOOTERS stun villains and give bonus points</li>
+                        <li>On SUBWAY SIGNS (Level 2), press S to teleport between stations</li>
+                        <li>VILLAINS have special powers — some chase you, leave trails, or trigger effects</li>
                     </ul>
                 </div>
                 
