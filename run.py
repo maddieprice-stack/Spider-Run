@@ -3614,9 +3614,9 @@ GAME_HTML = """
                             isVillainUsingSpecialPower = true;
                         }
                         
-                        // Stun villain
+                        // Stun villain (Venom despawns faster)
                         villain.stunned = true;
-                        villain.stunnedTimer = 180; // 3 seconds
+                        villain.stunnedTimer = (villain.type === 'Venom') ? 60 : 180; // Venom: 1s, others: 3s
                         
                         // Award bonus points for defeating powered-up villains
                         if (isVillainUsingSpecialPower) {
