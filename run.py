@@ -4273,7 +4273,7 @@ GAME_HTML = """
             // If Miles is selected, swap any Spider image used in the intro to Miles comic art
             if (typeof selectedSpider !== 'undefined' && selectedSpider === 'miles') {
                 const el3 = document.getElementById('level3IntroSpideyImage');
-                if (el3) el3.style.backgroundImage = "url('/static/Miles Morales Comic.png')";
+                if (el3) el3.style.backgroundImage = "url('/static/Miles Comic 3.png')";
             }
         }
 
