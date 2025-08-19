@@ -1029,7 +1029,7 @@ GAME_HTML = """
         // Game state management
         let currentState = 'title';
         let currentPanel = 0;
-        const totalPanels = 8;
+        const totalPanels = 7; // Panels: start(-1), 0..6
         let currentVictoryPanel = 0;
         const totalVictoryPanels = 5;
         
@@ -2115,6 +2115,11 @@ GAME_HTML = """
             } else {
                 const panel = document.getElementById(`comicPanel${panelNumber}`);
                 console.log('Showing comicPanel' + panelNumber + ':', panel);
+                if (!panel) {
+                    console.warn('Requested panel not found, falling back to start Level 1');
+                    beginLevel1FromIntro();
+                    return;
+                }
                 panel.classList.add('active');
                 panel.style.display = 'flex';
                 panel.style.position = 'fixed';
