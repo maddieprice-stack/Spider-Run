@@ -2570,6 +2570,7 @@ GAME_HTML = """
             
             setTimeout(() => {
                 level1State = 'gameplay';
+                currentState = 'gameplay';
                 initGameplay();
             }, 2000);
         }
