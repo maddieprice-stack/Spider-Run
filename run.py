@@ -2013,8 +2013,11 @@ GAME_HTML = """
                 currentBackgroundMusic.pause();
                 currentBackgroundMusic.currentTime = 0;
             }
-            // Switch to Level 3 music
-            currentBackgroundMusic = new Audio('/static/Spider song 3.mp3');
+            // Switch to Level 3 music (Miles vs Spider-Man)
+            const level3Track = (typeof selectedSpider !== 'undefined' && selectedSpider === 'miles')
+                ? '/static/Miles Song 3.mp3'
+                : '/static/Spider song 3.mp3';
+            currentBackgroundMusic = new Audio(level3Track);
             currentBackgroundMusic.volume = 0.3; // Set volume to 30%
             currentBackgroundMusic.loop = true;
             currentBackgroundMusic.addEventListener('error', function() {
