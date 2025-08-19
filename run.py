@@ -3144,19 +3144,47 @@ GAME_HTML = """
                 window.playerSprite.onload = function() {
                     // Image loaded, will be drawn next frame
                 };
-                window.playerSprite.src = '/static/Spider-man_Running_Sprite.png';
+                window.playerSprite.src = (selectedSpider === 'miles')
+                    ? '/static/Miles Morales Sprite.png'
+                    : '/static/Spider-man_Running_Sprite.png';
+            } else {
+                // Keep base sprite consistent with selection if not swinging/taxi
+                const desiredBase = (selectedSpider === 'miles')
+                    ? '/static/Miles Morales Sprite.png'
+                    : '/static/Spider-man_Running_Sprite.png';
+                if (!window.playerSprite.src.endsWith(desiredBase)) {
+                    window.playerSprite.src = desiredBase;
+                }
             }
             
             // Preload additional running frames (normal running animation)
             if (!window.playerRun2) {
                 window.playerRun2 = new Image();
                 window.playerRun2.onload = function() {};
-                window.playerRun2.src = '/static/Spider-man%20run%202.png';
+                window.playerRun2.src = (selectedSpider === 'miles')
+                    ? '/static/Miles Running 2.png'
+                    : '/static/Spider-man%20run%202.png';
+            } else {
+                const desiredRun2 = (selectedSpider === 'miles')
+                    ? '/static/Miles Running 2.png'
+                    : '/static/Spider-man%20run%202.png';
+                if (!window.playerRun2.src.endsWith(desiredRun2)) {
+                    window.playerRun2.src = desiredRun2;
+                }
             }
             if (!window.playerRun3) {
                 window.playerRun3 = new Image();
                 window.playerRun3.onload = function() {};
-                window.playerRun3.src = '/static/Spider-man%20run%203.png';
+                window.playerRun3.src = (selectedSpider === 'miles')
+                    ? '/static/Miles Running 3.png'
+                    : '/static/Spider-man%20run%203.png';
+            } else {
+                const desiredRun3 = (selectedSpider === 'miles')
+                    ? '/static/Miles Running 3.png'
+                    : '/static/Spider-man%20run%203.png';
+                if (!window.playerRun3.src.endsWith(desiredRun3)) {
+                    window.playerRun3.src = desiredRun3;
+                }
             }
             
             // Choose which Spider-Man sprite to use
