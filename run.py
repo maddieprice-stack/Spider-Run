@@ -781,6 +781,14 @@ GAME_HTML = """
         </div>
 
         <!-- Comic Intro Panels -->
+        <div id="comicPanelStart" class="comic-panel">
+            <div class="panel-content">
+                <div class="speech-bubble">
+                    Spider-man: Space Dust Chaos
+                </div>
+            </div>
+        </div>
+
         <div id="comicPanel0" class="comic-panel">
             <div class="panel-content">
                 <div class="dr-strange-image"></div>
@@ -1009,7 +1017,7 @@ GAME_HTML = """
         // Game state management
         let currentState = 'title';
         let currentPanel = 0;
-        const totalPanels = 7;
+        const totalPanels = 8;
         let currentVictoryPanel = 0;
         const totalVictoryPanels = 5;
         
@@ -2054,7 +2062,21 @@ GAME_HTML = """
             });
 
             // Show new panel immediately without page flip effect
-            if (panelNumber === 0) {
+            if (panelNumber < 0) {
+                const p = document.getElementById('comicPanelStart');
+                if (p) {
+                    p.classList.add('active');
+                    p.style.display = 'flex';
+                    p.style.position = 'fixed';
+                    p.style.top = '0';
+                    p.style.left = '0';
+                    p.style.width = '100vw';
+                    p.style.height = '100vh';
+                    p.style.visibility = 'visible';
+                    p.style.opacity = '1';
+                    p.style.zIndex = '9999';
+                }
+            } else if (panelNumber === 0) {
                 const panel0 = document.getElementById('comicPanel0');
                 console.log('Showing comicPanel0:', panel0);
                 panel0.classList.add('active');
@@ -2096,7 +2118,8 @@ GAME_HTML = """
             });
             characterChosen = false;
             currentState = 'comic';
-            currentPanel = 0;
+            // Start at new title panel before panel 0
+            currentPanel = -1;
             showPanel(0);
             const overlay = document.getElementById('comicCharacterSelect');
             if (overlay) {
@@ -3214,11 +3237,11 @@ GAME_HTML = """
                     swingReady = true;
                 }
                 if (swingReady && swing1 && swing2) {
-                    if (playerX !== lastPlayerX || playerY !== lastPlayerY) {
-                        swingAnimationCounter++;
-                        lastPlayerX = playerX;
-                        lastPlayerY = playerY;
-                    }
+                if (playerX !== lastPlayerX || playerY !== lastPlayerY) {
+                    swingAnimationCounter++;
+                    lastPlayerX = playerX;
+                    lastPlayerY = playerY;
+                }
                     currentPlayerSprite = (swingAnimationCounter % 2 === 0) ? swing1 : swing2;
                 }
             } else {
@@ -4945,7 +4968,7 @@ GAME_HTML = """
                 startGame();
             } else if (currentState === 'comic') {
                 // Require character selection before advancing from first panel
-                if (currentPanel === 0 && !characterChosen) {
+                if ((currentPanel === -1 || currentPanel === 0) && !characterChosen) {
                     // flash overlay to prompt selection
                     const overlay = document.getElementById('comicCharacterSelect');
                     if (overlay) {
