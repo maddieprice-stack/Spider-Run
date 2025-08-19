@@ -811,7 +811,7 @@ GAME_HTML = """
 
         <div id="comicPanel2" class="comic-panel">
             <div class="panel-content">
-                <div class="spider-man-victory-scene" id="introSpiderP2" style="background-image: url('/static/Spider-man%20Comic%203.png');"></div>
+                <div class="spider-man-victory-scene" id="introSpiderP2" style="background-image: url('/static/Spider-man%20Comic.png');"></div>
                 <div class="speech-bubble">
                     What's a little more dust on the streets? We've seen worse.
                 </div>
@@ -829,7 +829,7 @@ GAME_HTML = """
 
         <div id="comicPanel4" class="comic-panel">
             <div class="panel-content">
-                <div class="spider-man-victory-scene" id="introSpiderP4" style="background-image: url('/static/Spider-man%20Comic%203.png');"></div>
+                <div class="spider-man-victory-scene" id="introSpiderP4" style="background-image: url('/static/Spider-man%20Comic.png');"></div>
                 <div class="speech-bubble">
                     ...Okay, okay. Guess I'll grab a broom.
                 </div>
