@@ -990,8 +990,9 @@ GAME_HTML = """
         
         <!-- Win/Loss Cut Scenes -->
         <div id="winCutscene" class="win-loss-cutscene">
-            <div class="cutscene-panel">
+            <div class="cutscene-panel" style="background: url('/static/New%20York%203%20Updated.png') center/cover no-repeat;">
                 <div class="game-over-text">YOU WIN</div>
+                <div class="dr-strange-webp-image" style="position: relative; width: 50%; height: 40vh; margin: 10px auto; background-image: url('/static/Dr%20Strange%203.png'); background-size: contain; background-repeat: no-repeat; background-position: center;"></div>
                 <div class="quip-bubble" id="winQuip"></div>
                 <div class="cutscene-buttons">
                     <button class="cutscene-button" onclick="returnToTitle()">EXIT</button>
