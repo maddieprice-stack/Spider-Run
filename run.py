@@ -988,8 +988,17 @@ GAME_HTML = """
         <!-- Page Flip Effect -->
         <div id="pageFlip" class="page-flip"></div>
         
-        <!-- Win/Loss Cut Scenes (win cut scene removed) -->
-        
+        <!-- Win/Loss Cut Scenes -->
+        <div id="winCutscene" class="win-loss-cutscene">
+            <div class="cutscene-panel">
+                <div class="game-over-text">YOU WIN</div>
+                <div class="quip-bubble" id="winQuip"></div>
+                <div class="cutscene-buttons">
+                    <button class="cutscene-button" onclick="returnToTitle()">EXIT</button>
+                </div>
+            </div>
+        </div>
+
         <div id="loseCutscene" class="win-loss-cutscene">
             <div class="cutscene-panel">
                 <div class="game-over-text">GAME OVER</div>
@@ -3985,9 +3994,27 @@ GAME_HTML = """
         ];
         
         function showWinScreen() {
-            console.log('🔥🔥🔥 === showWinScreen() called (win cutscene removed) === 🔥🔥🔥');
-            // Skip win cutscene entirely and go straight to victory comic
-            continueToNextLevel();
+            console.log('🔥🔥🔥 === showWinScreen() called === 🔥🔥🔥');
+            // Stop music
+            stopBackgroundMusic();
+            currentState = 'win';
+            winLossState = 'win';
+            // Set a quip depending on level
+            if (currentLevel === 3) {
+                currentQuip = "Empire saved. Skyline secure.";
+            } else if (currentLevel === 2) {
+                currentQuip = winQuips['level2'];
+            } else {
+                currentQuip = winQuips['level1'];
+            }
+            // Hide other UIs
+            document.querySelectorAll('.comic-panel, .victory-panel').forEach(panel => panel.classList.remove('active'));
+            const winElement = document.getElementById('winCutscene');
+            if (winElement) {
+                winElement.classList.add('active');
+                const wq = document.getElementById('winQuip');
+                if (wq) wq.textContent = currentQuip;
+            }
         }
         
         function showLoseScreen() {
@@ -4871,6 +4898,18 @@ GAME_HTML = """
                 }
             }
 
+            function checkLevel3WinCondition() {
+                // Win only when all dust is collected and player is on the 'G' tile
+                if (dustCollected >= totalDust && totalDust > 0) {
+                    const atGoal = (mapData[playerY] && mapData[playerY][playerX] === 'G');
+                    if (atGoal) {
+                        showWinScreen();
+                        return true;
+                    }
+                }
+                return false;
+            }
+
             function neighborsOf(x, y) {
                 const result = [];
                 const dirs = [ [1,0], [-1,0], [0,1], [0,-1] ];
@@ -4991,6 +5030,8 @@ GAME_HTML = """
                         playerFlipX = !playerFlipX;
                         // Collect dust if present
                         checkDustCollection();
+                        // Check for meeting win condition (all dust + at goal 'G')
+                        if (checkLevel3WinCondition()) { return; }
                         paintAll();
                     }
                 });
