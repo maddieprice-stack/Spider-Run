@@ -2531,6 +2531,8 @@ GAME_HTML = """
             // Show Level 1 splash screen
             const canvas = document.getElementById('gameCanvas');
             const ctx = canvas.getContext('2d');
+            // Ensure canvas is visible (match Level 2 behavior)
+            canvas.style.display = 'block';
             
             // Set canvas style for comic book look
             canvas.style.border = '5px solid #000';
