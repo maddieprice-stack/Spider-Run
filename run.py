@@ -3981,7 +3981,12 @@ GAME_HTML = """
             
             // Hide all panels and show lose cutscene
             document.querySelectorAll('.comic-panel').forEach(panel => panel.classList.remove('active'));
-            document.getElementById('loseCutscene').classList.add('active');
+            const loseEl = document.getElementById('loseCutscene');
+            if (typeof selectedSpider !== 'undefined' && selectedSpider === 'miles') {
+                const defEls = loseEl.querySelectorAll('.spider-man-defeated');
+                defEls.forEach(el => { el.style.backgroundImage = "url('/static/Miles Sprite.png')"; });
+            }
+            loseEl.classList.add('active');
             document.getElementById('loseQuip').textContent = currentQuip;
         }
         
