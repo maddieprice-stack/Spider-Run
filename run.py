@@ -999,7 +999,7 @@ GAME_HTML = """
                 </div>
             </div>
         </div>
-
+        
         <div id="loseCutscene" class="win-loss-cutscene">
             <div class="cutscene-panel">
                 <div class="game-over-text">GAME OVER</div>
@@ -2239,7 +2239,8 @@ GAME_HTML = """
                 panel.style.display = 'none';
             });
             // Ensure proper state and music for Level 1
-            currentState = 'gameplay';
+            // Show Level 1 splash screen first (avoid entering gameplay state yet)
+            currentState = 'level1Splash';
             currentLevel = 1;
             if (typeof switchToLevel1Music === 'function') {
                 switchToLevel1Music();
@@ -2538,31 +2539,30 @@ GAME_HTML = """
             canvas.style.border = '5px solid #000';
             canvas.style.boxShadow = '5px 5px 0px rgba(0,0,0,0.3)';
             
-            // Draw splash screen
-            ctx.fillStyle = '#1a1a2e';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            // Draw comic-style title
+            // Draw splash screen background image immediately
+            const bgImage = new Image();
+            bgImage.onload = function() {
+                ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
+                // Draw comic-style title over background
             ctx.fillStyle = '#ffff00';
             ctx.strokeStyle = '#000';
             ctx.lineWidth = 3;
             ctx.font = 'bold 48px Comic Sans MS';
             ctx.textAlign = 'center';
-            
             const title = 'LEVEL 1: EAST VILLAGE';
             ctx.strokeText(title, canvas.width/2, 100);
             ctx.fillText(title, canvas.width/2, 100);
-            
-            // Draw East Village background
-            const bgImage = new Image();
-            bgImage.onload = function() {
-                ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
-                // Redraw title over background
+            };
+            bgImage.onerror = function() {
+                // Fallback color if image fails
+                ctx.fillStyle = '#1a1a2e';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
                 ctx.fillStyle = '#ffff00';
                 ctx.strokeStyle = '#000';
                 ctx.lineWidth = 3;
                 ctx.font = 'bold 48px Comic Sans MS';
                 ctx.textAlign = 'center';
+                const title = 'LEVEL 1: EAST VILLAGE';
                 ctx.strokeText(title, canvas.width/2, 100);
                 ctx.fillText(title, canvas.width/2, 100);
             };
@@ -5138,7 +5138,7 @@ GAME_HTML = """
                         level2State = 'gameplay';
                     }
                     initGameplay();
-                    }
+                }
                 }
             } else if (currentState === 'win') {
                 // Click anywhere on the win screen to return to title
