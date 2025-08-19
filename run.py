@@ -2247,6 +2247,14 @@ GAME_HTML = """
                 console.log('🔥 Panel display after force:', getComputedStyle(targetPanel).display);
                 console.log('🔥 Panel visibility after force:', getComputedStyle(targetPanel).visibility);
                 console.log('🔥 Panel z-index after force:', getComputedStyle(targetPanel).zIndex);
+
+                // If Miles was selected, swap Spider-Man image to Miles comic art for post-Level 1 cutscene
+                if (typeof selectedSpider !== 'undefined' && selectedSpider === 'miles') {
+                    const spEl = targetPanel.querySelector('.spider-man-victory-scene');
+                    if (spEl) {
+                        spEl.style.backgroundImage = "url('/static/Miles Comic 2.png')";
+                    }
+                }
                 
                 // Add click event listener to this victory panel
                 console.log('🔥 Adding click event listener to victory panel...');
