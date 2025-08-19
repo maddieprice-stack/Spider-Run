@@ -4026,6 +4026,11 @@ GAME_HTML = """
             }
             
             if (gameOverElement) {
+                // Swap defeated sprite if Miles selected
+                if (typeof selectedSpider !== 'undefined' && selectedSpider === 'miles') {
+                    const defEls = gameOverElement.querySelectorAll('.spider-man-defeated');
+                    defEls.forEach(el => { el.style.backgroundImage = "url('/static/Miles Sprite.png')"; });
+                }
                 gameOverElement.classList.add('active');
                 console.log('🔥 Game over cutscene shown');
             }
