@@ -2120,7 +2120,7 @@ GAME_HTML = """
             currentState = 'comic';
             // Start at new title panel before panel 0
             currentPanel = -1;
-            showPanel(0);
+            showPanel(-1);
             const overlay = document.getElementById('comicCharacterSelect');
             if (overlay) {
                 overlay.style.display = 'flex';
