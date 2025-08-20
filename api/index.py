@@ -8,19 +8,10 @@ import sys
 import zipfile
 import tempfile
 from http.server import BaseHTTPRequestHandler
-import mimetypes
 from urllib.parse import urlparse, parse_qs
 
 # Add the parent directory to the Python path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-# Try importing the in-app HTML to serve the game at root
-GAME_HTML = None
-try:
-    from run import GAME_HTML as _GAME_HTML
-    GAME_HTML = _GAME_HTML
-except Exception:
-    GAME_HTML = None
 
 # HTML template for the download page
 DOWNLOAD_HTML = """
@@ -150,29 +141,12 @@ class handler(BaseHTTPRequestHandler):
         parsed_url = urlparse(self.path)
         path = parsed_url.path
         
-        # Serve the actual game HTML at the root, mirroring localhost behavior
         if path == '/' or path == '/index.html':
-            html = GAME_HTML if GAME_HTML else DOWNLOAD_HTML
+            # Serve the download page
             self.send_response(200)
-            self.send_header('Content-type', 'text/html; charset=utf-8')
+            self.send_header('Content-type', 'text/html')
             self.end_headers()
-            self.wfile.write(html.encode('utf-8'))
-            
-        # Serve static assets directly from the static directory
-        elif path.startswith('/static/'):
-            fs_path = path.lstrip('/')
-            if os.path.exists(fs_path) and os.path.isfile(fs_path):
-                ctype, _ = mimetypes.guess_type(fs_path)
-                self.send_response(200)
-                self.send_header('Content-type', ctype or 'application/octet-stream')
-                self.end_headers()
-                with open(fs_path, 'rb') as f:
-                    self.wfile.write(f.read())
-            else:
-                self.send_response(404)
-                self.send_header('Content-type', 'text/plain')
-                self.end_headers()
-                self.wfile.write(b'404 - Static asset not found')
+            self.wfile.write(DOWNLOAD_HTML.encode())
             
         elif path == '/api/download/game':
             # Download complete game
